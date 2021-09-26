@@ -1,9 +1,60 @@
 #!/usr/bin/env perl
 
+package MusicDB;
+use strict;
+use warnings;
+use Moose;
+use Readonly;
+
+Readonly my $MUSIC_DB => '/var/lib/palmer/music-database.list';
+Readonly my $LIMIT => 20;
+
+has __db => (isa => 'ArrayRef[Str]', is => 'rw', default => sub {
+	return [ ];
+});
+
+sub BUILD {
+	my ($self) = @_;
+
+	$self->__reload();
+}
+
+sub __reload {
+	my ($self) = @_;
+
+	@{ $self->__db } = (); # flush
+
+	my $fh = IO::File->new();
+	if ($fh->open("< $MUSIC_DB")) {
+		while (my $line = <$fh>) {
+			chomp($line);
+			push(@{ $self->__db}, $line);
+		}
+		warn sprintf("%d tracks loaded\n", scalar(@{ $self->__db }));
+		$fh->close;
+	}
+
+	return;
+}
+
+sub search {
+	my ($self, $criteria) = @_;
+
+	$criteria =~ s/\W//g;
+
+	my @results = grep(/$criteria/i, @{ $self->__db });
+	$#results = $LIMIT - 1 if (scalar(@results) > $LIMIT);
+
+	warn(sprintf("Query '%s' returned %d results\n", $criteria, scalar(@results)));
+	return \@results;
+}
+
+package main;
 use strict;
 use warnings;
 use Data::Dumper;
 use English;
+use Readonly;
 use WWW::Telegram::BotAPI;
 use URI::URL;
 
@@ -22,6 +73,7 @@ my $api = WWW::Telegram::BotAPI->new (
 $api->agent->can('inactivity_timeout') and $api->agent->inactivity_timeout(45);
 my $me = $api->getMe or die;
 my ($offset, $updates) = 0;
+my $musicDb = MusicDB->new();
 
 # The commands that this bot supports.
 my $pic_id; # file_id of the last sent picture
@@ -53,6 +105,22 @@ my $commands = {
 			return "Would download from $url";
 		} else {
 			return "I don't recognize the ID or URL";
+		}
+	},
+	'search' => sub {
+		my (@input) = @_;
+		my $text = $input[0]->{text};
+		my @words = split(m/\s+/, $text);
+		$text = $words[1];
+		if ($text) {
+			my $results = $musicDb->search($text);
+			if (scalar(@$results)) {
+				return join("\n", @$results);
+			} else {
+				return "I don't have that track :(";
+			}
+		} else {
+			return 'Missing criteria';
 		}
 	},
     # Example demonstrating the use of parameters in a command.
