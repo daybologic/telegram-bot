@@ -1,5 +1,61 @@
 #!/usr/bin/env perl
 
+package UUIDClient;
+use strict;
+use warnings;
+use Moose;
+use Readonly;
+use Getopt::Std;
+use JSON qw(decode_json);
+use LWP::UserAgent;
+use MIME::Base64;
+use URI;
+
+Readonly my $URL => 'http://perlapi.daybologic.co.uk/v2/uuid/generate';
+
+has [qw(count version)] => (is => 'rw', isa => 'Int', default => 1);
+has __ua => (is => 'rw', isa => 'LWP::UserAgent', default => \&__makeUserAgent, lazy => 1,);
+
+sub __makeUserAgent {
+	my ($self) = @_;
+
+	my $ua = LWP::UserAgent->new;
+	$ua->timeout(120);
+	$ua->env_proxy;
+
+	return $ua;
+}
+
+sub generate {
+	my ($self) = @_;
+
+	my %opts = (
+		n => $self->count,
+		v => $self->version,
+	);
+
+	my $uri = URI->new($URL);
+	$uri->query_form(\%opts);
+
+	my @results;
+	#my @args = join('=', each(%opts));
+	#my $uri = $URL . join('&', @args);
+	printf(STDERR "%s\n", $uri);
+
+	my $response = $self->__ua->get($uri);
+	if ($response->is_success) {
+		my $decoded = decode_json(decode_base64($response->decoded_content));
+		foreach my $result (@{ $decoded->{results} }) {
+			push(@results, sprintf("%s\n", $result->{value}));
+		}
+	} else {
+		printf(STDERR "%s\n", $response->status_line);
+	}
+
+	printf(STDERR "%d results generated.\n", scalar(@results));
+	return \@results;
+}
+
 package MusicDB;
 use strict;
 use warnings;
@@ -74,6 +130,7 @@ $api->agent->can('inactivity_timeout') and $api->agent->inactivity_timeout(45);
 my $me = $api->getMe or die;
 my ($offset, $updates) = 0;
 my $musicDb = MusicDB->new();
+my $uuidClient = UUIDClient->new();
 
 # The commands that this bot supports.
 my $pic_id; # file_id of the last sent picture
@@ -121,6 +178,35 @@ my $commands = {
 			}
 		} else {
 			return 'Missing criteria';
+		}
+	},
+	'uuid' => sub {
+		my (@input) = @_;
+		my $text = $input[0]->{text};
+		my @words = split(m/\s+/, $text);
+		my ($version, $count) = (1, 1);
+		shift(@words); # Sack off 'uuid'
+		foreach my $word (@words) {
+			if ($word =~ m/^v(\d)$/i) {
+				$version = $1;
+				return "Sorry, only versions 1 or 4 supported, but I'm working on it" unless ($version == 1 || $version == 4);
+			} elsif ($word =~ m/^\d{1,2}$/) {
+				$count = $word;
+			} else {
+				return "Usage: /uuid v[version] [count]\n"
+				    . "Default UUID version is 1, count up to 99 is allowed, the default is 1.\n"
+				    . "Versions supported: 1, 4";
+			}
+		}
+
+		printf(STDERR "count has been set to %s\n", $uuidClient->count($count));
+		printf(STDERR "version has been set to %s\n", $uuidClient->version($version));
+
+		my $results = $uuidClient->generate();
+		if (scalar(@$results) > 0) {
+			return join("\n", @$results);
+		} else {
+			return "Something went wrong";
 		}
 	},
     # Example demonstrating the use of parameters in a command.
