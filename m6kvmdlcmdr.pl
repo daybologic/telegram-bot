@@ -180,6 +180,7 @@ my $commands = {
 			return 'Missing criteria';
 		}
 	},
+	'me' => sub { '' }, # no-op
 	'uuid' => sub {
 		my (@input) = @_;
 		my $text = $input[0]->{text};
