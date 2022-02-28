@@ -1,6 +1,7 @@
 #!/usr/bin/env perl
 
 package main;
+use Telegram::Bot;
 use strict;
 use warnings;
 

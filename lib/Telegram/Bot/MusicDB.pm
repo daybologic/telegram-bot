@@ -1,4 +1,4 @@
-package MusicDB;
+package Telegram::Bot::MusicDB;
 use strict;
 use warnings;
 use Moose;

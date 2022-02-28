@@ -1,4 +1,4 @@
-package UUIDClient;
+package Telegram::Bot::UUIDClient;
 use strict;
 use warnings;
 use Moose;

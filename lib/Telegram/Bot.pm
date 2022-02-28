@@ -1,9 +1,12 @@
-package main;
+package Telegram::Bot;
 use strict;
 use warnings;
 use Data::Dumper;
-use English;
+use English qw(-no_match_vars);
+use Moose;
 use Readonly;
+use Telegram::Bot::MusicDB;
+use Telegram::Bot::UUIDClient;
 use WWW::Telegram::BotAPI;
 use URI::URL;
 
@@ -22,8 +25,8 @@ my $api = WWW::Telegram::BotAPI->new (
 $api->agent->can('inactivity_timeout') and $api->agent->inactivity_timeout(45);
 my $me = $api->getMe or die;
 my ($offset, $updates) = 0;
-my $musicDb = MusicDB->new();
-my $uuidClient = UUIDClient->new();
+my $musicDb = Telegram::Bot::MusicDB->new();
+my $uuidClient = Telegram::Bot::UUIDClient->new();
 
 # The commands that this bot supports.
 my $pic_id; # file_id of the last sent picture
