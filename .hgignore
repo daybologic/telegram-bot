@@ -1,0 +1,5 @@
+syntax: glob
+.*.sw?
+MYMETA.json
+MYMETA.yml
+Makefile
