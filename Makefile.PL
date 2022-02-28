@@ -7,7 +7,7 @@ use ExtUtils::MakeMaker;
 use POSIX qw(EXIT_SUCCESS);
 
 WriteMakefile(
-	NAME         => 'Telegram::Bot'.
+	NAME         => 'Telegram::Bot',
 	VERSION_FROM => 'lib/Telegram/Bot.pm',
 	EXE_FILES    => [glob q('bin/*')],
 );
