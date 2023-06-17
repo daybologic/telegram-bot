@@ -46,3 +46,21 @@ sub run {
 sub __getFile {
 	my ($self, $code, $content) = @_;
 	mkdir('/tmp/palmer');
+	mkdir('/tmp/palmer/m6kvmdlcmdr');
+	my $name = sprintf('/tmp/palmer/m6kvmdlcmdr/%d.jpg', $code);
+	return $name if -f $name;
+
+	return undef unless ($content);
+
+	my $fh = IO::File->new("> $name");
+	if (defined $fh) {
+		print $fh $content;
+		$fh->close();
+	} else {
+		die("Sorry, cannot create $name: $!");
+	}
+
+	return $name;
+}
+
+1;
