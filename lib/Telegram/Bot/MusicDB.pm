@@ -1,19 +1,19 @@
 package Telegram::Bot::MusicDB;
-use strict;
-use warnings;
 use Moose;
 use Readonly;
 
-Readonly my $MUSIC_DB => '/var/lib/palmer/music-database.list';
 Readonly my $LIMIT => 20;
 
 has __db => (isa => 'ArrayRef[Str]', is => 'rw', default => sub {
 	return [ ];
 });
 
+has __location => (is => 'rw', lazy => 1, isa => 'Str', default => sub {
+	return "/var/lib/$ENV{USER}/telegram-bot/music-database.list";
+});
+
 sub BUILD {
 	my ($self) = @_;
-
 	$self->__reload();
 }
 
@@ -23,13 +23,13 @@ sub __reload {
 	@{ $self->__db } = (); # flush
 
 	my $fh = IO::File->new();
-	if ($fh->open("< $MUSIC_DB")) {
+	if ($fh->open('< ' . $self->__location)) {
 		while (my $line = <$fh>) {
 			chomp($line);
 			push(@{ $self->__db}, $line);
 		}
 		warn sprintf("%d tracks loaded\n", scalar(@{ $self->__db }));
-		$fh->close;
+		$fh->close();
 	}
 
 	return;
