@@ -2,6 +2,8 @@ package Telegram::Bot::MusicDB;
 use Moose;
 use Readonly;
 
+extends 'Telegram::Bot::Base';
+
 Readonly my $LIMIT => 20;
 
 has __db => (isa => 'ArrayRef[Str]', is => 'rw', default => sub {
@@ -12,9 +14,12 @@ has __location => (is => 'ro', lazy => 1, isa => 'Str', default => sub {
 	return "/var/lib/$ENV{USER}/telegram-bot/music-database.list";
 });
 
+has limit => (is => 'rw', isa => 'Int', default => $LIMIT);
+
 sub BUILD {
 	my ($self) = @_;
 	$self->__reload();
+	return;
 }
 
 sub __reload {
@@ -28,7 +33,7 @@ sub __reload {
 			chomp($line);
 			push(@{ $self->__db }, $line);
 		}
-		warn(sprintf("%d tracks loaded\n", scalar(@{ $self->__db })));
+		$self->_warn(sprintf("%d tracks loaded\n", scalar(@{ $self->__db })));
 		$fh->close();
 	}
 
@@ -41,9 +46,15 @@ sub search {
 	$criteria =~ s/\W//g;
 
 	my @results = grep(/$criteria/i, @{ $self->__db });
-	$#results = $LIMIT - 1 if (scalar(@results) > $LIMIT);
+	$#results = $self->limit - 1 if (scalar(@results) > $self->limit);
 
-	warn(sprintf("Query '%s' returned %d results\n", $criteria, scalar(@results)));
+	$self->_warn(sprintf(
+		"Query '%s' returned %d results (%d entries total)\n",
+		$criteria,
+		scalar(@results),
+		scalar(@{ $self->__db }),
+	));
+
 	return \@results;
 }
 

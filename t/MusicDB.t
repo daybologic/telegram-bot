@@ -9,6 +9,14 @@ use Test::More;
 
 extends 'Test::Module::Runnable';
 
+has __handle => (is => 'rw');
+
+sub tearDown {
+	my ($self, %params) = @_;
+	$self->__handle(undef);
+	return $self->SUPER::tearDown(%params);
+}
+
 sub testDefaultLocation {
 	my ($self) = @_;
 	plan tests => 1;
@@ -28,8 +36,7 @@ sub testSearchEmptyNoneFound {
 	my ($self) = @_;
 	plan tests => 1;
 
-	my ($handle, $location) = tempfile();
-	$self->sut(Telegram::Bot::MusicDB->new(__location => $location));
+	$self->__makeSUT(0);
 
 	is_deeply($self->sut->search('Obama'), [], 'none');
 
@@ -40,9 +47,7 @@ sub testSearchPopulatedNoneFound {
 	my ($self) = @_;
 	plan tests => 1;
 
-	my ($handle, $location) = tempfile();
-	__makeDatabase($handle);
-	$self->sut(Telegram::Bot::MusicDB->new(__location => $location));
+	$self->__makeSUT(1);
 
 	is_deeply($self->sut->search('Obama'), [], 'none');
 
@@ -53,14 +58,28 @@ sub testSearchPopulatedTwoFound {
 	my ($self) = @_;
 	plan tests => 1;
 
-	my ($handle, $location) = tempfile();
-	__makeDatabase($handle);
-	$self->sut(Telegram::Bot::MusicDB->new(__location => $location));
+	$self->__makeSUT(1);
 
-	is_deeply($self->sut->search('Judge'), [
+	is_deeply($self->sut->search('    Judge       '), [
 		'yyy Judge Jules',
 		'xxx Judge Dredd',
 	], 'two found');
+
+	return EXIT_SUCCESS;
+}
+
+sub testSearchPopulated {
+	my ($self) = @_;
+	plan tests => 2;
+
+	$self->__makeSUT(1);
+
+	my $limit = 10;
+	$self->sut->limit($limit);
+
+	my $result = $self->sut->search('F');
+	cmp_ok(scalar(@$result), '>=', 5, 'at least 5 results');
+	cmp_ok(scalar(@$result), '==', $limit, "not more than $limit results");
 
 	return EXIT_SUCCESS;
 }
@@ -81,6 +100,22 @@ sub __makeDatabase {
 	close($handle);
 
 	return;
+}
+
+sub __makeSUT {
+	my ($self, $populate) = @_;
+
+	my ($handle, $location) = tempfile();
+	$self->__handle($handle);
+
+	__makeDatabase($handle) if ($populate);
+
+	$self->sut(Telegram::Bot::MusicDB->new(
+		__location => $location,
+		_quiet      => 1,
+	));
+
+	return $self->sut;
 }
 
 package main;
