@@ -9,7 +9,7 @@ Build-Depends-Indep:
  perl,
  perl-base,
  perl-modules,
-Standards-Version: 3.7.3
+Standards-Version: 4.5.1
 
 Package: telegram-bot
 Architecture: all
