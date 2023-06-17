@@ -8,7 +8,7 @@ has __db => (isa => 'ArrayRef[Str]', is => 'rw', default => sub {
 	return [ ];
 });
 
-has __location => (is => 'rw', lazy => 1, isa => 'Str', default => sub {
+has __location => (is => 'ro', lazy => 1, isa => 'Str', default => sub {
 	return "/var/lib/$ENV{USER}/telegram-bot/music-database.list";
 });
 
@@ -23,12 +23,12 @@ sub __reload {
 	@{ $self->__db } = (); # flush
 
 	my $fh = IO::File->new();
-	if ($fh->open('< ' . $self->__location)) {
+	if ($fh->open($self->__location, 'r')) {
 		while (my $line = <$fh>) {
 			chomp($line);
-			push(@{ $self->__db}, $line);
+			push(@{ $self->__db }, $line);
 		}
-		warn sprintf("%d tracks loaded\n", scalar(@{ $self->__db }));
+		warn(sprintf("%d tracks loaded\n", scalar(@{ $self->__db })));
 		$fh->close();
 	}
 
