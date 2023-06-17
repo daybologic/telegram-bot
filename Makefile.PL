@@ -21,5 +21,3 @@ WriteMakefile(
 		'Test::Exception' => 0,
 	},
 );
-
-libuniversal-require-perl
