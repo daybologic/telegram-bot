@@ -19,6 +19,7 @@ Depends:
  ${shlibs:Depends},
  libmoose-perl,
  libreadonly-perl,
+ libuniversal-require-perl,
  perl,
 Description: Multipurpose bot for Telegram
  Absolutely packed with features, used by The Firm,
