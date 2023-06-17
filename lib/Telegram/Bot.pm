@@ -331,7 +331,7 @@ printf "Hello! I am %s. Starting...\n", $me->{result}{username};
 my $breakfastDone = 0;
 my $backCounter = 0;
 sub backgroundTasks {
-	my $chatId = 0; # The firm
+	my $chatId = 0;
 
 	my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time());
 
