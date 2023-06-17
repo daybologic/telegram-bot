@@ -11,7 +11,7 @@ Build-Depends-Indep:
  perl-modules,
 Standards-Version: 3.7.3
 
-Package: libdaybo-example-perl
+Package: telegram-bot
 Architecture: all
 Depends:
  ${misc:Depends},
