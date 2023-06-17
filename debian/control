@@ -20,5 +20,6 @@ Depends:
  libmoose-perl,
  libreadonly-perl,
  perl,
-Description: Add module description.
- Add a longer description of the module here.
+Description: Multipurpose bot for Telegram
+ Absolutely packed with features, used by The Firm,
+ amongst others.
