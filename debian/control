@@ -6,6 +6,7 @@ Build-Depends:
  debhelper (>= 13),
 Build-Depends-Indep:
  libmoose-perl,
+ libwww-telegram-botapi-perl,
  perl,
  perl-base,
  perl-modules,
@@ -20,6 +21,7 @@ Depends:
  libmoose-perl,
  libreadonly-perl,
  libuniversal-require-perl,
+ libwww-telegram-botapi-perl,
  perl,
 Description: Multipurpose bot for Telegram
  Absolutely packed with features, used by The Firm,
