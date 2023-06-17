@@ -6,13 +6,17 @@ use Data::Money::Amount;
 use English;
 use HTTP::Status qw(status_message);
 use Readonly;
+use Telegram::Bot::DrinksClient;
+use Telegram::Bot::GenderClient;
+use Telegram::Bot::MusicDB;
+use Telegram::Bot::UUIDClient;
 use Time::Duration;
 use WWW::Telegram::BotAPI;
 use URI::URL;
 use POSIX;
 
 BEGIN {
-	our $VERSION = '1.1.0';
+	our $VERSION = '1.1.1';
 }
 
 my $api = WWW::Telegram::BotAPI->new (
