@@ -11,6 +11,10 @@ use WWW::Telegram::BotAPI;
 use URI::URL;
 use POSIX;
 
+BEGIN {
+	our $VERSION = '1.1.0';
+}
+
 my $api = WWW::Telegram::BotAPI->new (
     #async => 1, # WARNING: may fail if Mojo::UserAgent is not available!
     token => '1702305769:AAHX_qVERvhB6velZ_jgLRAgR8Ax0_VWdDU', # FIXME: This has been exposed.  Generate a new one.
