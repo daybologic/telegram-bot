@@ -3,16 +3,13 @@ use strict;
 use warnings;
 use Data::Dumper;
 use Data::Money::Amount;
-use English qw(-no_match_vars);
-use Moose;
+use English;
 use HTTP::Status qw(status_message);
-use POSIX;
 use Readonly;
 use Time::Duration;
-use Telegram::Bot::MusicDB;
-use Telegram::Bot::UUIDClient;
-use URI::URL;
 use WWW::Telegram::BotAPI;
+use URI::URL;
+use POSIX;
 
 my $api = WWW::Telegram::BotAPI->new (
     #async => 1, # WARNING: may fail if Mojo::UserAgent is not available!
@@ -431,3 +428,5 @@ while (1) {
         }
     }
 }
+
+1;
