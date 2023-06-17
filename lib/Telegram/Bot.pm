@@ -21,7 +21,7 @@ BEGIN {
 
 my $api = WWW::Telegram::BotAPI->new (
     #async => 1, # WARNING: may fail if Mojo::UserAgent is not available!
-    token => '1702305769:AAHX_qVERvhB6velZ_jgLRAgR8Ax0_VWdDU', # FIXME: This has been exposed.  Generate a new one.
+    token => 'REDACTED', # FIXME
 );
 # ... but error handling is available as well.
 #my $result = eval { $api->getMe->{result}{username} }
