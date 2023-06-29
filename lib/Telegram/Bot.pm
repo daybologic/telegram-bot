@@ -140,8 +140,19 @@ my $commands = {
 	},
 	'weather' => sub {
 		my (@input) = @_;
-		my @text = `lynx -dump 'https://api.scorpstuff.com/weather.php?units=imperial&city=bath,GB'`;
-		return join("\n", @text);
+		my $text = $input[0]->{text};
+		my @words = split(m/\s+/, $text);
+		my (undef, $place) = @words;
+
+		#detaint
+		if ($place && $place =~ m/([a-z,]+)/i) {
+			$place = $1;
+		} else {
+			$place = 'Bath,GB';
+		}
+
+		my @cmd = `lynx -dump 'https://api.scorpstuff.com/weather.php?units=imperial&city=$place'`;
+		return join("\n", @cmd);
 	},
 	'error' => sub {
 		# TODO: You should use https://s5ock2i7gptq4b6h5rlvw6szva0wojrd.lambda-url.eu-west-2.on.aws/ now
