@@ -402,13 +402,14 @@ while (1) {
         warn "WARNING: getUpdates returned a false value - trying again...";
         next;
     }
+
     for my $u (@{$updates->{result}}) {
         warn $u->{message}{chat}{id};
         $offset = $u->{update_id} + 1 if $u->{update_id} >= $offset;
         if (my $text = $u->{message}{text}) { # Text message
             printf "Incoming text message from \@%s\n", ($u->{message}{from}{username} // '<undef>');
             printf "Text: %s\n", $text;
-            next if $text !~ m!^/[^_].!; # Not a command
+            next if (index($text, '/') != 0); # Not a command
             my ($cmd, @params) = split / /, $text;
             my $res = $commands->{substr($cmd, 1)} || $commands->{_unknown};
             # Pass to the subroutine the message object, and the parameters passed to the cmd.
