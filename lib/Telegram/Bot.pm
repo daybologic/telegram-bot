@@ -8,6 +8,7 @@ use HTTP::Status qw(status_message);
 use Readonly;
 use Telegram::Bot::DrinksClient;
 use Telegram::Bot::GenderClient;
+use Telegram::Bot::Memes;
 use Telegram::Bot::MusicDB;
 use Telegram::Bot::UUIDClient;
 use Time::Duration;
@@ -304,29 +305,12 @@ my $commands = {
 		my $text = $input[0]->{text};
 		my $id = $input[0]->{chat}->{id};
 		my @words = split(m/\s+/, $text);
-		$text = shift(@words);
 
-		my $pathPattern = '/home/palmer/workspace/emoticons/4x%s.%s';
-		warn $pathPattern;
-		foreach my $ext (qw(png gif jpg JPG jpeg)) {
-			my $path = sprintf($pathPattern, $text, $ext);
-			warn "Checking if '$path' exists";
-			if (-f $path) {
-				if ($ext eq 'gif' && $id != -407509267) {
-					return +{
-						method => 'sendAnimation',
-						animation => { file => $path },
-						caption => join(' ', @words),
-					};
-				} else {
-					return +{
-						method  => "sendPhoto",
-						photo   => { file => $path },
-						caption => join(' ', @words),
-					};
-				}
-			}
+		my $memes = Telegram::Bot::Memes->new(chatId => $id);
+		if (my $meme = $memes->run(@words)) {
+			return $meme;
 		}
+
 		return "Unknown command :( Try /start";
 	},
 };
