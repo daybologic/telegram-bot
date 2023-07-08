@@ -36,9 +36,4 @@ sub run {
 	return undef;
 }
 
-sub decommand {
-	my ($command) = @_;
-	
-}
-
 1;
