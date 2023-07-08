@@ -44,6 +44,21 @@ sub testYUNO { # a valid and important meme
 	return EXIT_SUCCESS;
 }
 
+sub testCaption {
+	my ($self) = @_;
+	plan tests => 1;
+
+	cmp_deeply($self->sut->run('/troll', 'just to', 'wind you up'), {
+		caption => 'just to wind you up',
+		method  => 'sendPhoto',
+		photo   => {
+			file => '/home/palmer/workspace/emoticons/4x/troll.png',
+		},
+	}, 'caption and image path correct');
+
+	return EXIT_SUCCESS;
+}
+
 package main;
 use strict;
 exit(MemesTests->new->run);
