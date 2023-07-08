@@ -59,6 +59,22 @@ sub testCaption {
 	return EXIT_SUCCESS;
 }
 
+sub testGIF {
+	my ($self) = @_;
+	plan tests => 1;
+
+	cmp_deeply($self->sut->run('/hotpotato'), {
+		caption   => '',
+		method    => 'sendAnimation',
+		animation => {
+			file => '/home/palmer/workspace/emoticons/4x/hotpotato.gif',
+		},
+	}, 'caption and image path correct') or diag(explain($self->sut->run('/hotpotato')));
+
+	return EXIT_SUCCESS;
+}
+
 package main;
 use strict;
+use warnings;
 exit(MemesTests->new->run);
