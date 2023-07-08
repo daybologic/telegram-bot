@@ -3,7 +3,7 @@ use Moose;
 
 use Readonly;
 
-Readonly my $PATH_PATTERN => '/home/palmer/workspace/emoticons/4x/%s.%s';
+Readonly my $CACHE_PATTERN => '/var/cache/telegram-bot/memes/%dx/%s.%s';
 Readonly my $IMAGE_SIZE => 4;
 Readonly my $S3_BUCKET => '58a75bba-1d73-11ee-afdd-5b1a31ab3736';
 Readonly my $S3_URI => 's3://%s/%dx/%s.%s';
@@ -17,7 +17,7 @@ sub run {
 	$text = __decommand($text);
 
 	foreach my $ext (qw(png gif jpg JPG jpeg)) {
-		my $path = sprintf($PATH_PATTERN, $text, $ext);
+		my $path = sprintf($CACHE_PATTERN, $IMAGE_SIZE, $text, $ext);
 		warn "Checking if '$path' exists";
 		if (-f $path) {
 			if ($ext eq 'gif' && $self->chatId != -407509267) {
