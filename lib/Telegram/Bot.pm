@@ -6,6 +6,7 @@ use Data::Money::Amount;
 use English;
 use HTTP::Status qw(status_message);
 use Readonly;
+use Telegram::Bot::CatClient;
 use Telegram::Bot::DrinksClient;
 use Telegram::Bot::GenderClient;
 use Telegram::Bot::Memes;
@@ -291,7 +292,7 @@ my $commands = {
 		$text = $words[1];
 		my $message = 'unknown';
 		eval { $message = status_message($text) };
-		my $file = CatClient->new->run($text);
+		my $file = Telegram::Bot::CatClient->new->run($text);
 		+{
 			method  => "sendPhoto",
 			photo   => {
