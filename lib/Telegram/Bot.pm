@@ -52,6 +52,11 @@ sub breakfast {
 	return "Has old $name had their breakfast yet?";
 }
 
+sub version {
+	my @output = `git rev-parse HEAD`;
+	return join("\n", @output);
+}
+
 # The commands that this bot supports.
 my $pic_id; # file_id of the last sent picture
 my $commands = {
@@ -84,6 +89,7 @@ my $commands = {
 			return "I don't recognize the ID or URL";
 		}
 	},
+	'version' => \&version,
 	'search' => sub {
 		my (@input) = @_;
 		my $text = $input[0]->{text};
