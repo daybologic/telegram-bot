@@ -4,6 +4,9 @@ use Moose;
 use Readonly;
 
 Readonly my $PATH_PATTERN => '/home/palmer/workspace/emoticons/4x%s.%s';
+Readonly my $IMAGE_SIZE => 4;
+Readonly my $S3_BUCKET => '58a75bba-1d73-11ee-afdd-5b1a31ab3736';
+Readonly my $S3_URI => 's3://%s/%dx/%s.%s';
 
 has chatId => (isa => 'Int', is => 'rw', default => 0);
 
@@ -35,5 +38,11 @@ sub run {
 
 	return undef;
 }
+
+sub __generateS3URI {
+	my ($name, $extension) = @_;
+	return sprintf($S3_URI, $S3_BUCKET, $IMAGE_SIZE, $name, $extension);
+}
+#[081058Z JUL 23][palmer@trinity] telegram-bot meme [2]$ aws s3 cp s3://$U/4x/troll.png /tmp/
 
 1;
