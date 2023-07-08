@@ -3,7 +3,7 @@ use Moose;
 
 use Readonly;
 
-Readonly my $PATH_PATTERN => '/home/palmer/workspace/emoticons/4x%s.%s';
+Readonly my $PATH_PATTERN => '/home/palmer/workspace/emoticons/4x/%s.%s';
 Readonly my $IMAGE_SIZE => 4;
 Readonly my $S3_BUCKET => '58a75bba-1d73-11ee-afdd-5b1a31ab3736';
 Readonly my $S3_URI => 's3://%s/%dx/%s.%s';
@@ -14,7 +14,7 @@ sub run {
 	my ($self, @words) = @_;
 
 	my $text = shift(@words);
-	$text = "/${text}" if (index($text, '/') != 0);
+	$text = __decommand($text);
 
 	foreach my $ext (qw(png gif jpg JPG jpeg)) {
 		my $path = sprintf($PATH_PATTERN, $text, $ext);
@@ -37,6 +37,12 @@ sub run {
 	}
 
 	return undef;
+}
+
+sub __decommand {
+	my ($command) = @_;
+	$command = substr($command, 1) if (index($command, '/') == 0);
+	return $command;
 }
 
 sub __generateS3URI {
