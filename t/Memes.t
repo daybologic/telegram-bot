@@ -74,6 +74,21 @@ sub testGIF {
 	return EXIT_SUCCESS;
 }
 
+sub testNoSlash {
+	my ($self) = @_;
+	plan tests => 1;
+
+	cmp_deeply($self->sut->run('rubberstamp'), {
+		caption => '',
+		method  => 'sendPhoto',
+		photo   => {
+			file => '/home/palmer/workspace/emoticons/4x/rubberstamp.png',
+		},
+	}, 'correct data');
+
+	return EXIT_SUCCESS;
+}
+
 package main;
 use strict;
 use warnings;

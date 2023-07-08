@@ -11,6 +11,8 @@ sub run {
 	my ($self, @words) = @_;
 
 	my $text = shift(@words);
+	$text = "/${text}" if (index($text, '/') != 0);
+
 	foreach my $ext (qw(png gif jpg JPG jpeg)) {
 		my $path = sprintf($PATH_PATTERN, $text, $ext);
 		warn "Checking if '$path' exists";
