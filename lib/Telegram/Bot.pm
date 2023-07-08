@@ -62,13 +62,13 @@ sub memeSearch {
 
 	my $name = $words[0];
 	$name =~ s/\s+//g; # no spaces
-	$name =~ m/^\#//; # Telegram tag not required but useful for tab completion
+	$name =~ s/^\#//; # Telegram tag not required but useful for tab completion
 
 	my $memes = Telegram::Bot::Memes->new(chatId => 0); # chatId not important in this context
 	my $results = $memes->search($name);
-	if (scalar(@$result) == 0) {
+	if (scalar(@$results) == 0) {
 		return 'There is no meme even remotely like that.  Maybe bother @m6kvm to add it?';
-	} elsif (scalar(@$result) == 1) {
+	} elsif (scalar(@$results) == 1) {
 		@words = split(m/\s+/, $text);
 		$words[0] = $words[1];
 		pop(@words);
@@ -76,7 +76,7 @@ sub memeSearch {
 			return $meme;
 		}
 	} else {
-		return "Multiple matches, could be any of these:\n" . join("\n", @$result);
+		return "Multiple matches, could be any of these:\n" . join("\n", @$results);
 	}
 }
 
