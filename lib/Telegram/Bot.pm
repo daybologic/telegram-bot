@@ -69,6 +69,9 @@ sub memeSearch {
 	if (scalar(@$result) == 0) {
 		return 'There is no meme even remotely like that.  Maybe bother @m6kvm to add it?';
 	} elsif (scalar(@$result) == 1) {
+		@words = split(m/\s+/, $text);
+		$words[0] = $words[1];
+		pop(@words);
 		if (my $meme = $memes->run(@words)) {
 			return $meme;
 		}
