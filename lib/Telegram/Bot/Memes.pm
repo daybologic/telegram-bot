@@ -25,7 +25,7 @@ sub run {
 				};
 			} else {
 				return +{
-					method  => "sendPhoto",
+					method  => 'sendPhoto',
 					photo   => { file => $path },
 					caption => join(' ', @words),
 				};
