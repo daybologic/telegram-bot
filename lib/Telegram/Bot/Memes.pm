@@ -1,6 +1,8 @@
 package Telegram::Bot::Memes;
 use Moose;
 
+use Data::Dumper;
+use JSON qw(decode_json);
 use POSIX qw(EXIT_SUCCESS);
 use Readonly;
 
@@ -18,16 +20,52 @@ sub run {
 	$text = __detaint($text);
 	return undef unless ($text);
 
-	if (my $path = pathFromCache($text)) {
+	if (my $path = __pathFromCache($text)) {
 		return $self->__telegramCommand($path, @words);
 	} else {
 		$self->__downloadMeme($text);
-		if (my $path = pathFromCache($text)) {
+		if (my $path = __pathFromCache($text)) {
 			return $self->__telegramCommand($path, @words);
 		}
 	}
 
 	return undef;
+}
+
+sub search {
+	my ($self, $critereon) = @_;
+
+	$self->getList();
+	my @results = grep(/$critereon/, @{ $self->getList() });
+
+	return \@results;
+}
+
+sub getList {
+	my ($self) = @_;
+
+	my $fileList = $self->__executeListingCommand($self->__buildListingCommand());
+	return $fileList;
+}
+
+sub __buildListingCommand {
+	my ($self) = @_;
+
+	return sprintf("aws --output json s3api list-objects --bucket %s --prefix '%dx/'",
+	    $S3_BUCKET, $IMAGE_SIZE);
+}
+
+sub __executeListingCommand {
+	my ($self, $command) = @_;
+	my @fileList;
+	my $output = `$command`;
+	$output = decode_json($output);
+	foreach my $fileEnt (@{ $output->{Contents} }) {
+		push(@fileList, substr($fileEnt->{Key}, 3)); # Remove size-related prefix
+		$fileList[-1] = (split(m/\./, $fileList[-1]))[0]; # remove file exension
+	}
+
+	return \@fileList;
 }
 
 sub __telegramCommand {
@@ -48,7 +86,7 @@ sub __telegramCommand {
 	};
 }
 
-sub pathFromCache {
+sub __pathFromCache {
 	my ($name) = @_;
 	foreach my $ext (qw(png gif jpg JPG jpeg)) {
 		my $path = __makeCachePattern($name, $ext);

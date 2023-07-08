@@ -53,6 +53,30 @@ sub breakfast {
 	return "Has old $name had their breakfast yet?";
 }
 
+sub memeSearch {
+	my (@input) = @_;
+	my $text = $input[0]->{text};
+
+	my @words = split(m/\s+/, $text);
+	shift(@words); # Sack off '/m'
+
+	my $name = $words[0];
+	$name =~ s/\s+//g; # no spaces
+	$name =~ m/^\#//; # Telegram tag not required but useful for tab completion
+
+	my $memes = Telegram::Bot::Memes->new(chatId => 0); # chatId not important in this context
+	my $results = $memes->search($name);
+	if (scalar(@$result) == 0) {
+		return 'There is no meme even remotely like that.  Maybe bother @m6kvm to add it?';
+	} elsif (scalar(@$result) == 1) {
+		if (my $meme = $memes->run(@words)) {
+			return $meme;
+		}
+	} else {
+		return "Multiple matches, could be any of these:\n" . join("\n", @$result);
+	}
+}
+
 # The commands that this bot supports.
 my $pic_id; # file_id of the last sent picture
 my $commands = {
@@ -101,6 +125,7 @@ my $commands = {
 			return 'Missing criteria';
 		}
 	},
+	'm' => \&memeSearch,
 	'me' => sub {
 		my (@input) = @_;
 		if (my $text = $input[0]->{text}) {

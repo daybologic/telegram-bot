@@ -89,6 +89,20 @@ sub testNoSlash {
 	return EXIT_SUCCESS;
 }
 
+sub testSearch {
+	my ($self) = @_;
+	plan tests => 1;
+
+	my $result = $self->sut->search('rap');
+	cmp_deeply($result, [
+		'itsatrap',
+		'ohcrap',
+		'philosoraptor',
+	], 'results') or diag(explain($result));
+
+	return EXIT_SUCCESS;
+}
+
 package main;
 use strict;
 use warnings;
