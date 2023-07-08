@@ -5,3 +5,4 @@ Makefile.old
 blib
 .*.sw?
 pm_to_blib
+*.ini
