@@ -24,7 +24,22 @@ sub testNotFound {
 	my ($self) = @_;
 	plan tests => 1;
 
-	is($self->sut->run('nonsense'), undef, 'run with nonsense returned <undef>');
+	is($self->sut->run('/nonsense'), undef, 'run with nonsense returned <undef>');
+
+	return EXIT_SUCCESS;
+}
+
+sub testYUNO { # a valid and important meme
+	my ($self) = @_;
+	plan tests => 1;
+
+	cmp_deeply($self->sut->run('/yuno'), {
+		caption => '',
+		method  => 'sendPhoto',
+		photo   => {
+			file => '/home/palmer/workspace/emoticons/4x/yuno.png',
+		},
+	}, 'run with yuno returned correct data');
 
 	return EXIT_SUCCESS;
 }
