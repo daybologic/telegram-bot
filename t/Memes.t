@@ -82,7 +82,7 @@ sub testNoSlash {
 		caption => '',
 		method  => 'sendPhoto',
 		photo   => {
-			file => '/var/cache/telegram-bot/memes/4x/rubberstamp.gif',
+			file => '/var/cache/telegram-bot/memes/4x/rubberstamp.png',
 		},
 	}, 'correct data');
 
