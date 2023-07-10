@@ -43,6 +43,11 @@ my $drinksClient = DrinksClient->new();
 my $genderClient = GenderClient->new();
 my $startTime = time();
 
+sub source {
+	return "Source code for the bot can be obtained from https://git.sr.ht/~m6kvm/telegram-bot\n" .
+	    'Patches and memes may be sent to palmer@overchat.org with subject "telegram-bot"';
+}
+
 sub breakfast {
 	my (@input) = @_;
 	my $text = $input[0]->{text};
@@ -146,6 +151,7 @@ my $commands = {
 	'horatio' => sub { return 'licking Ben\'s roast potato' },
 	'ben' => sub { return 'He\'s at the garage having his tires rotated' },
 	'breakfast' => \&breakfast,
+	'source' => \&source,
 	'miles' => sub {
 		my (@input) = @_;
 		my $text = $input[0]->{text};
