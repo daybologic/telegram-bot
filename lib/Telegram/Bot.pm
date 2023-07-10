@@ -74,7 +74,7 @@ sub memeSearch {
 	if (scalar(@$results) == 0) {
 		return 'There is no meme even remotely like that.  Maybe bother @m6kvm to add it?';
 	} elsif (scalar(@$results) == 1) {
-		if (my $meme = $memes->run($results[0])) {
+		if (my $meme = $memes->run($results->[0])) {
 			return $meme;
 		}
 	} else {
