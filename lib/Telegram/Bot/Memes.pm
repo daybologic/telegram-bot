@@ -35,7 +35,6 @@ sub run {
 sub search {
 	my ($self, $critereon) = @_;
 
-	$self->getList();
 	my @results = grep(/$critereon/, @{ $self->getList() });
 
 	return \@results;

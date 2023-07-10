@@ -103,6 +103,26 @@ sub testSearch {
 	return EXIT_SUCCESS;
 }
 
+sub testSearchDanger {
+	my ($self) = @_;
+	plan tests => 1;
+
+	my $result = $self->sut->search('danger');
+	cmp_deeply($result, ['dangerwillrobinson']);
+
+	return EXIT_SUCCESS;
+}
+
+sub testAli {
+	my ($self) = @_;
+	plan tests => 1;
+
+	my $result = $self->sut->search('ali');
+	cmp_deeply($result, ['alig']);
+
+	return EXIT_SUCCESS;
+}
+
 package main;
 use strict;
 use warnings;
