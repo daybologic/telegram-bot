@@ -37,6 +37,14 @@ sub search {
 
 	my @results = grep(/$critereon/, @{ $self->getList() });
 
+	# Check for exact match; and force only one result to be returned
+	# This avoids an overlapping meme being inaccessible
+	foreach my $result (@results) {
+		next if ($result ne $critereon);
+		@results = ($result);
+		last;
+	}
+
 	return \@results;
 }
 

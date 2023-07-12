@@ -89,7 +89,7 @@ sub testNoSlash {
 	return EXIT_SUCCESS;
 }
 
-sub testSearch {
+sub testSearchRap {
 	my ($self) = @_;
 	plan tests => 1;
 
@@ -99,6 +99,16 @@ sub testSearch {
 		'ohcrap',
 		'philosoraptor',
 	], 'results') or diag(explain($result));
+
+	return EXIT_SUCCESS;
+}
+
+sub testSearchFatherJack {
+	my ($self) = @_;
+	plan tests => 1;
+
+	my $result = $self->sut->search('fatherjack');
+	cmp_deeply($result, ['fatherjack']); # 'fatherjack2' does not come back
 
 	return EXIT_SUCCESS;
 }
