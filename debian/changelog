@@ -1,5 +1,5 @@
-telegram-bot (1.1.1) stable; urgency=low
+telegram-bot (1.0.2) stable; urgency=low
 
   * Internal release
 
- -- Duncan Ross Palmer <palmer@overchat.org>  Sat, 17 Jun 2023 18:23:35 +0100
+ -- Duncan Ross Palmer <palmer@overchat.org>  Wed, 26 Jul 2023 22:14:32 +0100

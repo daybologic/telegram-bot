@@ -18,7 +18,7 @@ use URI::URL;
 use POSIX;
 
 BEGIN {
-	our $VERSION = '1.1.1';
+	our $VERSION = '1.0.2';
 }
 
 my $api = WWW::Telegram::BotAPI->new (
