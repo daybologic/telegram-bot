@@ -13,6 +13,8 @@ Readonly my $S3_URI => 's3://%s/%dx/%s.%s';
 
 has chatId => (isa => 'Int', is => 'rw', default => 0);
 
+my %__memeExtensionCache = ( );
+
 sub run {
 	my ($self, @words) = @_;
 
@@ -51,8 +53,11 @@ sub search {
 sub getList {
 	my ($self) = @_;
 
-	my $fileList = $self->__executeListingCommand($self->__buildListingCommand());
-	return $fileList;
+	if (__memeExtensionCacheCount() > 0) {
+		return __memeExtensionCacheKeys();
+	} else {
+		return $self->__executeListingCommand($self->__buildListingCommand());
+	}
 }
 
 sub __buildListingCommand {
@@ -69,7 +74,9 @@ sub __executeListingCommand {
 	$output = decode_json($output);
 	foreach my $fileEnt (@{ $output->{Contents} }) {
 		push(@fileList, substr($fileEnt->{Key}, 3)); # Remove size-related prefix
-		$fileList[-1] = (split(m/\./, $fileList[-1]))[0]; # remove file exension
+		my ($memeName, $extension) = split(m/\./, $fileList[-1]);
+		__memeExtensionCacheStore($memeName, $extension);
+		$fileList[-1] = $memeName; # remove file exension
 	}
 
 	return \@fileList;
@@ -95,10 +102,17 @@ sub __telegramCommand {
 
 sub __pathFromCache {
 	my ($name) = @_;
-	foreach my $ext (qw(png gif jpg JPG jpeg)) {
-		my $path = __makeCachePattern($name, $ext);
+
+	if (my $extension = __memeExtensionCacheFetch($name)) {
+		my $path = __makeCachePattern($name, $extension);
 		warn "Checking if '$path' exists";
 		return $path if (-f $path);
+	} else {
+		foreach my $extension (qw(png gif jpg JPG jpeg)) {
+			my $path = __makeCachePattern($name, $extension);
+			warn "Checking if '$path' exists";
+			return $path if (-f $path);
+		}
 	}
 
 	return undef;
@@ -133,15 +147,38 @@ sub __buildCommand {
 sub __downloadMeme {
 	my ($self, $name) = @_;
 
-	foreach my $ext (qw(png gif jpg JPG jpeg)) {
-		last if ($self->__runCommand(__buildCommand($name, $ext)) == EXIT_SUCCESS);
+	$self->getList(); # causes extension cache to be refreshed periodically
+	if (my $extension = __memeExtensionCacheFetch($name)) {
+		my $command = __buildCommand($name, $extension);
+		$self->__runCommand($command);
 	}
+
+	return;
 }
 
 sub __runCommand {
 	my ($self, $command) = @_;
 	warn "Running $command";
 	return system($command);
+}
+
+sub __memeExtensionCacheStore {
+	my ($memeName, $extension) = @_;
+	$__memeExtensionCache{$memeName} = $extension;
+	return;
+}
+
+sub __memeExtensionCacheFetch {
+	my ($memeName) = @_;
+	return $__memeExtensionCache{$memeName};
+}
+
+sub __memeExtensionCacheCount {
+	return scalar(keys(%__memeExtensionCache));
+}
+
+sub __memeExtensionCacheKeys {
+	return [ keys(%__memeExtensionCache) ];
 }
 
 1;
