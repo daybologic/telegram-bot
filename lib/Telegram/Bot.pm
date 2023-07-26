@@ -144,6 +144,8 @@ my $commands = {
 				return 'I should like mine with milk and no sugar, thanks';
 			} elsif ($text =~ m/onder.*poo-poo/) {
 				return "I think everybody is balls-deep :(";
+			} elsif ($text =~ m/eat.*desk/i) {
+				return 'you filthy animal :(';
 			}
 			return '';
 		}
