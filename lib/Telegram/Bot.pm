@@ -12,6 +12,7 @@ use Telegram::Bot::GenderClient;
 use Telegram::Bot::Memes;
 use Telegram::Bot::MusicDB;
 use Telegram::Bot::UUIDClient;
+use Telegram::Bot::Weather::Location;
 use Time::Duration;
 use WWW::Telegram::BotAPI;
 use URI::URL;
@@ -183,15 +184,20 @@ my $commands = {
 	},
 	'weather' => sub {
 		my (@input) = @_;
+		my $user = $input[0]->{from}{username};
 		my $text = $input[0]->{text};
 		my @words = split(m/\s+/, $text);
 		my (undef, $place) = @words;
 
+		my $location = Telegram::Bot::Weather::Location->new(); # TODO: Global?
+
 		#detaint
 		if ($place && $place =~ m/([a-z,]+)/i) {
 			$place = $1;
+			$location->run($user, $place); # store for next go
 		} else {
-			$place = 'Bath,GB';
+			$place = $location->run($user);
+			$place = 'Bath,GB' if ($place eq 'nowhere');
 		}
 
 		my @cmd = `lynx -dump 'https://api.scorpstuff.com/weather.php?units=imperial&city=$place'`;
