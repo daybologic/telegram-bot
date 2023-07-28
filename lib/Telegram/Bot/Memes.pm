@@ -47,6 +47,7 @@ sub search {
 		last;
 	}
 
+	@results = sort(@results); # Ensure memes are lexically listed
 	return \@results;
 }
 
