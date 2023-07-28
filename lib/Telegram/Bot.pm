@@ -41,6 +41,7 @@ my $musicDb = Telegram::Bot::MusicDB->new();
 my $uuidClient = Telegram::Bot::UUIDClient->new();
 my $drinksClient = DrinksClient->new();
 my $genderClient = GenderClient->new();
+my $memes = Telegram::Bot::Memes->new();
 my $startTime = time();
 
 sub source {
@@ -66,20 +67,21 @@ sub version {
 sub memeSearch {
 	my (@input) = @_;
 	my $text = $input[0]->{text};
+	my $id = $input[0]->{chat}->{id};
 
 	my @words = split(m/\s+/, $text);
 	shift(@words); # Sack off '/m'
 
-	my $name = $words[0];
+	my $name = shift(@words);
 	$name =~ s/\s+//g; # no spaces
 	$name =~ s/^\#//; # Telegram tag not required but useful for tab completion
 
-	my $memes = Telegram::Bot::Memes->new(chatId => 0); # chatId not important in this context
+	$memes->chatId($id);
 	my $results = $memes->search($name);
 	if (scalar(@$results) == 0) {
 		return 'There is no meme even remotely like that.  Maybe bother @m6kvm to add it?';
 	} elsif (scalar(@$results) == 1) {
-		if (my $meme = $memes->run($results->[0])) {
+		if (my $meme = $memes->run($results->[0], @words)) {
 			return $meme;
 		}
 	} else {
@@ -357,7 +359,7 @@ my $commands = {
 		my $id = $input[0]->{chat}->{id};
 		my @words = split(m/\s+/, $text);
 
-		my $memes = Telegram::Bot::Memes->new(chatId => $id);
+		$memes->chatId($id);
 		if (my $meme = $memes->run(@words)) {
 			return $meme;
 		}
