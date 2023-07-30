@@ -22,7 +22,7 @@ use URI::URL;
 use POSIX;
 
 BEGIN {
-	our $VERSION = '1.0.2';
+	our $VERSION = '1.1.0';
 }
 
 Readonly my $WEATHER_API_TOKEN => 'Cj1MKv18bAcUYSIyjZnrpckLv'; # FIXME: Redacted; you need to patch this with guilt until we have a config mechanism
