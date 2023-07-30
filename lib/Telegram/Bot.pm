@@ -6,6 +6,7 @@ use Data::Money::Amount;
 use English;
 use HTTP::Status qw(status_message);
 use Readonly;
+use Telegram::Bot::Ball8;
 use Telegram::Bot::CatClient;
 use Telegram::Bot::DrinksClient;
 use Telegram::Bot::GenderClient;
@@ -90,6 +91,10 @@ sub memeSearch {
 	}
 }
 
+sub ball8 {
+	return Telegram::Bot::Ball8->new()->run();
+}
+
 # The commands that this bot supports.
 my $pic_id; # file_id of the last sent picture
 my $commands = {
@@ -153,6 +158,7 @@ my $commands = {
 			return '';
 		}
 	},
+	'8ball', => \&ball8,
 	'horatio' => sub { return 'licking Ben\'s roast potato' },
 	'ben' => sub { return 'He\'s at the garage having his tires rotated' },
 	'breakfast' => \&breakfast,
