@@ -4,6 +4,7 @@ use warnings;
 use Data::Dumper;
 use Data::Money::Amount;
 use English;
+use Geo::Weather::VisualCrossing;
 use HTTP::Status qw(status_message);
 use Readonly;
 use Telegram::Bot::Ball8;
@@ -23,6 +24,8 @@ use POSIX;
 BEGIN {
 	our $VERSION = '1.0.2';
 }
+
+Readonly my $WEATHER_API_TOKEN => 'Cj1MKv18bAcUYSIyjZnrpckLv'; # FIXME: Redacted; you need to patch this with guilt until we have a config mechanism
 
 my $api = WWW::Telegram::BotAPI->new (
     #async => 1, # WARNING: may fail if Mojo::UserAgent is not available!
@@ -46,6 +49,8 @@ my $drinksClient = DrinksClient->new();
 my $genderClient = GenderClient->new();
 my $memes = Telegram::Bot::Memes->new();
 my $startTime = time();
+
+my $visualCrossing = Geo::Weather::VisualCrossing->new(apiKey => $WEATHER_API_TOKEN);
 
 sub source {
 	return "Source code for the bot can be obtained from https://git.sr.ht/~m6kvm/telegram-bot\n" .
@@ -198,22 +203,30 @@ my $commands = {
 		my (@input) = @_;
 		my $user = $input[0]->{from}{username};
 		my $text = $input[0]->{text};
+
 		my @words = split(m/\s+/, $text);
-		my (undef, $place) = @words;
+		shift(@words);
 
 		my $location = Telegram::Bot::Weather::Location->new(); # TODO: Global?
 
 		#detaint
-		if ($place && $place =~ m/([a-z,]+)/i) {
-			$place = $1;
-			$location->run($user, $place); # store for next go
-		} else {
-			$place = $location->run($user);
-			$place = 'Bath,GB' if ($place eq 'nowhere');
+		my @place;
+		for (my $i = 0; $i < scalar(@words); $i++) {
+			if ($words[$i] && $words[$i] =~ m/([a-z,]+)/i) {
+				push(@place, $words[$i]);
+			}
 		}
 
-		my @cmd = `lynx -dump 'https://api.scorpstuff.com/weather.php?units=imperial&city=$place'`;
-		return join("\n", @cmd);
+		if (scalar(@place)) {
+			$location->run($user, join(' ', @place)); # store for next go
+		} else {
+			$place[0] = $location->run($user);
+			$place[0] = 'Bath,GB' if ($place[0] eq 'nowhere');
+		}
+
+		my $report = $visualCrossing->lookup(join(' ', @place));
+		return '[ERROR: CITY ' . join(' ', @place) . ' NOT FOUND]' unless ($report);
+		return $report->getScorpStuffFormat();
 	},
 	'error' => sub {
 		# TODO: You should use https://s5ock2i7gptq4b6h5rlvw6szva0wojrd.lambda-url.eu-west-2.on.aws/ now

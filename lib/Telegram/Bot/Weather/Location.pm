@@ -6,6 +6,7 @@ use Moose;
 use Readonly;
 use URI;
 use URI::Encode;
+use URI::Escape;
 
 Readonly my $LOCATION_LAMBDA_URL => 'https://oz4r4y4h2a2q2an2z2qtg7hwaa0ruejk.lambda-url.eu-west-2.on.aws?user=%s&platform=telegram';
 
@@ -27,11 +28,12 @@ sub run {
 	$username = '' unless ($username);
 
 	my $uri = $LOCATION_LAMBDA_URL;
-	$uri .= '&location=' . $location if ($location);
-	$uri = URI->new($uri);
 
 	my $encoder = URI::Encode->new({double_encode => 0});
 	$uri = $encoder->encode(sprintf($uri, $username));
+
+	$uri .= '&location=' . uri_escape($location) if ($location);
+	$uri = URI->new($uri);
 
 	return $self->__ua->get($uri)->decoded_content;
 }
