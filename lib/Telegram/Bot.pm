@@ -12,6 +12,7 @@ use Telegram::Bot::DrinksClient;
 use Telegram::Bot::GenderClient;
 use Telegram::Bot::Memes;
 use Telegram::Bot::MusicDB;
+use Telegram::Bot::RandomNumber;
 use Telegram::Bot::UUIDClient;
 use Telegram::Bot::Weather::Location;
 use Time::Duration;
@@ -95,6 +96,10 @@ sub ball8 {
 	return Telegram::Bot::Ball8->new()->run();
 }
 
+sub randomNumber {
+	return Telegram::Bot::RandomNumber->new()->run();
+}
+
 # The commands that this bot supports.
 my $pic_id; # file_id of the last sent picture
 my $commands = {
@@ -159,6 +164,7 @@ my $commands = {
 		}
 	},
 	'8ball', => \&ball8,
+	'random' => \&randomNumber,
 	'horatio' => sub { return 'licking Ben\'s roast potato' },
 	'ben' => sub { return 'He\'s at the garage having his tires rotated' },
 	'breakfast' => \&breakfast,
