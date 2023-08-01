@@ -291,6 +291,10 @@ my $commands = {
 		my $username = shift->{from}{username};
 		return $drinksClient->run($username // 'anonymous', 'beer');
 	},
+	'🍺' => sub {
+		my $username = shift->{from}{username};
+		return $drinksClient->run($username // 'anonymous', 'beer');
+	},
 	'redbull' => sub {
 		my $username = shift->{from}{username};
 		return $drinksClient->run($username // 'anonymous', 'beer');
