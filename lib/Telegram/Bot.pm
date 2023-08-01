@@ -20,6 +20,7 @@ use Time::Duration;
 use WWW::Telegram::BotAPI;
 use URI::URL;
 use POSIX;
+use utf8;
 
 BEGIN {
 	our $VERSION = '1.1.0';
@@ -228,11 +229,26 @@ my $commands = {
 		return '[ERROR: CITY ' . join(' ', @place) . ' NOT FOUND]' unless ($report);
 		return $report->getScorpStuffFormat();
 	},
+	'lyfe' => sub {
+		return 'Such is the drinking lyfe 😩';
+	},
 	'error' => sub {
 		# TODO: You should use https://s5ock2i7gptq4b6h5rlvw6szva0wojrd.lambda-url.eu-west-2.on.aws/ now
 		my $key = 1 + int(rand(462));
 		my $error = `aws --profile palmer dynamodb get-item --table-name excuses4 --key='{ "ident": { "S": "$key" } }' --cli-read-timeout 1800 | jq -a -r .Item.english.S`;
 		return $error;
+	},
+	'tableflip' => sub {
+		return '(┛ಠ_ಠ)┛彡┻━┻';
+	},
+	'disapproval' => sub {
+		return 'ಠ_ಠ';
+	},
+	'sis' => sub {
+		return '🚢🐿️';
+	},
+	'bitbucket' => sub {
+		return '0️⃣1️⃣🪣';
 	},
 	'uuid' => sub {
 		my (@input) = @_;
@@ -275,14 +291,6 @@ my $commands = {
 		my $username = shift->{from}{username};
 		return $drinksClient->run($username // 'anonymous', 'beer');
 	},
-	'irnbru' => sub {
-		my $username = shift->{from}{username};
-		return $drinksClient->run($username // 'anonymous', 'beer');
-	},
-	'monster' => sub {
-		my $username = shift->{from}{username};
-		return $drinksClient->run($username // 'anonymous', 'beer');
-	},
 	'redbull' => sub {
 		my $username = shift->{from}{username};
 		return $drinksClient->run($username // 'anonymous', 'beer');
@@ -291,7 +299,15 @@ my $commands = {
 		my $username = shift->{from}{username};
 		return $drinksClient->run($username // 'anonymous', 'coffee');
 	},
+	'☕️' => sub {
+		my $username = shift->{from}{username};
+		return $drinksClient->run($username // 'anonymous', 'coffee');
+	},
 	'tea' => sub {
+		my $username = shift->{from}{username};
+		return $drinksClient->run($username // 'anonymous', 'tea');
+	},
+	'🫖' => sub {
 		my $username = shift->{from}{username};
 		return $drinksClient->run($username // 'anonymous', 'tea');
 	},
