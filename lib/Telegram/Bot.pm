@@ -98,6 +98,34 @@ sub memeSearch {
 	}
 }
 
+sub memeAddRemove {
+	my (@input) = @_;
+	my $syntax = 0;
+	my $text = $input[0]->{text};
+
+	my @words = split(m/\s+/, $text);
+	shift(@words); # Sack off '/meme'
+
+	my ($op, $name) = @words;
+	if ($op) {
+		if ($op eq 'add') {
+			return 'ERROR: Sorry, adding memes is not yet possible';
+		} elsif ($op eq 'remove' || $op eq 'delete' || $op eq 'del' || $op eq 'rm' || $op eq 'erase' || $op eq 'expunge' || $op eq 'purge') {
+			return $memes->remove($name);
+		} else {
+			$syntax = 1;
+		}
+	} else {
+		$syntax = 1;
+	}
+
+	if ($syntax) {
+		return 'syntax: /meme rm <meme name>';
+	}
+
+	return "Can't get here";
+}
+
 sub ball8 {
 	return Telegram::Bot::Ball8->new()->run();
 }
@@ -156,6 +184,7 @@ my $commands = {
 		}
 	},
 	'm' => \&memeSearch,
+	'meme' => \&memeAddRemove,
 	'me' => sub {
 		my (@input) = @_;
 		if (my $text = $input[0]->{text}) {

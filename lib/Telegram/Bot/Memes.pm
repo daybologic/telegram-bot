@@ -61,6 +61,26 @@ sub getList {
 	}
 }
 
+sub remove {
+	my ($self, $name) = @_;
+	return 'Meme to erase not specified' unless (defined($name) && length($name) > 0);
+	return 'Illegal meme name' if ($name !~ m/^[a-z0-9]+$/i);
+
+	$self->getList(); # causes extension cache to be refreshed periodically
+	my $extension = __memeExtensionCacheFetch($name);
+	return "No such meme '$name'" unless ($extension);
+
+	$self->__runCommand(__buildDeleteCommand($name, $extension));
+
+	if (my $path = __makeCachePattern($name, $extension)) {
+		unlink($path);
+	}
+
+	__memeExtensionCacheRemove($name);
+
+	return "Meme '$name' erased";
+}
+
 sub __buildListingCommand {
 	my ($self) = @_;
 
@@ -145,6 +165,14 @@ sub __buildCommand {
 	);
 }
 
+sub __buildDeleteCommand {
+	my ($name, $ext) = @_;
+	return sprintf(
+		'aws s3 rm %s',
+		__generateS3URI($name, $ext),
+	);
+}
+
 sub __downloadMeme {
 	my ($self, $name) = @_;
 
@@ -180,6 +208,11 @@ sub __memeExtensionCacheCount {
 
 sub __memeExtensionCacheKeys {
 	return [ keys(%__memeExtensionCache) ];
+}
+
+sub __memeExtensionCacheRemove {
+	my ($memeName) = @_;
+	delete($__memeExtensionCache{$memeName});
 }
 
 1;
