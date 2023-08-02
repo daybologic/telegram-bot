@@ -14,6 +14,7 @@ Readonly my @YES_REMARK => (
 	"Affirmative",
 	'yes',
 	'Y U NO?', # TODO: Can we direct to a meme via some sort of magic?
+	'indubitably',
 	'I did so yesterday'.
 	'what are you waiting for?',
 );
