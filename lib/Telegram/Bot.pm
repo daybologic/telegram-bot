@@ -112,6 +112,15 @@ sub memeAddRemove {
 			return 'ERROR: Sorry, adding memes is not yet possible';
 		} elsif ($op eq 'remove' || $op eq 'delete' || $op eq 'del' || $op eq 'rm' || $op eq 'erase' || $op eq 'expunge' || $op eq 'purge') {
 			return $memes->remove($name);
+		} elsif ($op eq 'post') {
+			my $url;
+			(undef, $url, @words) = @words;
+			return +{
+				method  => 'sendPhoto',
+				photo   => $url,
+				caption => join(' ', @words),
+			};
+
 		} else {
 			$syntax = 1;
 		}
