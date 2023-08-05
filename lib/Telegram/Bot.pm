@@ -143,6 +143,10 @@ sub randomNumber {
 	return Telegram::Bot::RandomNumber->new()->run();
 }
 
+sub insult {
+	return 'You manky Scotch git';
+}
+
 # The commands that this bot supports.
 my $pic_id; # file_id of the last sent picture
 my $commands = {
@@ -210,6 +214,7 @@ my $commands = {
 	'8ball', => \&ball8,
 	'random' => \&randomNumber,
 	'horatio' => sub { return 'licking Ben\'s roast potato' },
+	'insult' => \&insult,
 	'ben' => sub { return 'He\'s at the garage having his tires rotated' },
 	'breakfast' => \&breakfast,
 	'source' => \&source,
@@ -285,8 +290,14 @@ my $commands = {
 	'sis' => sub {
 		return '🚢🐿️';
 	},
+	'bird' => sub {
+		return '🕊️';
+	},
 	'bitbucket' => sub {
 		return '0️⃣1️⃣🪣';
+	},
+	'shrug' => sub {
+		return '¯\_(ツ)_/¯';
 	},
 	'uuid' => sub {
 		my (@input) = @_;
