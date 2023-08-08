@@ -51,7 +51,7 @@ sub __resizeWrapper {
 		file     => $self->original->file,
 	});
 
-	unless (-f $newHandle) {
+	unless (-f $newHandle->path) {
 		$self->__resize($newHandle, $size);
 	}
 
