@@ -23,7 +23,7 @@ use POSIX;
 use utf8;
 
 BEGIN {
-	our $VERSION = '1.2.0';
+	our $VERSION = '1.3.0';
 }
 
 Readonly my $WEATHER_API_TOKEN => 'Cj1MKv18bAcUYSIyjZnrpckLv'; # FIXME: Redacted; you need to patch this with guilt until we have a config mechanism
