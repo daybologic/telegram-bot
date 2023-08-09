@@ -1,5 +1,52 @@
+telegram-bot (1.3.0) stable; urgency=low
+
+  * Added /meme add support
+  * Added /bird, /insult, /shrug
+
+ -- Duncan Ross Palmer <palmer@overchat.org>  Tue, 08 Aug 2023 22:51:43 +0100
+
+telegram-bot (1.2.0) stable; urgency=low
+
+  * Added /meme post <URL> words
+  * Added /sis (ship-it squirrel)
+  * Added /meme rm <name> (meme-removal)
+  * Added indubitably as a valid 8ball response
+  * Added some emojis as valid commands (/🍺, /☕️, /🫖)
+  * Added /disapproval and /tableflip
+
+ -- Duncan Ross Palmer <palmer@overchat.org>  Tue, 03 Aug 2023 19:44:42 +0100
+
+telegram-bot (1.1.0) stable; urgency=low
+
+  * /8ball and /random as new commands
+  * /m respects the GIF-excluded channel, like /meme already did
+  * Meme search results are sorted
+  * Text in /m <meme> <text> is used on re-post to the channel
+  * Optimizations for slow meme fetching
+  * Weather backend completely replaced, stores your last-queried location and uses visualcrossing.com
+  * Capture /me comments about eating at your desk
+
+ -- Duncan Ross Palmer <palmer@overchat.org>  Sun, 30 Jul 2023 12:36:51 +0100
+
 telegram-bot (1.0.2) stable; urgency=low
 
-  * Internal release
+  * /me eating at desk patch (formerly "soup")
+  * Optimization for slow meme fetch
+  * Weather from locations other than Bath,GB
 
  -- Duncan Ross Palmer <palmer@overchat.org>  Wed, 26 Jul 2023 22:14:32 +0100
+
+telegram-bot (1.0.1) stable; urgency=low
+
+  * Release after overlapping meme fix
+    fix 'meme' inaccessible because 'meme2' existed
+
+ -- Duncan Ross Palmer <palmer@overchat.org>  Wed, 12 Jul 2023 22:05:13 +0100
+
+telegram-bot (1.0.0) stable; urgency=low
+
+  * Initial stable release
+    After everybody has gotten used to using the bot
+  * Advertise source code via /source
+
+ -- Duncan Ross Palmer <palmer@overchat.org>  Mon, 10 Jul 2023 22:46:49 +0100

@@ -6,3 +6,4 @@ blib
 .*.sw?
 pm_to_blib
 *.ini
+t/data/?x
