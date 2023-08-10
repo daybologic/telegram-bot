@@ -27,7 +27,10 @@ The bot relies on too many external, unpackaged dependencies at the moment to se
 
 ## Talking to the Bot
 
-Find the bot online under the username [@m6kvmdlcmdrbot](https://t.me/m6kvmdlcmdrbot).
+Find the bot online under the name [m6kvmdlcmdr](https://t.me/m6kvmdlcmdrbot) (@m6kvmdlcmdrbot).
+The exact username is due to a requirement by Telegram for all bots' usernames to end with the word 'bot'.
+
+If you run the bot yourself, substitute your preferred username - but remember that aforementioned requirement.
 
 ### Features
 
