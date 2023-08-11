@@ -44,6 +44,71 @@ Convert a currency amount in GBP to USD.  Usage: /usd <123.45>
 
 Convert a currency amount in USD to GBP.  Usage: /gbp <123.45>
 
+#### Drinks/snacks counters
+
+In order to keep a count of how many drinks you are having in a day, you may use the following counters, none of which take an argument:
+
+All of these counters are analogous:
+
+##### /beer (or /🍺)
+
+##### /coffee (or /☕️)
+
+##### /tea (or /🫖)
+
+##### /water (or /💦)
+
+This uses your username and the data is expired if not used for eight hours, which means you can start again the next day without any kind of manual reset.
+
+#### Errors
+
+You may solicit a random and stupid error or technical excuse by using /error
+This command takes no parameters.  A future enhancement may allow a repeatable error based on an integer,
+but it is undecided how to implement this.  Perhaps if an ID is reported within the error.
+
+#### Gender
+
+Some commands may refer to you as 'they' or 'their' because the bot does not known your gender.  If you would like to set
+a gender, type one of:
+
+/gender female
+
+or
+
+/gender male
+
+You cannot use this command if you have not configured a username within Telegram.
+
+In order to see your current gender, type /gender
+
+It is not currently possible to remove your selected gender and revert to 'they'.
+
+#### Memes
+
+Dynamic meme handling is one of the core features of the bot; we allow meme use, addition, removal, and search.
+
+TODO
+
+#### UUID generation
+
+In its simplest form, in order to obtain a [UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier) type /uuid
+
+TODO: /uuid <uuid> doesn't work
+
+#### Weather
+
+In order to obtain the weather for any location use /weather <location>
+A report of the weather for the specified location at the present time is returned.
+The location should be a city, or identifiable place.  The format of the report may change between releases.
+
+If you have set a username, the bot will remember you and the location you looked up last, allowing you to use /weather
+without a location in the future.
+
+The backend used for /weather uses [visualcrossing.com](https://www.visualcrossing.com) with their permission,
+and the Perl library [Geo::Weather::VisualCrossing](https://git.sr.ht/~m6kvm/libgeo-weather-visualcrossing-perl)
+
+You will need this library and an API token from Visual Crossing in order to use this feature, if you plan to use the bot yourself, or develop the feature.
+
 ## Community
 
 - [telegram-bot-discuss (mailing list)](https://lists.sr.ht/~m6kvm/telegram-bot-discuss)
