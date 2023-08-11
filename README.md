@@ -1,6 +1,6 @@
 # telegram-bot
 
-[![sourcehut release](https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/circles1.svg)](https://git.sr.ht/~m6kvm/telegram-bot)
+[![sourcehut release](Emoji_u1f916.svg)](https://git.sr.ht/~m6kvm/telegram-bot)
 
 Welcome to the Telegram-bot! (@m6kvmdlcmdr) by Rev. Duncan Ross Palmer
 
@@ -42,6 +42,14 @@ It is always right!
 Disclaimer: Don't ask for serious advice, we don't condone self-harm.  The bot is not a financial advisor, nor a lawyer, nor a doctor.  In fact, it doesn't really have any qualifications at all.
 
 Usage: /8ball <question>
+
+#### HTTP.cat
+
+The HTTP /cat command, returns an image representing an [HTTP error code](https://http.dev/status).
+
+The images are shamelessly taken from the [http.cat](https://http.cat/) whimsical website.
+
+usage: /cat <code>
 
 #### Currency conversion
 
@@ -100,6 +108,46 @@ For how long the machine the bot is running on has been up, and how long the scr
 
 To obtain version information from the running bot, and potentially other modules, type:
 /version
+
+#### Emojis
+
+Emojis are easily acceessible on most modern platforms but not all, you can instruct the bot to use some pre-determined emojis and series of emojis for various in-jokes, as follows:
+
+##### /bitbucket
+
+The website [bitbucket.org](https://bitbucket.org):
+0️⃣1️⃣🪣'
+
+##### /disapproval
+
+The Look of [disapproval](https://looks.wtf):
+
+ಠ_ಠ
+
+##### /shrug
+
+The "shruggie", which was in common use before 🤷‍♀️
+
+¯\_(ツ)_/¯
+
+##### /tableflip
+
+Produces the following image:
+(┛ಠ_ಠ)┛彡┻━┻
+
+##### /bird
+
+A bird:
+🕊️
+
+We often use this to indicate that code is OK.
+
+##### /sis
+
+Ship-it Squrrel:
+🚢🐿️
+
+We often use this to indicate that code is OK.
 
 #### Errors
 
@@ -178,6 +226,17 @@ Note that all memes are accessible to all users, so please be considerate.  If y
 
 nb. in future versions, your username may be stored along with the meme, for access control reasons, and if you do not have a username, use of this command may be restricted.
 
+#### Music
+
+Commands related to music
+
+##### /search
+
+Search through the author's collection;
+
+Note that this method is presently broken, for unknown reasons, and will be restored as soon as possible.
+In the future, we will allow downloading this music via the bot too.
+
 #### UUID generation
 
 In its simplest form, in order to obtain a [UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier) type /uuid
@@ -198,61 +257,94 @@ and the Perl library [Geo::Weather::VisualCrossing](https://git.sr.ht/~m6kvm/lib
 
 You will need this library and an API token from Visual Crossing in order to use this feature, if you plan to use the bot yourself, or develop the feature.
 
-#### Undocumented
+#### Miscellaneous
 
-The following commands are undocumented at the present time.  Please do not use them, until further notice:
+##### /me (ignored)
 
-##### /ben
+It's common on IRC to say that one is doing something by saying /me.
+This bot ignores /me, rather than complaining it doesn't recognize the command.
+This allows you to run another bot in the channel which understands and does something with this command.
 
 ##### /random
 
+Return a random number.  This is similar to $RANDOM in the shell.
+The number is limited to 16-bits in width.  Only one result per execution.
+
 ##### /lyfe
+
+Insinuate that somebody is hung over from alcoholic beverages.
+
+TODO: It should be moved into custom commands, defined in a config file
 
 ##### /insult
 
-##### /lastphoto
-
-##### /search
+Produce a random insult
+WARNING: May not be politically correct; may cause offence!
 
 ##### /miles
 
-##### /keyboard
+Convert a number of kilometers into miles.
+
+Usage: /miles <km>
+
+km must be a number.
 
 ##### /say
 
-##### /me
+The bot will repeat whatever you write here.  This is mostly so you can start other text beginning with '/', without producing an error.
 
-##### /shrug
-
-##### /bitbucket
-
-##### /encoding
+/say <text>
 
 ##### /yt
 
-##### /cat
+This command is used to remotely download from YouTube but it doesn't work!
+In a future release, the bot will download something on your behalf and then produce a link.
 
 ##### /ynyr
 
-##### /tableflip
+The old one!  Not as old as all that!
+Watch the film 'Krull' before using this comnand.
 
-##### /bird
-
-##### /sis
+TODO: It should be moved into custom commands, defined in a config file
 
 ##### /horatio
 
-##### /disapproval
+Esoteric: May be removed in a future release.
+
+TODO: It should be moved into custom commands, defined in a config file
+
+##### /ben
+
+Report Ben's live whereabouts
+This is a joke command, and it always reports the same thing.
+TODO: It should be moved into custom commands, defined in a config file
+
+##### /breakfast
+
+Remind the given user to have their breakfast.
+Usage: /breakfast <@username>
+
+##### /lastphoto
+
+Debugging purposes only; returns the staged meme which would be stored with the next /meme add <name> command.
+This command is subject to removal, renaming, or potentially a debug-only mode.
+
+#### Undocumented
+
+The following commands are undocumented at the present time.  Please do not use them, until further notice.
+All of these are likely to be removed soon.
+
+##### /keyboard
+
+##### /encoding
 
 ##### /knock
 
-##### /whoami
+##### /phone
 
 ##### /redbull
 
-##### /phone
-
-##### /breakfast
+##### /whoami
 
 ## Community
 
