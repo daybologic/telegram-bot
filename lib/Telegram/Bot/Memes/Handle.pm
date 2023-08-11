@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-#
 # telegram-bot
 # Copyright (c) 2023, Rev. Duncan Ross Palmer (2E0EOL),
 # All rights reserved.
@@ -31,30 +29,24 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-package MemesTests_generateS3URI;
-use strict;
-use warnings;
+package Telegram::Bot::Memes::Handle;
 use Moose;
-extends 'Test::Module::Runnable';
 
-use Telegram::Bot::Memes;
-use English qw(-no_match_vars);
-use POSIX qw(EXIT_SUCCESS);
-use Test::Deep qw(cmp_deeply all isa methods bool re);
-use Test::Exception;
-use Test::More;
+has rootPath => (is => 'ro', isa => 'Str', default => '/var/cache/telegram-bot/memes');
+has ['aspect', 'file'] => (isa => 'Str', is => 'ro', required => 1);
+has path => (isa => 'Str', is => 'ro', lazy => 1, default => \&__makePath);
+has __aspectPath => (isa => 'Str', is => 'ro', lazy => 1, default => \&__makeAspectPath);
 
-sub test {
+sub __makePath {
 	my ($self) = @_;
-	plan tests => 1;
-
-	my $result = Telegram::Bot::Memes::__generateS3URI('troll', 'png');
-	is($result, 's3://58a75bba-1d73-11ee-afdd-5b1a31ab3736/4x/troll.png', "URL: '$result'");
-
-	return EXIT_SUCCESS;
+	return join('/', $self->__aspectPath, $self->file);
 }
 
-package main;
-use strict;
-use warnings;
-exit(MemesTests_generateS3URI->new->run);
+sub __makeAspectPath {
+	my ($self) = @_;
+	my $aspectPath = join('/', $self->rootPath, $self->aspect);
+	mkdir($aspectPath);
+	return $aspectPath;
+}
+
+1;

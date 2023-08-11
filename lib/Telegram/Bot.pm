@@ -1,3 +1,34 @@
+# telegram-bot
+# Copyright (c) 2023, Rev. Duncan Ross Palmer (2E0EOL),
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+#  1. Redistributions of source code must retain the above copyright
+#     notice, this list of conditions and the following disclaimer.
+#
+#  2. Redistributions in binary form must reproduce the above copyright
+#     notice, this list of conditions and the following disclaimer in the
+#     documentation and/or other materials provided with the distribution.
+#
+#  3. Neither the name of the project nor the names of its contributors
+#     may be used to endorse or promote products derived from this software
+#     without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE PROJECT AND CONTRIBUTORS ``AS IS'' AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE PROJECT OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+# OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+# OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+
 package Telegram::Bot;
 use strict;
 use warnings;
@@ -23,7 +54,7 @@ use POSIX;
 use utf8;
 
 BEGIN {
-	our $VERSION = '1.2.0';
+	our $VERSION = '1.3.0';
 }
 
 Readonly my $WEATHER_API_TOKEN => 'Cj1MKv18bAcUYSIyjZnrpckLv'; # FIXME: Redacted; you need to patch this with guilt until we have a config mechanism
@@ -48,7 +79,7 @@ my $musicDb = Telegram::Bot::MusicDB->new();
 my $uuidClient = Telegram::Bot::UUIDClient->new();
 my $drinksClient = DrinksClient->new();
 my $genderClient = GenderClient->new();
-my $memes = Telegram::Bot::Memes->new();
+my $memes = Telegram::Bot::Memes->new(api => $api);
 my $startTime = time();
 
 my $visualCrossing = Geo::Weather::VisualCrossing->new(apiKey => $WEATHER_API_TOKEN);
@@ -88,7 +119,7 @@ sub memeSearch {
 	$memes->chatId($id);
 	my $results = $memes->search($name);
 	if (scalar(@$results) == 0) {
-		return 'There is no meme even remotely like that.  Maybe bother @m6kvm to add it?';
+		return "There is no meme like that.  Send me a PM or tag me in an image and then use '/meme add <name>'";
 	} elsif (scalar(@$results) == 1) {
 		if (my $meme = $memes->run($results->[0], @words)) {
 			return $meme;
@@ -99,7 +130,7 @@ sub memeSearch {
 }
 
 sub memeAddRemove {
-	my (@input) = @_;
+	my ($picId, @input) = @_;
 	my $syntax = 0;
 	my $text = $input[0]->{text};
 
@@ -108,8 +139,8 @@ sub memeAddRemove {
 
 	my ($op, $name) = @words;
 	if ($op) {
-		if ($op eq 'add') {
-			return 'ERROR: Sorry, adding memes is not yet possible';
+		if ($op eq 'add' || $op eq 'new') {
+			return $memes->add($name, $picId);
 		} elsif ($op eq 'remove' || $op eq 'delete' || $op eq 'del' || $op eq 'rm' || $op eq 'erase' || $op eq 'expunge' || $op eq 'purge') {
 			return $memes->remove($name);
 		} elsif ($op eq 'post') {
@@ -129,7 +160,7 @@ sub memeAddRemove {
 	}
 
 	if ($syntax) {
-		return 'syntax: /meme rm <meme name>';
+		return 'syntax: /meme [add|rm] <meme name>';
 	}
 
 	return "Can't get here";
@@ -197,7 +228,9 @@ my $commands = {
 		}
 	},
 	'm' => \&memeSearch,
-	'meme' => \&memeAddRemove,
+	'meme' => sub {
+		memeAddRemove($pic_id, @_); # FIXME: Setting pic_id = undef after call doesn't work properly, even though I need to do it.
+	},
 	'me' => sub {
 		my (@input) = @_;
 		if (my $text = $input[0]->{text}) {
@@ -473,8 +506,15 @@ $commands->{start} = "Hello! Try /" . join " - /", grep !/^_/, keys %$commands;
 
 # Special message type handling
 my $message_types = {
-    # Save the picture ID to use it in `lastphoto`.
-    "photo" => sub { $pic_id = shift->{photo}[0]{file_id} },
+	# Save the picture ID to use it in `lastphoto`.
+	'photo' => sub {
+			$pic_id = shift->{photo}[-1]{file_id};
+			+{
+				method     => 'sendMessage',
+				text       => "OK I've seen your meme, now say /meme add <name>.\n"
+				    . 'NOTE: This operation is slow, please be patient, the bot may not respond for up to a minute.',
+			},
+	},
     # Receive contacts!
     "contact" => sub {
         my $contact = shift->{contact};

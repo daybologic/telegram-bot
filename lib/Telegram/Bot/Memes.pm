@@ -1,3 +1,34 @@
+# telegram-bot
+# Copyright (c) 2023, Rev. Duncan Ross Palmer (2E0EOL),
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+#  1. Redistributions of source code must retain the above copyright
+#     notice, this list of conditions and the following disclaimer.
+#
+#  2. Redistributions in binary form must reproduce the above copyright
+#     notice, this list of conditions and the following disclaimer in the
+#     documentation and/or other materials provided with the distribution.
+#
+#  3. Neither the name of the project nor the names of its contributors
+#     may be used to endorse or promote products derived from this software
+#     without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE PROJECT AND CONTRIBUTORS ``AS IS'' AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE PROJECT OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+# OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+# OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+
 package Telegram::Bot::Memes;
 use Moose;
 
@@ -5,13 +36,18 @@ use Data::Dumper;
 use JSON qw(decode_json);
 use POSIX qw(EXIT_SUCCESS);
 use Readonly;
+use Telegram::Bot::Memes::Add;
 
-Readonly my $CACHE_PATTERN => '/var/cache/telegram-bot/memes/%dx/%s.%s';
-Readonly my $IMAGE_SIZE => 4;
+Readonly my $CACHE_PATTERN => '/var/cache/telegram-bot/memes/%s/%s.%s';
+Readonly my $IMAGE_ASPECT => '4x';
 Readonly my $S3_BUCKET => '58a75bba-1d73-11ee-afdd-5b1a31ab3736';
-Readonly my $S3_URI => 's3://%s/%dx/%s.%s';
+Readonly my $S3_URI => 's3://%s/%s/%s.%s';
 
 has chatId => (isa => 'Int', is => 'rw', default => 0);
+
+has adder => (isa => 'Telegram::Bot::Memes::Add', is => 'ro', init_arg => undef, lazy => 1, default => \&__makeAdder);
+
+has api => (is => 'rw', isa => 'WWW::Telegram::BotAPI');
 
 my %__memeExtensionCache = ( );
 
@@ -61,6 +97,17 @@ sub getList {
 	}
 }
 
+sub exists {
+	my ($self, $name) = @_;
+
+	my $list = $self->getList();
+	foreach my $thisName (@$list) {
+		return 1 if (lc($name) eq lc($thisName));
+	}
+
+	return 0;
+}
+
 sub remove {
 	my ($self, $name) = @_;
 	return 'Meme to erase not specified' unless (defined($name) && length($name) > 0);
@@ -70,10 +117,11 @@ sub remove {
 	my $extension = __memeExtensionCacheFetch($name);
 	return "No such meme '$name'" unless ($extension);
 
-	$self->__runCommand(__buildDeleteCommand($name, $extension));
-
-	if (my $path = __makeCachePattern($name, $extension)) {
-		unlink($path);
+	foreach my $aspect ('original', '4x', '2x', '1x') { # TODO: Can iterate through aspects?
+		$self->__runCommand(__buildDeleteCommand($name, $extension, $aspect));
+		if (my $path = __makeCachePattern($name, $extension, $aspect)) {
+			unlink($path);
+		}
 	}
 
 	__memeExtensionCacheRemove($name);
@@ -81,11 +129,35 @@ sub remove {
 	return "Meme '$name' erased";
 }
 
+sub add {
+	my ($self, $name, $picId) = @_;
+	return 'Meme to add not specified' unless (defined($name) && length($name) > 0);
+	return 'Illegal meme name' if ($name !~ m/^[a-z0-9]+$/i);
+
+	if ($self->exists($name)) {
+		return "A meme by the name '$name' aleady exists, use /$name to see it, or /meme rm $name to delete it";
+	}
+
+	unless ($picId) {
+		return 'There is no staged meme - please PM the bot with a photo or picture, and then try this message again';
+	}
+
+	my $response = $self->adder->add($name, $picId);
+	__memeExtensionCacheStore($name, 'jpg'); # Important; or isn't listable or removable
+	return $response;
+}
+
+sub addToBucket {
+	my ($self, $path, $name, $aspect) = @_;
+	$self->__runCommand(__buildUploadCommand($name, $path, $aspect));
+	return;
+}
+
 sub __buildListingCommand {
 	my ($self) = @_;
 
-	return sprintf("aws --output json s3api list-objects --bucket %s --prefix '%dx/'",
-	    $S3_BUCKET, $IMAGE_SIZE);
+	return sprintf("aws --output json s3api list-objects --bucket %s --prefix '%s/'",
+	    $S3_BUCKET, $IMAGE_ASPECT);
 }
 
 sub __executeListingCommand {
@@ -147,13 +219,15 @@ sub __detaint {
 }
 
 sub __generateS3URI {
-	my ($name, $ext) = @_;
-	return sprintf($S3_URI, $S3_BUCKET, $IMAGE_SIZE, $name, $ext);
+	my ($name, $ext, $aspect) = @_;
+	$aspect = $IMAGE_ASPECT unless ($aspect);
+	return sprintf($S3_URI, $S3_BUCKET, $aspect, $name, $ext);
 }
 
 sub __makeCachePattern {
-	my ($name, $ext) = @_;
-	sprintf($CACHE_PATTERN, $IMAGE_SIZE, $name, $ext);
+	my ($name, $ext, $aspect) = @_;
+	$aspect = $IMAGE_ASPECT unless ($aspect);
+	sprintf($CACHE_PATTERN, $aspect, $name, $ext);
 }
 
 sub __buildCommand {
@@ -165,11 +239,20 @@ sub __buildCommand {
 	);
 }
 
+sub __buildUploadCommand {
+	my ($name, $path, $aspect) = @_;
+	return sprintf(
+		'aws s3 cp %s %s',
+		$path,
+		__generateS3URI($name, 'jpg', $aspect),
+	);
+}
+
 sub __buildDeleteCommand {
-	my ($name, $ext) = @_;
+	my ($name, $ext, $aspect) = @_;
 	return sprintf(
 		'aws s3 rm %s',
-		__generateS3URI($name, $ext),
+		__generateS3URI($name, $ext, $aspect),
 	);
 }
 
@@ -189,6 +272,14 @@ sub __runCommand {
 	my ($self, $command) = @_;
 	warn "Running $command";
 	return system($command);
+}
+
+sub __makeAdder {
+	my ($self) = @_;
+	return Telegram::Bot::Memes::Add->new({
+		api   => $self->api,
+		owner => $self,
+	});
 }
 
 sub __memeExtensionCacheStore {
