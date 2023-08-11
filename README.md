@@ -16,13 +16,13 @@ For up to date documentation, please ensure you are viewing the latest copy at [
 
 ## Project goals
 
-The project started out as a way to quickly ask a remote copy of [yt-dlp](https://github.com/yt-dlp/yt-dlp) to perform downloads of music videos, but this has thus far been an semi-abandoned goal.  Instead, the bot quickly took on a rapid growth of off-the-cuff ideas. See features.  We would appreciate any patches or forks!
+The project started out as a way to quickly ask a remote copy of [yt-dlp](https://github.com/yt-dlp/yt-dlp) to perform downloads of music videos, but this has thus far been an semi-abandoned goal.  Instead, the bot quickly took on a rapid growth of off-the-cuff ideas. See [Features](#Features).  We would appreciate any patches or forks!
 
 ## Setup / installation
 
 TODO: nb. most users will not be installing this bot, and therefore instructions will be perfected later.
-For the moment, we will direct you to features instead.
 
+For the moment, we will direct you to [Features](#Features) instead.
 The bot relies on too many external, unpackaged dependencies at the moment to set up by third parties.
 
 ## Talking to the Bot
