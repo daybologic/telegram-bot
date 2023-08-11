@@ -237,11 +237,31 @@ Search through the author's collection;
 Note that this method is presently broken, for unknown reasons, and will be restored as soon as possible.
 In the future, we will allow downloading this music via the bot too.
 
-#### UUID generation
+#### UUIDs
 
-In its simplest form, in order to obtain a [UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier) type /uuid
+Relating to [UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier)s;
+These services are all handled by a backend microservice.
+
+##### Generating a UUID
+
+In its simplest form, in order to obtain a unique identifier,
+Usage: /uuid
+
+The default version of UUID is 1.  In order to obtain a version 4 UUID, specify /uuid v4.
+If you need multiple UUIDs. specify an integer.  For example, to obtain five UUIDs, using the version 4 scheme:
+
+/uuid v4 5
+
+or
+
+/uuid 5 v4
+
+Order of arguments is not important here.
+
+#### Obtaining UUID information
 
 TODO: /uuid <uuid> doesn't work
+In theory it gives information about UUIDs, but it's broken.  We're sorry
 
 #### Weather
 
