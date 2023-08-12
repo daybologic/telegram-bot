@@ -49,7 +49,7 @@ The HTTP /cat command, returns an image representing an [HTTP error code](https:
 
 The images are shamelessly taken from the [http.cat](https://http.cat/) whimsical website.
 
-usage: /cat <code>
+usage: /cat code
 
 #### Currency conversion
 
@@ -178,7 +178,7 @@ Dynamic meme handling is one of the core features of the bot; we allow meme use,
 
 ##### Search
 
-In order see a list of memes, type /m <critereon>.  If your meme matches meme exactly, it is used - try to make
+In order see a list of memes, type /m critereon.  If your meme matches meme exactly, it is used - try to make
 your meme search query less precise.  A good starting point might be, for example:
 
 /m e
@@ -190,7 +190,7 @@ and not by the bot code, at present.  You can narrow down the search as required
 
 If a meme is useless, incorrect, or offensive, you may remove the meme by using:
 
-/meme rm <name>
+/meme rm name
 
 The name must be exact.
 
@@ -204,19 +204,19 @@ nb. in future versions, if you do not have a username, use of this command may b
 
 To use a meme, the following syntaxes are supported:
 
-/m <name>
-/m #<name>
+/m name
+/m #name
 /name
 
 ie. any unknown command will map to a meme.
-Note that if another command conflicts with the name of the meme, in the /<name> syntax, the command will take precedence, and the meme is inaccesible using that syntax; this is for obvious security reasons, or vital commands might become unusable.
+Note that if another command conflicts with the name of the meme, in the /name syntax, the command will take precedence, and the meme is inaccesible using that syntax; this is for obvious security reasons, or vital commands might become unusable.
 
 ##### Adding
 
 Message the bot privately and send JPEG image.  Please don't try other image types, it is unsupported.
 
 Once the bot acknowledges that it has seen your meme (it will say so),
-type /meme add <name>.
+type /meme add name.
 
 If the meme name is already used, this operation will fail.  If this happens, pick another name.  You do not have to send the picture again.
 
@@ -260,12 +260,12 @@ Order of arguments is not important here.
 
 #### Obtaining UUID information
 
-TODO: /uuid <uuid> doesn't work
+TODO: /uuid uuid doesn't work
 In theory it gives information about UUIDs, but it's broken.  We're sorry
 
 #### Weather
 
-In order to obtain the weather for any location use /weather <location>
+In order to obtain the weather for any location use /weather location
 A report of the weather for the specified location at the present time is returned.
 The location should be a city, or identifiable place.  The format of the report may change between releases.
 
@@ -305,7 +305,7 @@ WARNING: May not be politically correct; may cause offence!
 
 Convert a number of kilometers into miles.
 
-Usage: /miles <km>
+Usage: /miles km
 
 km must be a number.
 
