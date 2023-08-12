@@ -41,7 +41,7 @@ It is always right!
 
 Disclaimer: Don't ask for serious advice, we don't condone self-harm.  The bot is not a financial advisor, nor a lawyer, nor a doctor.  In fact, it doesn't really have any qualifications at all.
 
-Usage: /8ball <question>
+Usage: /8ball question
 
 #### HTTP.cat
 
