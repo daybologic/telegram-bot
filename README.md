@@ -12,7 +12,7 @@ If you would like to run your own copy of this telegram-bot, you will need to do
 
 ## Documentation
 
-For up to date documentation, please ensure you are viewing the latest copy at [sourcehut](https://git.sr.ht/~m6kvm/telegram-bot/tree/f/docs/item/README.md)
+For up to date documentation, please ensure you are viewing the latest copy at [sourcehut](https://git.sr.ht/~m6kvm/telegram-bot/tree/develop/item/README.md)
 
 ## Project goals
 
