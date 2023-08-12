@@ -366,8 +366,6 @@ All of these are likely to be removed soon.
 
 ##### /redbull
 
-##### /whoami
-
 ## Community
 
 - [telegram-bot-discuss (mailing list)](https://lists.sr.ht/~m6kvm/telegram-bot-discuss)

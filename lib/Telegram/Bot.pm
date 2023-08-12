@@ -427,10 +427,6 @@ my $commands = {
 	'ynyr' => sub { return "Not as old as all that" },
     # Example demonstrating the use of parameters in a command.
     "say"      => sub { join " ", splice @_, 1 or "Usage: /say something" },
-    # Example showing how to use the result of an API call.
-    "whoami"   => sub {
-        sprintf "Hello %s, I am %s! How are you?", shift->{from}{username}, $me->{result}{username}
-    },
     # Example showing how to send multiple lines in a single message.
     "knock"    => sub {
         sprintf "Knock-knock.\n- Who's there?\n@%s!", $me->{result}{username}
