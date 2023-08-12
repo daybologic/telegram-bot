@@ -401,6 +401,10 @@ my $commands = {
 		my $username = shift->{from}{username};
 		return $drinksClient->run($username // 'anonymous', 'water');
 	},
+	'💦' => sub {
+		my $username = shift->{from}{username};
+		return $drinksClient->run($username // 'anonymous', 'water');
+	},
 	'gender' => sub {
 		my (@input) = @_;
 		my $text = $input[0]->{text};
