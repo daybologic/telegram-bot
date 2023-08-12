@@ -205,7 +205,9 @@ nb. in future versions, if you do not have a username, use of this command may b
 To use a meme, the following syntaxes are supported:
 
 /m name
+
 /m #name
+
 /name
 
 ie. any unknown command will map to a meme.
