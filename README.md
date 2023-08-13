@@ -364,8 +364,6 @@ All of these are likely to be removed soon.
 
 ##### /phone
 
-##### /redbull
-
 ## Community
 
 - [telegram-bot-discuss (mailing list)](https://lists.sr.ht/~m6kvm/telegram-bot-discuss)
