@@ -40,6 +40,7 @@ use HTTP::Status qw(status_message);
 use Readonly;
 use Telegram::Bot::Ball8;
 use Telegram::Bot::CatClient;
+use Telegram::Bot::Config;
 use Telegram::Bot::DrinksClient;
 use Telegram::Bot::GenderClient;
 use Telegram::Bot::Memes;
@@ -59,10 +60,7 @@ BEGIN {
 
 Readonly my $WEATHER_API_TOKEN => 'Cj1MKv18bAcUYSIyjZnrpckLv'; # FIXME: Redacted; you need to patch this with guilt until we have a config mechanism
 
-my $api = WWW::Telegram::BotAPI->new (
-    #async => 1, # WARNING: may fail if Mojo::UserAgent is not available!
-    token => 'REDACTED', # FIXME
-);
+my $api = __makeAPI();
 # ... but error handling is available as well.
 #my $result = eval { $api->getMe->{result}{username} }
 #    or die 'Got error message: ', $api->parse_error->{msg};
@@ -81,6 +79,7 @@ my $drinksClient = DrinksClient->new();
 my $genderClient = GenderClient->new();
 my $memes = Telegram::Bot::Memes->new(api => $api);
 my $startTime = time();
+my $config;
 
 my $visualCrossing = Geo::Weather::VisualCrossing->new(apiKey => $WEATHER_API_TOKEN);
 
@@ -176,6 +175,17 @@ sub randomNumber {
 
 sub insult {
 	return 'You manky Scotch git';
+}
+
+sub __makeAPI {
+	$config = Telegram::Bot::Config->new();
+	my $token = $config->getSectionByName(__PACKAGE__)->getValueByKey('api_key');
+	die 'No API token' unless ($token);
+
+	return WWW::Telegram::BotAPI->new (
+		#async => 1, # WARNING: may fail if Mojo::UserAgent is not available!
+		token => $token,
+	);
 }
 
 # The commands that this bot supports.
