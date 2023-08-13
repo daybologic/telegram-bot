@@ -59,8 +59,6 @@ BEGIN {
 	our $VERSION = '1.3.0';
 }
 
-Readonly my $WEATHER_API_TOKEN => 'Cj1MKv18bAcUYSIyjZnrpckLv'; # FIXME: Redacted; you need to patch this with guilt until we have a config mechanism
-
 my $api = __makeAPI();
 # ... but error handling is available as well.
 #my $result = eval { $api->getMe->{result}{username} }
@@ -82,7 +80,7 @@ my $memes = Telegram::Bot::Memes->new(api => $api);
 my $startTime = time();
 my $config;
 my $admins;
-my $visualCrossing = Geo::Weather::VisualCrossing->new(apiKey => $WEATHER_API_TOKEN);
+my $visualCrossing;
 
 sub source {
 	return "Source code for the bot can be obtained from https://git.sr.ht/~m6kvm/telegram-bot\n" .
@@ -185,6 +183,10 @@ sub __makeAPI {
 
 	$admins = Telegram::Bot::Admins->new(config => $config);
 	$admins->load();
+
+	$visualCrossing = Geo::Weather::VisualCrossing->new({
+		apiKey => $config->getSectionByName('Telegram::Bot::Weather::Client')->getValueByKey('api_key'),
+	});
 
 	return WWW::Telegram::BotAPI->new (
 		#async => 1, # WARNING: may fail if Mojo::UserAgent is not available!
