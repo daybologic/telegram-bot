@@ -1,1 +1,1 @@
-debian/etc/telegram-bot.ini /etc/
+debian/etc/telegram-bot.conf /etc/
