@@ -38,6 +38,7 @@ use English;
 use Geo::Weather::VisualCrossing;
 use HTTP::Status qw(status_message);
 use Readonly;
+use Telegram::Bot::Admins;
 use Telegram::Bot::Ball8;
 use Telegram::Bot::CatClient;
 use Telegram::Bot::Config;
@@ -80,7 +81,7 @@ my $genderClient = GenderClient->new();
 my $memes = Telegram::Bot::Memes->new(api => $api);
 my $startTime = time();
 my $config;
-
+my $admins;
 my $visualCrossing = Geo::Weather::VisualCrossing->new(apiKey => $WEATHER_API_TOKEN);
 
 sub source {
@@ -181,6 +182,9 @@ sub __makeAPI {
 	$config = Telegram::Bot::Config->new();
 	my $token = $config->getSectionByName(__PACKAGE__)->getValueByKey('api_key');
 	die 'No API token' unless ($token);
+
+	$admins = Telegram::Bot::Admins->new(config => $config);
+	$admins->load();
 
 	return WWW::Telegram::BotAPI->new (
 		#async => 1, # WARNING: may fail if Mojo::UserAgent is not available!
