@@ -63,7 +63,7 @@ sub run {
 	my $encoder = URI::Encode->new({double_encode => 0});
 	$uri = $encoder->encode(sprintf($uri, $username));
 
-	$uri .= '&location=' . uri_escape($location) if ($location);
+	$uri .= '&location=' . uri_escape_utf8($location) if ($location);
 	$uri = URI->new($uri);
 
 	return $self->__ua->get($uri)->decoded_content;
