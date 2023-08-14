@@ -33,7 +33,8 @@ package Telegram::Bot;
 use strict;
 use warnings;
 use Data::Dumper;
-use Data::Money::Amount;
+use Data::Money::Amount 0.2.0;
+use Data::Money::Currency::Converter::Repository::APILayer 0.2.0;
 use English;
 use Geo::Weather::VisualCrossing;
 use HTTP::Status qw(status_message);
@@ -187,6 +188,10 @@ sub __makeAPI {
 	$visualCrossing = Geo::Weather::VisualCrossing->new({
 		apiKey => $config->getSectionByName('Telegram::Bot::Weather::Client')->getValueByKey('api_key'),
 	});
+
+	$Data::Money::Currency::Converter::Repository::APILayer::apiKey =
+	    $config->getSectionByName('Data::Money::Currency::Converter::Repository::APILayer')
+	    ->getValueByKey('api_key');
 
 	return WWW::Telegram::BotAPI->new (
 		#async => 1, # WARNING: may fail if Mojo::UserAgent is not available!
