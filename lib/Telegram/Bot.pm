@@ -100,6 +100,7 @@ sub breakfast {
 
 sub version {
 	my @output = `git rev-parse HEAD`;
+	unshift(@output, $Telegram::Bot::VERSION);
 	return join("\n", @output);
 }
 
