@@ -455,8 +455,6 @@ my $commands = {
             }
         }
     },
-    # Test UTF-8
-    "encoding" => sub { "Привет! こんにちは! Buondì!" },
     # Example sending a photo with a known picture ID.
     "lastphoto" => sub {
         return "You didn't send any picture!" unless $pic_id;
