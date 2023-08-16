@@ -40,9 +40,11 @@ use Geo::Weather::VisualCrossing;
 use HTTP::Status qw(status_message);
 use Readonly;
 use Telegram::Bot::Admins;
+use Telegram::Bot::Audit;
 use Telegram::Bot::Ball8;
 use Telegram::Bot::CatClient;
 use Telegram::Bot::Config;
+use Telegram::Bot::DB;
 use Telegram::Bot::DrinksClient;
 use Telegram::Bot::GenderClient;
 use Telegram::Bot::Memes;
@@ -82,6 +84,8 @@ my $startTime = time();
 my $config;
 my $admins;
 my $visualCrossing;
+my $db;
+my $audit;
 
 sub source {
 	return "Source code for the bot can be obtained from https://git.sr.ht/~m6kvm/telegram-bot\n" .
@@ -132,6 +136,7 @@ sub memeSearch {
 sub memeAddRemove {
 	my ($picId, @input) = @_;
 	my $syntax = 0;
+	my $user = $input[0]->{from}{username};
 	my $text = $input[0]->{text};
 
 	my @words = split(m/\s+/, $text);
@@ -142,7 +147,7 @@ sub memeAddRemove {
 		if ($op eq 'add' || $op eq 'new') {
 			return $memes->add($name, $picId);
 		} elsif ($op eq 'remove' || $op eq 'delete' || $op eq 'del' || $op eq 'rm' || $op eq 'erase' || $op eq 'expunge' || $op eq 'purge') {
-			return $memes->remove($name);
+			return $memes->remove($name, $user);
 		} elsif ($op eq 'post') {
 			my $url;
 			(undef, $url, @words) = @words;
@@ -178,10 +183,28 @@ sub insult {
 	return 'You manky Scotch git';
 }
 
+sub getAdmins {
+	die("Admins module is not loaded") unless ($admins);
+	return $admins;
+}
+
+sub recordStartup {
+	my ($self) = @_;
+
+	$audit->recordStartup();
+
+	return;
+}
+
 sub __makeAPI {
 	$config = Telegram::Bot::Config->new();
 	my $token = $config->getSectionByName(__PACKAGE__)->getValueByKey('api_key');
 	die 'No API token' unless ($token);
+
+	$db = Telegram::Bot::DB->new(config => $config);
+	$db->__connect(); # FIXME
+
+	$audit = Telegram::Bot::Audit->new(db => $db);
 
 	$admins = Telegram::Bot::Admins->new(config => $config);
 	$admins->load();
@@ -559,6 +582,7 @@ my $message_types = {
 };
 
 printf "Hello! I am %s. Starting...\n", $me->{result}{username};
+recordStartup();
 
 my $breakfastDone = 0;
 my $backCounter = 0;

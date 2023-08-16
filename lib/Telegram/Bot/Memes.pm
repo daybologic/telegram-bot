@@ -36,6 +36,7 @@ use Data::Dumper;
 use JSON qw(decode_json);
 use POSIX qw(EXIT_SUCCESS);
 use Readonly;
+use Telegram::Bot;
 use Telegram::Bot::Memes::Add;
 
 Readonly my $CACHE_PATTERN => '/var/cache/telegram-bot/memes/%s/%s.%s';
@@ -109,13 +110,25 @@ sub exists {
 }
 
 sub remove {
-	my ($self, $name) = @_;
+	my ($self, $name, $user) = @_;
+	return 'Sorry, you cannot remove memes without having a Telegram username' unless ($user);
 	return 'Meme to erase not specified' unless (defined($name) && length($name) > 0);
 	return 'Illegal meme name' if ($name !~ m/^[a-z0-9]+$/i);
 
 	$self->getList(); # causes extension cache to be refreshed periodically
 	my $extension = __memeExtensionCacheFetch($name);
 	return "No such meme '$name'" unless ($extension);
+
+	return "Sorry, \@$user, only an admin can remove the meme '$name'"
+		unless (Telegram::Bot::getAdmins()->isAdmin($user));
+
+	$self->__removeAspects($name, $extension);
+	__memeExtensionCacheRemove($name);
+	return "Meme '$name' erased";
+}
+
+sub __removeAspects {
+	my ($self, $name, $extension) = @_;
 
 	foreach my $aspect ('original', '4x', '2x', '1x') { # TODO: Can iterate through aspects?
 		$self->__runCommand(__buildDeleteCommand($name, $extension, $aspect));
@@ -124,9 +137,7 @@ sub remove {
 		}
 	}
 
-	__memeExtensionCacheRemove($name);
-
-	return "Meme '$name' erased";
+	return;
 }
 
 sub add {
