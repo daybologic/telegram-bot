@@ -421,49 +421,10 @@ my $commands = {
 		return $value;
 	},
 	'ynyr' => sub { return "Not as old as all that" },
-    # Example demonstrating the use of parameters in a command.
-    "say"      => sub { join " ", splice @_, 1 or "Usage: /say something" },
-    # Example showing how to send multiple lines in a single message.
-    "knock"    => sub {
-        sprintf "Knock-knock.\n- Who's there?\n@%s!", $me->{result}{username}
-    },
-    # Example displaying a keyboard with some simple options.
-    "keyboard" => sub {
-        +{
-            text => "Here's a cool keyboard.",
-            reply_markup => {
-                keyboard => [ [ "a" .. "c" ], [ "d" .. "f" ], [ "g" .. "i" ] ],
-                one_time_keyboard => \1 # \1 maps to "true" when being JSON-ified
-            }
-        }
-    },
-    # Let me identify yourself by sending your phone number to me.
-    "phone" => sub {
-        +{
-            text => "Would you allow me to get your phone number please?",
-            reply_markup => {
-                keyboard => [
-                    [
-                        {
-                            text => "Sure!",
-                            request_contact => \1
-                        },
-                        "No, go away!"
-                    ]
-                ],
-                one_time_keyboard => \1
-            }
-        }
-    },
-    # Example sending a photo with a known picture ID.
-    "lastphoto" => sub {
-        return "You didn't send any picture!" unless $pic_id;
-        +{
-            method  => "sendPhoto",
-            photo   => $pic_id,
-            caption => "Here it is!"
-        }
-    },
+	# Example demonstrating the use of parameters in a command.
+	'say' => sub {
+		join " ", splice @_, 1 or "Usage: /say something"
+	},
 	'cat' => sub {
 		my (@input) = @_;
 		my $text = $input[0]->{text};
@@ -509,21 +470,6 @@ my $message_types = {
 				    . 'NOTE: This operation is slow, please be patient, the bot may not respond for up to a minute.',
 			},
 	},
-    # Receive contacts!
-    "contact" => sub {
-        my $contact = shift->{contact};
-        +{
-            method     => "sendMessage",
-            parse_mode => "Markdown",
-            text       => sprintf (
-                            "Here's some information about this contact.\n" .
-                            "- Name: *%s*\n- Surname: *%s*\n" .
-                            "- Phone number: *%s*\n- Telegram UID: *%s*",
-                            $contact->{first_name}, $contact->{last_name} || "?",
-                            $contact->{phone_number}, $contact->{user_id} || "?"
-                        )
-        }
-    }
 };
 
 printf "Hello! I am %s. Starting...\n", $me->{result}{username};
