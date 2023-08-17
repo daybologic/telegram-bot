@@ -358,15 +358,9 @@ All of these are likely to be removed soon.
 
 ##### /keyboard
 
-##### /encoding
-
 ##### /knock
 
 ##### /phone
-
-##### /redbull
-
-##### /whoami
 
 ## Community
 
