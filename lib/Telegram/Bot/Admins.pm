@@ -29,44 +29,70 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-package Telegram::Bot::Weather::Location;
+package Telegram::Bot::Admins;
 use strict;
 use warnings;
-use LWP::UserAgent;
 use Moose;
 use Readonly;
-use URI;
-use URI::Encode;
-use URI::Escape;
+use Telegram::Bot::Admin;
 
-Readonly my $LOCATION_LAMBDA_URL => 'https://oz4r4y4h2a2q2an2z2qtg7hwaa0ruejk.lambda-url.eu-west-2.on.aws?user=%s&platform=telegram';
+Readonly my $SECTION_NAME => 'Telegram::Bot';
 
-has __ua => (is => 'rw', isa => 'LWP::UserAgent', default => \&__makeUserAgent, lazy => 1);
+has admins => (is => 'rw', isa => 'ArrayRef[Telegram::Bot::Admin]', default => sub {[]});
+has config => (required => 1, isa => 'Telegram::Bot::Config', is => 'ro');
 
-sub __makeUserAgent { # TODO: Should be shared, and possibly use same UA as Telegram API client
+sub load {
 	my ($self) = @_;
 
-	my $ua = LWP::UserAgent->new;
-	$ua->timeout(120);
-	$ua->env_proxy;
-
-	return $ua;
+	if (my $section = $self->config->getSectionByName($SECTION_NAME)) {
+		if (my $valueStr = $section->getValueByKey('admins')) {
+			$valueStr =~ s/\s+//;
+			my @names = split(m/,/, $valueStr);
+			foreach my $name (@names) {
+				push(@{ $self->admins }, $self->makeAdmin($name));
+			}
+		}
+	}
 }
 
-sub run {
-	my ($self, $username, $location) = @_;
+sub makeAdmin {
+	my ($self, $name) = @_;
+	return Telegram::Bot::Admin->new(
+		type  => __detectType($name),
+		value => __logAddingAdmin(lc($name)),
+	);
+}
 
-	$username = '' unless ($username);
+sub __logAddingAdmin {
+	my ($name) = @_;
+	warn "Added admin '$name'";
+	return $name;
+}
 
-	my $uri = $LOCATION_LAMBDA_URL;
+sub isAdmin {
+	my ($self, $name) = @_;
 
-	my $encoder = URI::Encode->new({double_encode => 0});
-	$uri = $encoder->encode(sprintf($uri, $username));
+	foreach my $admin (@{ $self->admins }) {
+		if ($admin->value eq lc($name)) {
+			warn("name '$name' is an admin");
+			return 1;
+		}
+	}
 
-	$uri .= '&location=' . uri_escape_utf8($location) if ($location);
-	$uri = URI->new($uri);
+	warn("name '$name' is *NOT* an admin");
+	return 0;
+}
 
-	return $self->__ua->get($uri)->decoded_content;
+sub __detectType {
+	my ($name) = @_;
+
+	if ($name =~ m/^\+/) {
+		return 'number';
+	} elsif ($name =~ m/^\@/) {
+		return 'handle';
+	}
+
+	die("The specified admin, '$name', must begin with '+' for a number or '\@' for a handle");
 }
 
 1;

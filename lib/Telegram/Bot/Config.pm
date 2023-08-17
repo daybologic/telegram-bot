@@ -29,44 +29,44 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-package Telegram::Bot::Weather::Location;
+package Telegram::Bot::Config;
 use strict;
 use warnings;
-use LWP::UserAgent;
-use Moose;
+use Config::INI;
+use Data::Dumper;
+use Telegram::Bot::Config::Section;
 use Readonly;
-use URI;
-use URI::Encode;
-use URI::Escape;
+use POSIX;
+use Moose;
+use utf8;
 
-Readonly my $LOCATION_LAMBDA_URL => 'https://oz4r4y4h2a2q2an2z2qtg7hwaa0ruejk.lambda-url.eu-west-2.on.aws?user=%s&platform=telegram';
-
-has __ua => (is => 'rw', isa => 'LWP::UserAgent', default => \&__makeUserAgent, lazy => 1);
-
-sub __makeUserAgent { # TODO: Should be shared, and possibly use same UA as Telegram API client
-	my ($self) = @_;
-
-	my $ua = LWP::UserAgent->new;
-	$ua->timeout(120);
-	$ua->env_proxy;
-
-	return $ua;
+BEGIN {
+	our $VERSION = '1.3.0';
 }
 
-sub run {
-	my ($self, $username, $location) = @_;
+Readonly my $FILE_NAME => 'etc/telegram-bot.conf';
 
-	$username = '' unless ($username);
+has __data => (is => 'rw');
 
-	my $uri = $LOCATION_LAMBDA_URL;
+sub getSectionByName {
+	my ($self, $name) = @_;
 
-	my $encoder = URI::Encode->new({double_encode => 0});
-	$uri = $encoder->encode(sprintf($uri, $username));
+	return $self->__makeSection($name, $self->__load()->{$name});
+}
 
-	$uri .= '&location=' . uri_escape_utf8($location) if ($location);
-	$uri = URI->new($uri);
+sub __load {
+	my ($self, $force) = @_;
 
-	return $self->__ua->get($uri)->decoded_content;
+	if ($force || !$self->__data) {
+		$self->__data(Config::INI::Reader->read_file($FILE_NAME));
+	}
+
+	return $self->__data;
+}
+
+sub __makeSection {
+	my ($self, $name, $keys) = @_;
+	return Telegram::Bot::Config::Section->new(name => $name, 'keys' => $keys);
 }
 
 1;

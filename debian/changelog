@@ -1,3 +1,10 @@
+telegram-bot (1.3.1) stable; urgency=high
+
+  * uri_escape -> uri_escape_utf8
+    People may attempt to lookup locations with unusual characters
+
+ -- Duncan Ross Palmer <palmer@overchat.org>  Tue, 08 Aug 2023 22:51:43 +0100
+
 telegram-bot (1.3.0) stable; urgency=low
 
   * Added /meme add support

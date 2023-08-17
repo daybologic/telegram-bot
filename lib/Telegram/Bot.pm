@@ -33,13 +33,16 @@ package Telegram::Bot;
 use strict;
 use warnings;
 use Data::Dumper;
-use Data::Money::Amount;
+use Data::Money::Amount 0.2.0;
+use Data::Money::Currency::Converter::Repository::APILayer 0.2.0;
 use English;
 use Geo::Weather::VisualCrossing;
 use HTTP::Status qw(status_message);
 use Readonly;
+use Telegram::Bot::Admins;
 use Telegram::Bot::Ball8;
 use Telegram::Bot::CatClient;
+use Telegram::Bot::Config;
 use Telegram::Bot::DrinksClient;
 use Telegram::Bot::GenderClient;
 use Telegram::Bot::Memes;
@@ -54,15 +57,10 @@ use POSIX;
 use utf8;
 
 BEGIN {
-	our $VERSION = '1.3.0';
+	our $VERSION = '1.3.1';
 }
 
-Readonly my $WEATHER_API_TOKEN => 'Cj1MKv18bAcUYSIyjZnrpckLv'; # FIXME: Redacted; you need to patch this with guilt until we have a config mechanism
-
-my $api = WWW::Telegram::BotAPI->new (
-    #async => 1, # WARNING: may fail if Mojo::UserAgent is not available!
-    token => 'REDACTED', # FIXME
-);
+my $api = __makeAPI();
 # ... but error handling is available as well.
 #my $result = eval { $api->getMe->{result}{username} }
 #    or die 'Got error message: ', $api->parse_error->{msg};
@@ -81,8 +79,9 @@ my $drinksClient = DrinksClient->new();
 my $genderClient = GenderClient->new();
 my $memes = Telegram::Bot::Memes->new(api => $api);
 my $startTime = time();
-
-my $visualCrossing = Geo::Weather::VisualCrossing->new(apiKey => $WEATHER_API_TOKEN);
+my $config;
+my $admins;
+my $visualCrossing;
 
 sub source {
 	return "Source code for the bot can be obtained from https://git.sr.ht/~m6kvm/telegram-bot\n" .
@@ -101,6 +100,7 @@ sub breakfast {
 
 sub version {
 	my @output = `git rev-parse HEAD`;
+	unshift(@output, $Telegram::Bot::VERSION);
 	return join("\n", @output);
 }
 
@@ -176,6 +176,28 @@ sub randomNumber {
 
 sub insult {
 	return 'You manky Scotch git';
+}
+
+sub __makeAPI {
+	$config = Telegram::Bot::Config->new();
+	my $token = $config->getSectionByName(__PACKAGE__)->getValueByKey('api_key');
+	die 'No API token' unless ($token);
+
+	$admins = Telegram::Bot::Admins->new(config => $config);
+	$admins->load();
+
+	$visualCrossing = Geo::Weather::VisualCrossing->new({
+		apiKey => $config->getSectionByName('Telegram::Bot::Weather::Client')->getValueByKey('api_key'),
+	});
+
+	$Data::Money::Currency::Converter::Repository::APILayer::apiKey =
+	    $config->getSectionByName('Data::Money::Currency::Converter::Repository::APILayer')
+	    ->getValueByKey('api_key');
+
+	return WWW::Telegram::BotAPI->new (
+		#async => 1, # WARNING: may fail if Mojo::UserAgent is not available!
+		token => $token,
+	);
 }
 
 # The commands that this bot supports.
