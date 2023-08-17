@@ -90,10 +90,11 @@ sub source {
 
 sub breakfast {
 	my (@input) = @_;
+	my $user = $input[0]->{from}{username} || 'jesscharlton';
 	my $text = $input[0]->{text};
 	my @words = split(m/\s+/, $text);
 	shift(@words); # Sack off 'breakfast'
-	my $name = $words[0] ? $words[0] : 'jesscharlton';
+	my $name = $words[0] ? $words[0] : $user;
 	$name = '@' . $name if (index($name, '@') != 0);
 	return "Has old $name had their breakfast yet?";
 }
