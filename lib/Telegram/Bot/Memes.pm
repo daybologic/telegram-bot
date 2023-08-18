@@ -123,8 +123,10 @@ sub remove {
 	my $extension = __memeExtensionCacheFetch($name);
 	return "No such meme '$name'" unless ($extension);
 
-	return "Sorry, \@$user, only an admin can remove the meme '$name'"
-		unless (Telegram::Bot::getAdmins()->isAdmin($user));
+	my $isOwner = $self->__isOwner($name, $self->userRepo->username2User($user));
+	unless ($isOwner || Telegram::Bot::getAdmins()->isAdmin($user)) {
+		return "Sorry, \@$user, only the owner of the meme '$name', or an admin may remove it";
+	}
 
 	$self->__removeAspects($name, $extension);
 	__memeExtensionCacheRemove($name);
@@ -167,6 +169,21 @@ sub addToBucket {
 	my ($self, $path, $name, $aspect) = @_;
 	$self->__runCommand(__buildUploadCommand($name, $path, $aspect));
 	return;
+}
+
+sub __isOwner {
+	my ($self, $name, $user) = @_;
+
+	my $sth = $self->db->getHandle()->prepare('SELECT owner FROM meme WHERE name = ?');
+	$sth->execute($name);
+
+	while (my $row = $sth->fetchrow_hashref()) {
+		if ($row->{owner} == $user->id) {
+			return 1;
+		}
+	}
+
+	return 0;
 }
 
 sub __buildListingCommand {

@@ -82,14 +82,19 @@ sub create {
 	return $user;
 }
 
-sub username2Id {
+sub username2User {
 	my ($self, $user) = @_;
 
 	if (my $existingUser = $self->fetchByName($user)) {
-		return $existingUser->id;
+		return $existingUser;
 	}
 
-	return $self->create($user)->id;
+	return $self->create($user);
+}
+
+sub username2Id {
+	my ($self, $user) = @_;
+	return $self->username2User($user)->id;
 }
 
 1;
