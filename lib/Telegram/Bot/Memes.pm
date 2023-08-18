@@ -50,6 +50,8 @@ has adder => (isa => 'Telegram::Bot::Memes::Add', is => 'ro', init_arg => undef,
 
 has api => (is => 'rw', isa => 'WWW::Telegram::BotAPI');
 
+has db => (is => 'ro', isa => 'Telegram::Bot::DB', required => 1);
+
 my %__memeExtensionCache = ( );
 
 sub run {
@@ -141,7 +143,8 @@ sub __removeAspects {
 }
 
 sub add {
-	my ($self, $name, $picId) = @_;
+	my ($self, $name, $picId, $user) = @_;
+	return 'Sorry, you cannot add memes without having a Telegram username' unless ($user);
 	return 'Meme to add not specified' unless (defined($name) && length($name) > 0);
 	return 'Illegal meme name' if ($name !~ m/^[a-z0-9]+$/i);
 
@@ -153,7 +156,7 @@ sub add {
 		return 'There is no staged meme - please PM the bot with a photo or picture, and then try this message again';
 	}
 
-	my $response = $self->adder->add($name, $picId);
+	my $response = $self->adder->add($name, $picId, $user);
 	__memeExtensionCacheStore($name, 'jpg'); # Important; or isn't listable or removable
 	return $response;
 }

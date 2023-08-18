@@ -79,7 +79,7 @@ my $musicDb = Telegram::Bot::MusicDB->new();
 my $uuidClient = Telegram::Bot::UUIDClient->new();
 my $drinksClient = DrinksClient->new();
 my $genderClient = GenderClient->new();
-my $memes = Telegram::Bot::Memes->new(api => $api);
+my $memes;
 my $startTime = time();
 my $config;
 my $admins;
@@ -146,7 +146,7 @@ sub memeAddRemove {
 	my ($op, $name) = @words;
 	if ($op) {
 		if ($op eq 'add' || $op eq 'new') {
-			return $memes->add($name, $picId);
+			return $memes->add($name, $picId, $user);
 		} elsif ($op eq 'remove' || $op eq 'delete' || $op eq 'del' || $op eq 'rm' || $op eq 'erase' || $op eq 'expunge' || $op eq 'purge') {
 			return $memes->remove($name, $user);
 		} elsif ($op eq 'post') {
@@ -218,10 +218,14 @@ sub __makeAPI {
 	    $config->getSectionByName('Data::Money::Currency::Converter::Repository::APILayer')
 	    ->getValueByKey('api_key');
 
-	return WWW::Telegram::BotAPI->new (
+	my $localApi = WWW::Telegram::BotAPI->new (
 		#async => 1, # WARNING: may fail if Mojo::UserAgent is not available!
 		token => $token,
 	);
+
+	$memes = Telegram::Bot::Memes->new(api => $localApi, db => $db);
+
+	return $localApi;
 }
 
 # The commands that this bot supports.
