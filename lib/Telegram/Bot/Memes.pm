@@ -129,6 +129,7 @@ sub remove {
 	}
 
 	$self->__removeAspects($name, $extension);
+	$self->__forgetOwner($name);
 	__memeExtensionCacheRemove($name);
 	return "Meme '$name' erased";
 }
@@ -184,6 +185,15 @@ sub __isOwner {
 	}
 
 	return 0;
+}
+
+sub __forgetOwner {
+	my ($self, $name) = @_;
+
+	my $sth = $self->db->getHandle()->prepare('DELETE FROM meme WHERE name = ?');
+	$sth->execute($name);
+
+	return;
 }
 
 sub __buildListingCommand {
