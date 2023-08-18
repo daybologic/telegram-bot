@@ -73,7 +73,7 @@ sub resizer {
 sub __recordOwner {
 	my ($self, $name, $user) = @_;
 
-	my $sth = $self->owner->db->getHandle()->prepare('INSERT INTO meme (name, owner) VALUES(?,?)');
+	my $sth = $self->owner->db->getHandle()->prepare('REPLACE INTO meme (name, owner) VALUES(?,?)');
 	$sth->execute($name, $self->owner->userRepo->username2Id($user));
 
 	return;
