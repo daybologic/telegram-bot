@@ -72,8 +72,10 @@ sub resizer {
 
 sub __recordOwner {
 	my ($self, $name, $user) = @_;
+
 	my $sth = $self->owner->db->getHandle()->prepare('INSERT INTO meme (name, owner) VALUES(?,?)');
-	$sth->execute($name, 1); # FIXME: need way to determine id from username
+	$sth->execute($name, $self->owner->userRepo->username2Id($user));
+
 	return;
 }
 

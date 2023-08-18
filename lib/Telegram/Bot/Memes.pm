@@ -52,6 +52,8 @@ has api => (is => 'rw', isa => 'WWW::Telegram::BotAPI');
 
 has db => (is => 'ro', isa => 'Telegram::Bot::DB', required => 1);
 
+has userRepo => (is => 'ro', isa => 'Telegram::Bot::User::Repository', required => 1);
+
 my %__memeExtensionCache = ( );
 
 sub run {

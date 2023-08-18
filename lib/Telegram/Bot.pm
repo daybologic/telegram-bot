@@ -50,6 +50,7 @@ use Telegram::Bot::GenderClient;
 use Telegram::Bot::Memes;
 use Telegram::Bot::MusicDB;
 use Telegram::Bot::RandomNumber;
+use Telegram::Bot::User::Repository;
 use Telegram::Bot::UUIDClient;
 use Telegram::Bot::Weather::Location;
 use Time::Duration;
@@ -86,6 +87,7 @@ my $admins;
 my $visualCrossing;
 my $db;
 my $audit;
+my $userRepo;
 
 sub source {
 	return "Source code for the bot can be obtained from https://git.sr.ht/~m6kvm/telegram-bot\n" .
@@ -210,6 +212,8 @@ sub __makeAPI {
 	$admins = Telegram::Bot::Admins->new(config => $config);
 	$admins->load();
 
+	$userRepo = Telegram::Bot::User::Repository->new(db => $db);
+
 	$visualCrossing = Geo::Weather::VisualCrossing->new({
 		apiKey => $config->getSectionByName('Telegram::Bot::Weather::Client')->getValueByKey('api_key'),
 	});
@@ -223,7 +227,7 @@ sub __makeAPI {
 		token => $token,
 	);
 
-	$memes = Telegram::Bot::Memes->new(api => $localApi, db => $db);
+	$memes = Telegram::Bot::Memes->new(api => $localApi, db => $db, userRepo => $userRepo);
 
 	return $localApi;
 }
