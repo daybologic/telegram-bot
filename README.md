@@ -196,9 +196,9 @@ The name must be exact.
 
 Synonyms: 'remove', 'delete', 'del', 'erase', 'expunge', 'purge'
 
-All users may remove any meme; we may make this more secure and store your username and allow an admin username, in a later revision of the module.
+If you added the meme, you are permitted to remove it, otherwise you must be an admin to remove a meme.
 
-nb. in future versions, if you do not have a username, use of this command may be restricted.
+You must have a Telegram username (Telegram makes this optional), in order to use this command.
 
 ##### Use
 
@@ -226,7 +226,7 @@ Synonyms: 'new'
 
 Note that all memes are accessible to all users, so please be considerate.  If you are hosting the code yourself, the memes are under your control, but others can access them.
 
-nb. in future versions, your username may be stored along with the meme, for access control reasons, and if you do not have a username, use of this command may be restricted.
+You must have a Telegram username (Telegram makes this optional), in order to use this command.  Your username will be stored alongside the meme, but it will not be exposed to other users.  This is purely to facilitate you removing or replacing the meme, without the need for intervention by an administrator.
 
 #### Music
 
