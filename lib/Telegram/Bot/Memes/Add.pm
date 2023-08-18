@@ -41,7 +41,7 @@ has api => (is => 'ro', isa => 'WWW::Telegram::BotAPI', required => 1);
 has owner => (is => 'ro', isa => 'Telegram::Bot::Memes', required => 1);
 
 sub add {
-	my ($self, $name, $fileId) = @_;
+	my ($self, $name, $fileId, $user) = @_;
 
 	my $filePath = $self->__fetchViaAPI($fileId);
 	warn $filePath;
@@ -54,7 +54,10 @@ sub add {
 		$self->owner->addToBucket($resizer->$attribName->path, $name, $aspect);
 	}
 
-	return "Successfully added meme '$name', type '/$name' to use it, '/meme rm $name' to delete, if it isn't right";
+	$self->__recordOwner($name, $user);
+
+	return 'Thankyou, @' . $user . ", successfully added meme '$name', type '/$name' to use it, "
+	    . "'/meme rm $name' to delete, if it isn't right";
 }
 
 sub resizer {
@@ -65,6 +68,15 @@ sub resizer {
 	move($filePath, $resizer->original->path);
 
 	return $resizer;
+}
+
+sub __recordOwner {
+	my ($self, $name, $user) = @_;
+
+	my $sth = $self->owner->db->getHandle()->prepare('REPLACE INTO meme (name, owner) VALUES(?,?)');
+	$sth->execute($name, $self->owner->userRepo->username2Id($user));
+
+	return;
 }
 
 sub __makeFileName {

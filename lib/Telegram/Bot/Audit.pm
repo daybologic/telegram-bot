@@ -29,78 +29,22 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-package Telegram::Bot::Admins;
-use strict;
-use warnings;
+package Telegram::Bot::Audit;
 use Moose;
-use Readonly;
-use Telegram::Bot::Admin;
 
-Readonly my $SECTION_NAME => 'Telegram::Bot';
+#use Readonly;
+use Telegram::Bot;
+use Telegram::Bot::DB;
 
-has admins => (is => 'rw', isa => 'ArrayRef[Telegram::Bot::Admin]', default => sub {[]});
-has config => (required => 1, isa => 'Telegram::Bot::Config', is => 'ro');
+has __db => (is => 'ro', isa => 'Telegram::Bot::DB', init_arg => 'db', required => 1);
 
-sub load {
+sub recordStartup {
 	my ($self) = @_;
+	# TODO: event ID must be different every time; not 640d9f32-3c81-11ee-8596-63ec67873f69
+	my $sth = $self->__db->getHandle()->prepare('INSERT INTO audit_event (type, event, is_system, notes) VALUES(?,?,?,?)');
+	$sth->execute(1, '640d9f32-3c81-11ee-8596-63ec67873f69', 1, "Telegram $Telegram::Bot::VERSION is starting up (2)");
 
-	if (my $section = $self->config->getSectionByName($SECTION_NAME)) {
-		if (my $valueStr = $section->getValueByKey('admins')) {
-			$valueStr =~ s/\s+//;
-			my @names = split(m/,/, $valueStr);
-			foreach my $name (@names) {
-				push(@{ $self->admins }, $self->makeAdmin($name));
-			}
-		}
-	}
-}
-
-sub makeAdmin {
-	my ($self, $name) = @_;
-	return Telegram::Bot::Admin->new(
-		type  => __detectType($name),
-		value => __logAddingAdmin(lc($name)),
-	);
-}
-
-sub __logAddingAdmin {
-	my ($name) = @_;
-	warn "Added admin '$name'";
-	return $name;
-}
-
-sub isAdmin {
-	my ($self, $name) = @_;
-
-	my $type = __detectType($name, 1);
-	if (!defined($type)) {
-		$name = '@' . $name;
-	} elsif ($type eq 'number') {
-		return 0; # TODO: We don't handle this yet
-	}
-
-	foreach my $admin (@{ $self->admins }) {
-		if ($admin->value eq lc($name)) {
-			warn("name '$name' is an admin");
-			return 1;
-		}
-	}
-
-	warn("name '$name' is *NOT* an admin");
-	return 0;
-}
-
-sub __detectType {
-	my ($name, $force) = @_;
-
-	if ($name =~ m/^\+/) {
-		return 'number';
-	} elsif ($name =~ m/^\@/) {
-		return 'handle';
-	}
-
-	return undef if ($force);
-	die("The specified admin, '$name', must begin with '+' for a number or '\@' for a handle");
+	return;
 }
 
 1;

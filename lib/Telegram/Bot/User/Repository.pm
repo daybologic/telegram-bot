@@ -29,78 +29,72 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-package Telegram::Bot::Admins;
-use strict;
-use warnings;
+package Telegram::Bot::User::Repository;
 use Moose;
+
+use Data::Dumper;
 use Readonly;
-use Telegram::Bot::Admin;
+use Telegram::Bot::User;
 
-Readonly my $SECTION_NAME => 'Telegram::Bot';
+has __db => (is => 'ro', isa => 'Telegram::Bot::DB', init_arg => 'db', required => 1);
 
-has admins => (is => 'rw', isa => 'ArrayRef[Telegram::Bot::Admin]', default => sub {[]});
-has config => (required => 1, isa => 'Telegram::Bot::Config', is => 'ro');
-
-sub load {
+sub fetchById {
 	my ($self) = @_;
-
-	if (my $section = $self->config->getSectionByName($SECTION_NAME)) {
-		if (my $valueStr = $section->getValueByKey('admins')) {
-			$valueStr =~ s/\s+//;
-			my @names = split(m/,/, $valueStr);
-			foreach my $name (@names) {
-				push(@{ $self->admins }, $self->makeAdmin($name));
-			}
-		}
-	}
+	...
 }
 
-sub makeAdmin {
-	my ($self, $name) = @_;
-	return Telegram::Bot::Admin->new(
-		type  => __detectType($name),
-		value => __logAddingAdmin(lc($name)),
-	);
-}
+sub fetchByName {
+	my ($self, $user) = @_;
 
-sub __logAddingAdmin {
-	my ($name) = @_;
-	warn "Added admin '$name'";
-	return $name;
-}
+	my $sth = $self->__db->getHandle()->prepare('SELECT id, name, enabled FROM user WHERE name = ?');
+	$sth->execute($user);
 
-sub isAdmin {
-	my ($self, $name) = @_;
-
-	my $type = __detectType($name, 1);
-	if (!defined($type)) {
-		$name = '@' . $name;
-	} elsif ($type eq 'number') {
-		return 0; # TODO: We don't handle this yet
+	while (my $row = $sth->fetchrow_hashref()) {
+		my %params = ( %$row, repo => $self );
+		return Telegram::Bot::User->new(\%params);
 	}
 
-	foreach my $admin (@{ $self->admins }) {
-		if ($admin->value eq lc($name)) {
-			warn("name '$name' is an admin");
-			return 1;
-		}
-	}
-
-	warn("name '$name' is *NOT* an admin");
-	return 0;
+	return undef; # FIXME: Must be Telegram::Bot::User
 }
 
-sub __detectType {
-	my ($name, $force) = @_;
+sub save {
+	my ($self) = @_;
+	...
 
-	if ($name =~ m/^\+/) {
-		return 'number';
-	} elsif ($name =~ m/^\@/) {
-		return 'handle';
+	#return;
+}
+
+sub create {
+	my ($self, $user) = @_;
+
+	if (!ref($user)) { # raw username
+		$user = Telegram::Bot::User->new({
+			name => $user,
+			repo => $self,
+		});
 	}
 
-	return undef if ($force);
-	die("The specified admin, '$name', must begin with '+' for a number or '\@' for a handle");
+	my $handle = $self->__db->getHandle();
+	my $sth = $handle->prepare('INSERT INTO user (name, enabled) VALUES(?,?)');
+	$sth->execute($user->name, $user->enabled);
+	$user->id($handle->last_insert_id());
+
+	return $user;
+}
+
+sub username2User {
+	my ($self, $user) = @_;
+
+	if (my $existingUser = $self->fetchByName($user)) {
+		return $existingUser;
+	}
+
+	return $self->create($user);
+}
+
+sub username2Id {
+	my ($self, $user) = @_;
+	return $self->username2User($user)->id;
 }
 
 1;

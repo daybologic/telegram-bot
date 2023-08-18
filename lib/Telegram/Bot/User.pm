@@ -29,78 +29,19 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-package Telegram::Bot::Admins;
-use strict;
-use warnings;
+package Telegram::Bot::User;
 use Moose;
+
 use Readonly;
-use Telegram::Bot::Admin;
 
-Readonly my $SECTION_NAME => 'Telegram::Bot';
+has name => (isa => 'Str', is => 'ro', required => 1);
+has id => (isa => 'Int', is => 'rw', default => 0); # database key only
+has enabled => (is => 'Bool', is => 'rw', default => 1);
+has repo => (isa => 'Telegram::Bot::User::Repository', is => 'ro', required => 1);
 
-has admins => (is => 'rw', isa => 'ArrayRef[Telegram::Bot::Admin]', default => sub {[]});
-has config => (required => 1, isa => 'Telegram::Bot::Config', is => 'ro');
-
-sub load {
+sub save {
 	my ($self) = @_;
-
-	if (my $section = $self->config->getSectionByName($SECTION_NAME)) {
-		if (my $valueStr = $section->getValueByKey('admins')) {
-			$valueStr =~ s/\s+//;
-			my @names = split(m/,/, $valueStr);
-			foreach my $name (@names) {
-				push(@{ $self->admins }, $self->makeAdmin($name));
-			}
-		}
-	}
-}
-
-sub makeAdmin {
-	my ($self, $name) = @_;
-	return Telegram::Bot::Admin->new(
-		type  => __detectType($name),
-		value => __logAddingAdmin(lc($name)),
-	);
-}
-
-sub __logAddingAdmin {
-	my ($name) = @_;
-	warn "Added admin '$name'";
-	return $name;
-}
-
-sub isAdmin {
-	my ($self, $name) = @_;
-
-	my $type = __detectType($name, 1);
-	if (!defined($type)) {
-		$name = '@' . $name;
-	} elsif ($type eq 'number') {
-		return 0; # TODO: We don't handle this yet
-	}
-
-	foreach my $admin (@{ $self->admins }) {
-		if ($admin->value eq lc($name)) {
-			warn("name '$name' is an admin");
-			return 1;
-		}
-	}
-
-	warn("name '$name' is *NOT* an admin");
-	return 0;
-}
-
-sub __detectType {
-	my ($name, $force) = @_;
-
-	if ($name =~ m/^\+/) {
-		return 'number';
-	} elsif ($name =~ m/^\@/) {
-		return 'handle';
-	}
-
-	return undef if ($force);
-	die("The specified admin, '$name', must begin with '+' for a number or '\@' for a handle");
+	return $self->repo->save($self);
 }
 
 1;

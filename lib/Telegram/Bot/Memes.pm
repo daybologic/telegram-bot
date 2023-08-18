@@ -36,6 +36,7 @@ use Data::Dumper;
 use JSON qw(decode_json);
 use POSIX qw(EXIT_SUCCESS);
 use Readonly;
+use Telegram::Bot;
 use Telegram::Bot::Memes::Add;
 
 Readonly my $CACHE_PATTERN => '/var/cache/telegram-bot/memes/%s/%s.%s';
@@ -48,6 +49,10 @@ has chatId => (isa => 'Int', is => 'rw', default => 0);
 has adder => (isa => 'Telegram::Bot::Memes::Add', is => 'ro', init_arg => undef, lazy => 1, default => \&__makeAdder);
 
 has api => (is => 'rw', isa => 'WWW::Telegram::BotAPI');
+
+has db => (is => 'ro', isa => 'Telegram::Bot::DB', required => 1);
+
+has userRepo => (is => 'ro', isa => 'Telegram::Bot::User::Repository', required => 1);
 
 my %__memeExtensionCache = ( );
 
@@ -109,13 +114,28 @@ sub exists {
 }
 
 sub remove {
-	my ($self, $name) = @_;
+	my ($self, $name, $user) = @_;
+	return 'Sorry, you cannot remove memes without having a Telegram username' unless ($user);
 	return 'Meme to erase not specified' unless (defined($name) && length($name) > 0);
 	return 'Illegal meme name' if ($name !~ m/^[a-z0-9]+$/i);
 
 	$self->getList(); # causes extension cache to be refreshed periodically
 	my $extension = __memeExtensionCacheFetch($name);
 	return "No such meme '$name'" unless ($extension);
+
+	my $isOwner = $self->__isOwner($name, $self->userRepo->username2User($user));
+	unless ($isOwner || Telegram::Bot::getAdmins()->isAdmin($user)) {
+		return "Sorry, \@$user, only the owner of the meme '$name', or an admin may remove it";
+	}
+
+	$self->__removeAspects($name, $extension);
+	$self->__forgetOwner($name);
+	__memeExtensionCacheRemove($name);
+	return "Meme '$name' erased";
+}
+
+sub __removeAspects {
+	my ($self, $name, $extension) = @_;
 
 	foreach my $aspect ('original', '4x', '2x', '1x') { # TODO: Can iterate through aspects?
 		$self->__runCommand(__buildDeleteCommand($name, $extension, $aspect));
@@ -124,13 +144,12 @@ sub remove {
 		}
 	}
 
-	__memeExtensionCacheRemove($name);
-
-	return "Meme '$name' erased";
+	return;
 }
 
 sub add {
-	my ($self, $name, $picId) = @_;
+	my ($self, $name, $picId, $user) = @_;
+	return 'Sorry, you cannot add memes without having a Telegram username' unless ($user);
 	return 'Meme to add not specified' unless (defined($name) && length($name) > 0);
 	return 'Illegal meme name' if ($name !~ m/^[a-z0-9]+$/i);
 
@@ -142,7 +161,7 @@ sub add {
 		return 'There is no staged meme - please PM the bot with a photo or picture, and then try this message again';
 	}
 
-	my $response = $self->adder->add($name, $picId);
+	my $response = $self->adder->add($name, $picId, $user);
 	__memeExtensionCacheStore($name, 'jpg'); # Important; or isn't listable or removable
 	return $response;
 }
@@ -150,6 +169,30 @@ sub add {
 sub addToBucket {
 	my ($self, $path, $name, $aspect) = @_;
 	$self->__runCommand(__buildUploadCommand($name, $path, $aspect));
+	return;
+}
+
+sub __isOwner {
+	my ($self, $name, $user) = @_;
+
+	my $sth = $self->db->getHandle()->prepare('SELECT owner FROM meme WHERE name = ?');
+	$sth->execute($name);
+
+	while (my $row = $sth->fetchrow_hashref()) {
+		if ($row->{owner} == $user->id) {
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+sub __forgetOwner {
+	my ($self, $name) = @_;
+
+	my $sth = $self->db->getHandle()->prepare('DELETE FROM meme WHERE name = ?');
+	$sth->execute($name);
+
 	return;
 }
 
