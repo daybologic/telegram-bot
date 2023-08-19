@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-#
 # telegram-bot
 # Copyright (c) 2023, Rev. Duncan Ross Palmer (2E0EOL),
 # All rights reserved.
@@ -31,30 +29,35 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-package MemesTests_generateS3URI;
+package Telegram::Bot::Config::Section;
 use strict;
 use warnings;
+use Data::Dumper;
+use Readonly;
+use POSIX;
 use Moose;
-extends 'Test::Module::Runnable';
+use utf8;
 
-use Telegram::Bot::Memes;
-use English qw(-no_match_vars);
-use POSIX qw(EXIT_SUCCESS);
-use Test::Deep qw(cmp_deeply all isa methods bool re);
-use Test::Exception;
-use Test::More;
-
-sub test {
-	my ($self) = @_;
-	plan tests => 1;
-
-	my $result = Telegram::Bot::Memes::__generateS3URI('troll', 'png');
-	is($result, 's3://58a75bba-1d73-11ee-afdd-5b1a31ab3736/4x/troll.png', "URL: '$result'");
-
-	return EXIT_SUCCESS;
+BEGIN {
+	our $VERSION = '2.0.0';
 }
 
-package main;
-use strict;
-use warnings;
-exit(MemesTests_generateS3URI->new->run);
+has 'keys' => (is => 'rw');
+has name => (isa => 'Str', is => 'rw');
+
+sub getValueByKey {
+	my ($self, $key) = @_;
+
+	my $name = $self->name;
+	if (!exists($self->keys->{$key})) {
+		warn("Accessing key '$key' in section '$name' - but it does not exist");
+		return undef;
+	}
+
+	my $value = $self->keys->{$key};
+	$value =~ s/^'//;
+	$value =~ s/'$//;
+	return $value;
+}
+
+1;

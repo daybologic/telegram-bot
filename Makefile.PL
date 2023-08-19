@@ -13,6 +13,7 @@ WriteMakefile(
 	AUTHOR       => 'Duncan Ross Palmer (palmer@overchat.org)',
 	ABSTRACT     => 'Multipurpose bot for Telegram',
 	PREREQ_PM => {
+		'Config::INI'  => 0, # libconfig-ini-perl
 		'LWP'          => 0,
 		'Moose'        => 0,
 		'DateTime'     => 0,

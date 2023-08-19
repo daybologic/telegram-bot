@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-#
 # telegram-bot
 # Copyright (c) 2023, Rev. Duncan Ross Palmer (2E0EOL),
 # All rights reserved.
@@ -31,30 +29,78 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-package MemesTests_generateS3URI;
+package Telegram::Bot::Admins;
 use strict;
 use warnings;
 use Moose;
-extends 'Test::Module::Runnable';
+use Readonly;
+use Telegram::Bot::Admin;
 
-use Telegram::Bot::Memes;
-use English qw(-no_match_vars);
-use POSIX qw(EXIT_SUCCESS);
-use Test::Deep qw(cmp_deeply all isa methods bool re);
-use Test::Exception;
-use Test::More;
+Readonly my $SECTION_NAME => 'Telegram::Bot';
 
-sub test {
+has admins => (is => 'rw', isa => 'ArrayRef[Telegram::Bot::Admin]', default => sub {[]});
+has config => (required => 1, isa => 'Telegram::Bot::Config', is => 'ro');
+
+sub load {
 	my ($self) = @_;
-	plan tests => 1;
 
-	my $result = Telegram::Bot::Memes::__generateS3URI('troll', 'png');
-	is($result, 's3://58a75bba-1d73-11ee-afdd-5b1a31ab3736/4x/troll.png', "URL: '$result'");
-
-	return EXIT_SUCCESS;
+	if (my $section = $self->config->getSectionByName($SECTION_NAME)) {
+		if (my $valueStr = $section->getValueByKey('admins')) {
+			$valueStr =~ s/\s+//;
+			my @names = split(m/,/, $valueStr);
+			foreach my $name (@names) {
+				push(@{ $self->admins }, $self->makeAdmin($name));
+			}
+		}
+	}
 }
 
-package main;
-use strict;
-use warnings;
-exit(MemesTests_generateS3URI->new->run);
+sub makeAdmin {
+	my ($self, $name) = @_;
+	return Telegram::Bot::Admin->new(
+		type  => __detectType($name),
+		value => __logAddingAdmin(lc($name)),
+	);
+}
+
+sub __logAddingAdmin {
+	my ($name) = @_;
+	warn "Added admin '$name'";
+	return $name;
+}
+
+sub isAdmin {
+	my ($self, $name) = @_;
+
+	my $type = __detectType($name, 1);
+	if (!defined($type)) {
+		$name = '@' . $name;
+	} elsif ($type eq 'number') {
+		return 0; # TODO: We don't handle this yet
+	}
+
+	foreach my $admin (@{ $self->admins }) {
+		if ($admin->value eq lc($name)) {
+			warn("name '$name' is an admin");
+			return 1;
+		}
+	}
+
+	warn("name '$name' is *NOT* an admin");
+	return 0;
+}
+
+sub __detectType {
+	my ($name, $force) = @_;
+
+	if ($name =~ m/^\+/) {
+		return 'number';
+	} elsif ($name =~ m/^\@/) {
+		return 'handle';
+	}
+
+	return undef if ($force);
+	die("The specified admin, '$name', must begin with '+' for a number or '\@' for a handle");
+}
+
+1;

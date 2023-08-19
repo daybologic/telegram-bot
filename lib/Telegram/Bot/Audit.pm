@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-#
 # telegram-bot
 # Copyright (c) 2023, Rev. Duncan Ross Palmer (2E0EOL),
 # All rights reserved.
@@ -31,30 +29,22 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-package MemesTests_generateS3URI;
-use strict;
-use warnings;
+package Telegram::Bot::Audit;
 use Moose;
-extends 'Test::Module::Runnable';
 
-use Telegram::Bot::Memes;
-use English qw(-no_match_vars);
-use POSIX qw(EXIT_SUCCESS);
-use Test::Deep qw(cmp_deeply all isa methods bool re);
-use Test::Exception;
-use Test::More;
+#use Readonly;
+use Telegram::Bot;
+use Telegram::Bot::DB;
 
-sub test {
+has __db => (is => 'ro', isa => 'Telegram::Bot::DB', init_arg => 'db', required => 1);
+
+sub recordStartup {
 	my ($self) = @_;
-	plan tests => 1;
+	# TODO: event ID must be different every time; not 640d9f32-3c81-11ee-8596-63ec67873f69
+	my $sth = $self->__db->getHandle()->prepare('INSERT INTO audit_event (type, event, is_system, notes) VALUES(?,?,?,?)');
+	$sth->execute(1, '640d9f32-3c81-11ee-8596-63ec67873f69', 1, "Telegram $Telegram::Bot::VERSION is starting up (2)");
 
-	my $result = Telegram::Bot::Memes::__generateS3URI('troll', 'png');
-	is($result, 's3://58a75bba-1d73-11ee-afdd-5b1a31ab3736/4x/troll.png', "URL: '$result'");
-
-	return EXIT_SUCCESS;
+	return;
 }
 
-package main;
-use strict;
-use warnings;
-exit(MemesTests_generateS3URI->new->run);
+1;

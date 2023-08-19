@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-#
 # telegram-bot
 # Copyright (c) 2023, Rev. Duncan Ross Palmer (2E0EOL),
 # All rights reserved.
@@ -31,30 +29,15 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-package MemesTests_generateS3URI;
+package Telegram::Bot::Admin;
 use strict;
 use warnings;
+use Data::Money::Amount;
+use English;
+use Readonly;
 use Moose;
-extends 'Test::Module::Runnable';
 
-use Telegram::Bot::Memes;
-use English qw(-no_match_vars);
-use POSIX qw(EXIT_SUCCESS);
-use Test::Deep qw(cmp_deeply all isa methods bool re);
-use Test::Exception;
-use Test::More;
+#TODO: Make type an enum 'number', 'handle'
+has [qw(type value)] => (is => 'ro', isa => 'Str');
 
-sub test {
-	my ($self) = @_;
-	plan tests => 1;
-
-	my $result = Telegram::Bot::Memes::__generateS3URI('troll', 'png');
-	is($result, 's3://58a75bba-1d73-11ee-afdd-5b1a31ab3736/4x/troll.png', "URL: '$result'");
-
-	return EXIT_SUCCESS;
-}
-
-package main;
-use strict;
-use warnings;
-exit(MemesTests_generateS3URI->new->run);
+1;

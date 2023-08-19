@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-#
 # telegram-bot
 # Copyright (c) 2023, Rev. Duncan Ross Palmer (2E0EOL),
 # All rights reserved.
@@ -31,30 +29,44 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-package MemesTests_generateS3URI;
+package Telegram::Bot::Config;
 use strict;
 use warnings;
+use Config::INI;
+use Data::Dumper;
+use Telegram::Bot::Config::Section;
+use Readonly;
+use POSIX;
 use Moose;
-extends 'Test::Module::Runnable';
+use utf8;
 
-use Telegram::Bot::Memes;
-use English qw(-no_match_vars);
-use POSIX qw(EXIT_SUCCESS);
-use Test::Deep qw(cmp_deeply all isa methods bool re);
-use Test::Exception;
-use Test::More;
-
-sub test {
-	my ($self) = @_;
-	plan tests => 1;
-
-	my $result = Telegram::Bot::Memes::__generateS3URI('troll', 'png');
-	is($result, 's3://58a75bba-1d73-11ee-afdd-5b1a31ab3736/4x/troll.png', "URL: '$result'");
-
-	return EXIT_SUCCESS;
+BEGIN {
+	our $VERSION = '2.0.0';
 }
 
-package main;
-use strict;
-use warnings;
-exit(MemesTests_generateS3URI->new->run);
+Readonly my $FILE_NAME => 'etc/telegram-bot.conf';
+
+has __data => (is => 'rw');
+
+sub getSectionByName {
+	my ($self, $name) = @_;
+
+	return $self->__makeSection($name, $self->__load()->{$name});
+}
+
+sub __load {
+	my ($self, $force) = @_;
+
+	if ($force || !$self->__data) {
+		$self->__data(Config::INI::Reader->read_file($FILE_NAME));
+	}
+
+	return $self->__data;
+}
+
+sub __makeSection {
+	my ($self, $name, $keys) = @_;
+	return Telegram::Bot::Config::Section->new(name => $name, 'keys' => $keys);
+}
+
+1;

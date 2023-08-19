@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-#
 # telegram-bot
 # Copyright (c) 2023, Rev. Duncan Ross Palmer (2E0EOL),
 # All rights reserved.
@@ -31,30 +29,72 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-package MemesTests_generateS3URI;
-use strict;
-use warnings;
+package Telegram::Bot::User::Repository;
 use Moose;
-extends 'Test::Module::Runnable';
 
-use Telegram::Bot::Memes;
-use English qw(-no_match_vars);
-use POSIX qw(EXIT_SUCCESS);
-use Test::Deep qw(cmp_deeply all isa methods bool re);
-use Test::Exception;
-use Test::More;
+use Data::Dumper;
+use Readonly;
+use Telegram::Bot::User;
 
-sub test {
+has __db => (is => 'ro', isa => 'Telegram::Bot::DB', init_arg => 'db', required => 1);
+
+sub fetchById {
 	my ($self) = @_;
-	plan tests => 1;
-
-	my $result = Telegram::Bot::Memes::__generateS3URI('troll', 'png');
-	is($result, 's3://58a75bba-1d73-11ee-afdd-5b1a31ab3736/4x/troll.png', "URL: '$result'");
-
-	return EXIT_SUCCESS;
+	...
 }
 
-package main;
-use strict;
-use warnings;
-exit(MemesTests_generateS3URI->new->run);
+sub fetchByName {
+	my ($self, $user) = @_;
+
+	my $sth = $self->__db->getHandle()->prepare('SELECT id, name, enabled FROM user WHERE name = ?');
+	$sth->execute($user);
+
+	while (my $row = $sth->fetchrow_hashref()) {
+		my %params = ( %$row, repo => $self );
+		return Telegram::Bot::User->new(\%params);
+	}
+
+	return undef; # FIXME: Must be Telegram::Bot::User
+}
+
+sub save {
+	my ($self) = @_;
+	...
+
+	#return;
+}
+
+sub create {
+	my ($self, $user) = @_;
+
+	if (!ref($user)) { # raw username
+		$user = Telegram::Bot::User->new({
+			name => $user,
+			repo => $self,
+		});
+	}
+
+	my $handle = $self->__db->getHandle();
+	my $sth = $handle->prepare('INSERT INTO user (name, enabled) VALUES(?,?)');
+	$sth->execute($user->name, $user->enabled);
+	$user->id($handle->last_insert_id());
+
+	return $user;
+}
+
+sub username2User {
+	my ($self, $user) = @_;
+
+	if (my $existingUser = $self->fetchByName($user)) {
+		return $existingUser;
+	}
+
+	return $self->create($user);
+}
+
+sub username2Id {
+	my ($self, $user) = @_;
+	return $self->username2User($user)->id;
+}
+
+1;

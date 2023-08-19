@@ -1,19 +1,56 @@
+# telegram-bot
+# Copyright (c) 2023, Rev. Duncan Ross Palmer (2E0EOL),
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+#  1. Redistributions of source code must retain the above copyright
+#     notice, this list of conditions and the following disclaimer.
+#
+#  2. Redistributions in binary form must reproduce the above copyright
+#     notice, this list of conditions and the following disclaimer in the
+#     documentation and/or other materials provided with the distribution.
+#
+#  3. Neither the name of the project nor the names of its contributors
+#     may be used to endorse or promote products derived from this software
+#     without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE PROJECT AND CONTRIBUTORS ``AS IS'' AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE PROJECT OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+# OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+# OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+
 package Telegram::Bot;
 use strict;
 use warnings;
 use Data::Dumper;
-use Data::Money::Amount;
+use Data::Money::Amount 0.2.0;
+use Data::Money::Currency::Converter::Repository::APILayer 0.2.0;
 use English;
 use Geo::Weather::VisualCrossing;
 use HTTP::Status qw(status_message);
 use Readonly;
+use Telegram::Bot::Admins;
+use Telegram::Bot::Audit;
 use Telegram::Bot::Ball8;
 use Telegram::Bot::CatClient;
+use Telegram::Bot::Config;
+use Telegram::Bot::DB;
 use Telegram::Bot::DrinksClient;
 use Telegram::Bot::GenderClient;
 use Telegram::Bot::Memes;
 use Telegram::Bot::MusicDB;
 use Telegram::Bot::RandomNumber;
+use Telegram::Bot::User::Repository;
 use Telegram::Bot::UUIDClient;
 use Telegram::Bot::Weather::Location;
 use Time::Duration;
@@ -23,15 +60,10 @@ use POSIX;
 use utf8;
 
 BEGIN {
-	our $VERSION = '1.3.0';
+	our $VERSION = '2.0.0';
 }
 
-Readonly my $WEATHER_API_TOKEN => 'Cj1MKv18bAcUYSIyjZnrpckLv'; # FIXME: Redacted; you need to patch this with guilt until we have a config mechanism
-
-my $api = WWW::Telegram::BotAPI->new (
-    #async => 1, # WARNING: may fail if Mojo::UserAgent is not available!
-    token => 'REDACTED', # FIXME
-);
+my $api = __makeAPI();
 # ... but error handling is available as well.
 #my $result = eval { $api->getMe->{result}{username} }
 #    or die 'Got error message: ', $api->parse_error->{msg};
@@ -48,10 +80,14 @@ my $musicDb = Telegram::Bot::MusicDB->new();
 my $uuidClient = Telegram::Bot::UUIDClient->new();
 my $drinksClient = DrinksClient->new();
 my $genderClient = GenderClient->new();
-my $memes = Telegram::Bot::Memes->new(api => $api);
+my $memes;
 my $startTime = time();
-
-my $visualCrossing = Geo::Weather::VisualCrossing->new(apiKey => $WEATHER_API_TOKEN);
+my $config;
+my $admins;
+my $visualCrossing;
+my $db;
+my $audit;
+my $userRepo;
 
 sub source {
 	return "Source code for the bot can be obtained from https://git.sr.ht/~m6kvm/telegram-bot\n" .
@@ -60,16 +96,18 @@ sub source {
 
 sub breakfast {
 	my (@input) = @_;
+	my $user = $input[0]->{from}{username} || 'jesscharlton';
 	my $text = $input[0]->{text};
 	my @words = split(m/\s+/, $text);
 	shift(@words); # Sack off 'breakfast'
-	my $name = $words[0] ? $words[0] : 'jesscharlton';
+	my $name = $words[0] ? $words[0] : $user;
 	$name = '@' . $name if (index($name, '@') != 0);
 	return "Has old $name had their breakfast yet?";
 }
 
 sub version {
 	my @output = `git rev-parse HEAD`;
+	unshift(@output, $Telegram::Bot::VERSION);
 	return join("\n", @output);
 }
 
@@ -101,6 +139,7 @@ sub memeSearch {
 sub memeAddRemove {
 	my ($picId, @input) = @_;
 	my $syntax = 0;
+	my $user = $input[0]->{from}{username};
 	my $text = $input[0]->{text};
 
 	my @words = split(m/\s+/, $text);
@@ -109,9 +148,9 @@ sub memeAddRemove {
 	my ($op, $name) = @words;
 	if ($op) {
 		if ($op eq 'add' || $op eq 'new') {
-			return $memes->add($name, $picId);
+			return $memes->add($name, $picId, $user);
 		} elsif ($op eq 'remove' || $op eq 'delete' || $op eq 'del' || $op eq 'rm' || $op eq 'erase' || $op eq 'expunge' || $op eq 'purge') {
-			return $memes->remove($name);
+			return $memes->remove($name, $user);
 		} elsif ($op eq 'post') {
 			my $url;
 			(undef, $url, @words) = @words;
@@ -145,6 +184,52 @@ sub randomNumber {
 
 sub insult {
 	return 'You manky Scotch git';
+}
+
+sub getAdmins {
+	die("Admins module is not loaded") unless ($admins);
+	return $admins;
+}
+
+sub recordStartup {
+	my ($self) = @_;
+
+	$audit->recordStartup();
+
+	return;
+}
+
+sub __makeAPI {
+	$config = Telegram::Bot::Config->new();
+	my $token = $config->getSectionByName(__PACKAGE__)->getValueByKey('api_key');
+	die 'No API token' unless ($token);
+
+	$db = Telegram::Bot::DB->new(config => $config);
+	$db->__connect(); # FIXME
+
+	$audit = Telegram::Bot::Audit->new(db => $db);
+
+	$admins = Telegram::Bot::Admins->new(config => $config);
+	$admins->load();
+
+	$userRepo = Telegram::Bot::User::Repository->new(db => $db);
+
+	$visualCrossing = Geo::Weather::VisualCrossing->new({
+		apiKey => $config->getSectionByName('Telegram::Bot::Weather::Client')->getValueByKey('api_key'),
+	});
+
+	$Data::Money::Currency::Converter::Repository::APILayer::apiKey =
+	    $config->getSectionByName('Data::Money::Currency::Converter::Repository::APILayer')
+	    ->getValueByKey('api_key');
+
+	my $localApi = WWW::Telegram::BotAPI->new (
+		#async => 1, # WARNING: may fail if Mojo::UserAgent is not available!
+		token => $token,
+	);
+
+	$memes = Telegram::Bot::Memes->new(api => $localApi, db => $db, userRepo => $userRepo);
+
+	return $localApi;
 }
 
 # The commands that this bot supports.
@@ -346,10 +431,6 @@ my $commands = {
 		my $username = shift->{from}{username};
 		return $drinksClient->run($username // 'anonymous', 'beer');
 	},
-	'redbull' => sub {
-		my $username = shift->{from}{username};
-		return $drinksClient->run($username // 'anonymous', 'beer');
-	},
 	'coffee' => sub {
 		my $username = shift->{from}{username};
 		return $drinksClient->run($username // 'anonymous', 'coffee');
@@ -367,6 +448,10 @@ my $commands = {
 		return $drinksClient->run($username // 'anonymous', 'tea');
 	},
 	'water' => sub {
+		my $username = shift->{from}{username};
+		return $drinksClient->run($username // 'anonymous', 'water');
+	},
+	'💦' => sub {
 		my $username = shift->{from}{username};
 		return $drinksClient->run($username // 'anonymous', 'water');
 	},
@@ -390,55 +475,10 @@ my $commands = {
 		return $value;
 	},
 	'ynyr' => sub { return "Not as old as all that" },
-    # Example demonstrating the use of parameters in a command.
-    "say"      => sub { join " ", splice @_, 1 or "Usage: /say something" },
-    # Example showing how to use the result of an API call.
-    "whoami"   => sub {
-        sprintf "Hello %s, I am %s! How are you?", shift->{from}{username}, $me->{result}{username}
-    },
-    # Example showing how to send multiple lines in a single message.
-    "knock"    => sub {
-        sprintf "Knock-knock.\n- Who's there?\n@%s!", $me->{result}{username}
-    },
-    # Example displaying a keyboard with some simple options.
-    "keyboard" => sub {
-        +{
-            text => "Here's a cool keyboard.",
-            reply_markup => {
-                keyboard => [ [ "a" .. "c" ], [ "d" .. "f" ], [ "g" .. "i" ] ],
-                one_time_keyboard => \1 # \1 maps to "true" when being JSON-ified
-            }
-        }
-    },
-    # Let me identify yourself by sending your phone number to me.
-    "phone" => sub {
-        +{
-            text => "Would you allow me to get your phone number please?",
-            reply_markup => {
-                keyboard => [
-                    [
-                        {
-                            text => "Sure!",
-                            request_contact => \1
-                        },
-                        "No, go away!"
-                    ]
-                ],
-                one_time_keyboard => \1
-            }
-        }
-    },
-    # Test UTF-8
-    "encoding" => sub { "Привет! こんにちは! Buondì!" },
-    # Example sending a photo with a known picture ID.
-    "lastphoto" => sub {
-        return "You didn't send any picture!" unless $pic_id;
-        +{
-            method  => "sendPhoto",
-            photo   => $pic_id,
-            caption => "Here it is!"
-        }
-    },
+	# Example demonstrating the use of parameters in a command.
+	'say' => sub {
+		join " ", splice @_, 1 or "Usage: /say something"
+	},
 	'cat' => sub {
 		my (@input) = @_;
 		my $text = $input[0]->{text};
@@ -484,24 +524,10 @@ my $message_types = {
 				    . 'NOTE: This operation is slow, please be patient, the bot may not respond for up to a minute.',
 			},
 	},
-    # Receive contacts!
-    "contact" => sub {
-        my $contact = shift->{contact};
-        +{
-            method     => "sendMessage",
-            parse_mode => "Markdown",
-            text       => sprintf (
-                            "Here's some information about this contact.\n" .
-                            "- Name: *%s*\n- Surname: *%s*\n" .
-                            "- Phone number: *%s*\n- Telegram UID: *%s*",
-                            $contact->{first_name}, $contact->{last_name} || "?",
-                            $contact->{phone_number}, $contact->{user_id} || "?"
-                        )
-        }
-    }
 };
 
 printf "Hello! I am %s. Starting...\n", $me->{result}{username};
+recordStartup();
 
 my $breakfastDone = 0;
 my $backCounter = 0;
