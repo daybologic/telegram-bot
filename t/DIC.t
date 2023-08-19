@@ -1,3 +1,5 @@
+#!/usr/bin/perl
+#
 # telegram-bot
 # Copyright (c) 2023, Rev. Duncan Ross Palmer (2E0EOL),
 # All rights reserved.
@@ -29,21 +31,37 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-package Telegram::Bot::Audit;
+package DICTests;
+use strict;
+use warnings;
 use Moose;
+extends 'Test::Module::Runnable';
 
-#use Readonly;
-use Telegram::Bot::DB;
+use English qw(-no_match_vars);
+use POSIX qw(EXIT_SUCCESS);
+use Telegram::Bot::DI::Container;
+use Test::Deep qw(cmp_deeply all isa methods bool re);
+use Test::Exception;
+use Test::More;
 
-has __db => (is => 'ro', isa => 'Telegram::Bot::DB', init_arg => 'db', required => 1);
-
-sub recordStartup {
+sub setUp {
 	my ($self) = @_;
-	# TODO: event ID must be different every time; not 640d9f32-3c81-11ee-8596-63ec67873f69
-	my $sth = $self->__db->getHandle()->prepare('INSERT INTO audit_event (type, event, is_system, notes) VALUES(?,?,?,?)');
-	$sth->execute(1, '640d9f32-3c81-11ee-8596-63ec67873f69', 1, "Telegram $Telegram::Bot::VERSION is starting up (2)");
 
-	return;
+	$self->sut(Telegram::Bot::DI::Container->new());
+
+	return EXIT_SUCCESS;
 }
 
-1;
+sub testAttributes {
+	my ($self) = @_;
+	plan tests => 1;
+
+	isa_ok($self->sut->config, 'Telegram::Bot::Config', 'config');
+
+	return EXIT_SUCCESS;
+}
+
+package main;
+use strict;
+use warnings;
+exit(DICTests->new->run);

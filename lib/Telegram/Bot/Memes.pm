@@ -36,7 +36,6 @@ use Data::Dumper;
 use JSON qw(decode_json);
 use POSIX qw(EXIT_SUCCESS);
 use Readonly;
-use Telegram::Bot;
 use Telegram::Bot::Memes::Add;
 
 Readonly my $CACHE_PATTERN => '/var/cache/telegram-bot/memes/%s/%s.%s';

@@ -54,7 +54,7 @@ has api => (is => 'rw', isa => 'WWW::Telegram::BotAPI');
 has audit => (is => 'rw', isa => 'Telegram::Bot::Audit');
 has ball8 => (is => 'rw', isa => 'Telegram::Bot::Ball8');
 has catClient => (is => 'rw', isa => 'Telegram::Bot::CatClient');
-has config => (is => 'rw', isa => 'Telegram::Bot::Config');
+has config => (is => 'rw', isa => 'Telegram::Bot::Config', lazy => 1, builder => '_makeConfig');
 has db => (is => 'rw', isa => 'Telegram::Bot::DB');
 has drinksClient => (is => 'rw', isa => 'Telegram::Bot::DrinksClient');
 has genderClient => (is => 'rw', isa => 'Telegram::Bot::GenderClient');
@@ -65,5 +65,11 @@ has ua => (is => 'rw', isa => 'LWP::UserAgent');
 has userRepo => (is => 'rw', isa => 'Telegram::Bot::User::Repository');
 has uuidClient => (is => 'rw', isa => 'Telegram::Bot::UUIDClient');
 has weatherLocation => (is => 'rw', isa => 'Telegram::Bot::Weather::Location');
+
+
+sub _makeConfig {
+	my ($self) = @_;
+	return Telegram::Bot::Config->new();
+}
 
 1;
