@@ -60,7 +60,7 @@ use POSIX;
 use utf8;
 
 BEGIN {
-	our $VERSION = '1.3.1';
+	our $VERSION = '2.0.0';
 }
 
 my $api = __makeAPI();
