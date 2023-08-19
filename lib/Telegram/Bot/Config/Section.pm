@@ -39,7 +39,7 @@ use Moose;
 use utf8;
 
 BEGIN {
-	our $VERSION = '1.3.0';
+	our $VERSION = '2.0.0';
 }
 
 has 'keys' => (is => 'rw');
