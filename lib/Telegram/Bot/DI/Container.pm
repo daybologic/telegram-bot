@@ -33,24 +33,36 @@ package Telegram::Bot::DI::Container;
 use Moose;
 
 use Readonly;
-use Telegram::Bot::DB;
+use Telegram::Bot::Admins;
+use Telegram::Bot::Audit;
+use Telegram::Bot::Ball8;
+use Telegram::Bot::CatClient;
 use Telegram::Bot::Config;
+use Telegram::Bot::DB;
+use Telegram::Bot::DrinksClient;
+use Telegram::Bot::GenderClient;
+use Telegram::Bot::Memes;
+use Telegram::Bot::MusicDB;
+use Telegram::Bot::RandomNumber;
+use Telegram::Bot::User::Repository;
+use Telegram::Bot::UUIDClient;
+use Telegram::Bot::Weather::Location;
+use WWW::Telegram::BotAPI;
 
-#lib/Telegram/Bot/Weather/Location.pm
-#lib/Telegram/Bot/Memes/Add.pm
-#lib/Telegram/Bot/Admins.pm
-#lib/Telegram/Bot/Audit.pm
-#lib/Telegram/Bot/Ball8.pm
-#lib/Telegram/Bot/CatClient.pm
-has db => (is => 'rw', isa => 'Telegram::Bot::DB');
-#lib/Telegram/Bot/DrinksClient.pm
-#lib/Telegram/Bot/GenderClient.pm
-#lib/Telegram/Bot/Memes.pm
-#lib/Telegram/Bot/MusicDB.pm
-#lib/Telegram/Bot/RandomNumber.pm
-#lib/Telegram/Bot/UUIDClient.pm
-#lib/Telegram/Bot/User/Repository.pm
-#lib/Telegram/Bot/Config.pm
+has admins => (is => 'rw', isa => 'Telegram::Bot::Admins');
+has api => (is => 'rw', isa => 'WWW::Telegram::BotAPI');
+has audit => (is => 'rw', isa => 'Telegram::Bot::Audit');
+has ball8 => (is => 'rw', isa => 'Telegram::Bot::Ball8');
+has musicDB => (is => 'rw', isa => 'Telegram::Bot::MusicDB');
+has genderClient => (is => 'rw', isa => 'Telegram::Bot::GenderClient');
+has weatherLocation => (is => 'rw', isa => 'Telegram::Bot::Weather::Location');
+has catClient => (is => 'rw', isa => 'Telegram::Bot::CatClient');
+has drinksClient => (is => 'rw', isa => 'Telegram::Bot::DrinksClient');
+has randomNumber => (is => 'rw', isa => 'Telegram::Bot::RandomNumber');
 has config => (is => 'rw', isa => 'Telegram::Bot::Config');
+has db => (is => 'rw', isa => 'Telegram::Bot::DB');
+has memes => (is => 'rw', isa => 'Telegram::Bot::Memes');
+has userRepo => (is => 'rw', isa => 'Telegram::Bot::User::Repository');
+has uuidClient => (is => 'rw', isa => 'Telegram::Bot::UUIDClient');
 
 1;
