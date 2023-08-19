@@ -33,8 +33,7 @@ package Telegram::Bot::DI::Container;
 use Moose;
 
 use Readonly;
-
-#has __db => (is => 'ro', isa => 'Telegram::Bot::DB', init_arg => 'db', required => 1);
+use Telegram::Bot::DB;
 
 #lib/Telegram/Bot/Weather/Location.pm
 #lib/Telegram/Bot/Memes/Add/Resizer.pm
@@ -47,7 +46,7 @@ use Readonly;
 #lib/Telegram/Bot/Base.pm
 #lib/Telegram/Bot/CatClient.pm
 #lib/Telegram/Bot/Config/Section.pm
-#lib/Telegram/Bot/DB.pm
+has db => (is => 'rw', isa => 'Telegram::Bot::DB');
 #lib/Telegram/Bot/DrinksClient.pm
 #lib/Telegram/Bot/GenderClient.pm
 #lib/Telegram/Bot/Memes.pm
