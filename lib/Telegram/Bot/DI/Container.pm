@@ -32,7 +32,7 @@
 package Telegram::Bot::DI::Container;
 use Moose;
 
-use Readonly;
+use LWP::UserAgent;
 use Telegram::Bot::Admins;
 use Telegram::Bot::Audit;
 use Telegram::Bot::Ball8;
@@ -55,6 +55,7 @@ has audit => (is => 'rw', isa => 'Telegram::Bot::Audit');
 has ball8 => (is => 'rw', isa => 'Telegram::Bot::Ball8');
 has musicDB => (is => 'rw', isa => 'Telegram::Bot::MusicDB');
 has genderClient => (is => 'rw', isa => 'Telegram::Bot::GenderClient');
+has ua => (is => 'rw', isa => 'LWP::UserAgent');
 has weatherLocation => (is => 'rw', isa => 'Telegram::Bot::Weather::Location');
 has catClient => (is => 'rw', isa => 'Telegram::Bot::CatClient');
 has drinksClient => (is => 'rw', isa => 'Telegram::Bot::DrinksClient');
