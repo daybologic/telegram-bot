@@ -34,18 +34,14 @@ use Moose;
 
 use Readonly;
 use Telegram::Bot::DB;
+use Telegram::Bot::Config;
 
 #lib/Telegram/Bot/Weather/Location.pm
-#lib/Telegram/Bot/Memes/Add/Resizer.pm
 #lib/Telegram/Bot/Memes/Add.pm
-#lib/Telegram/Bot/Memes/Handle.pm
-#lib/Telegram/Bot/Admin.pm
 #lib/Telegram/Bot/Admins.pm
 #lib/Telegram/Bot/Audit.pm
 #lib/Telegram/Bot/Ball8.pm
-#lib/Telegram/Bot/Base.pm
 #lib/Telegram/Bot/CatClient.pm
-#lib/Telegram/Bot/Config/Section.pm
 has db => (is => 'rw', isa => 'Telegram::Bot::DB');
 #lib/Telegram/Bot/DrinksClient.pm
 #lib/Telegram/Bot/GenderClient.pm
@@ -53,10 +49,8 @@ has db => (is => 'rw', isa => 'Telegram::Bot::DB');
 #lib/Telegram/Bot/MusicDB.pm
 #lib/Telegram/Bot/RandomNumber.pm
 #lib/Telegram/Bot/UUIDClient.pm
-#lib/Telegram/Bot/User.pm
 #lib/Telegram/Bot/User/Repository.pm
 #lib/Telegram/Bot/Config.pm
-#lib/Telegram/Bot/DI/Container.pm
-#lib/Telegram/Bot.pm
+has config => (is => 'rw', isa => 'Telegram::Bot::Config');
 
 1;
