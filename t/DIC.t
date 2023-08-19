@@ -52,11 +52,21 @@ sub setUp {
 	return EXIT_SUCCESS;
 }
 
-sub testAttributes {
+sub testAttributesSimple {
 	my ($self) = @_;
 	plan tests => 1;
 
 	isa_ok($self->sut->config, 'Telegram::Bot::Config', 'config');
+
+	return EXIT_SUCCESS;
+}
+
+sub testUA {
+	my ($self) = @_;
+	plan tests => 2;
+
+	isa_ok($self->sut->ua, 'LWP::UserAgent', 'ua');
+	is($self->sut->ua->timeout, 120, 'timeout');
 
 	return EXIT_SUCCESS;
 }

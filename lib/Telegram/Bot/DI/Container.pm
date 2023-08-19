@@ -61,15 +61,24 @@ has genderClient => (is => 'rw', isa => 'Telegram::Bot::GenderClient');
 has memes => (is => 'rw', isa => 'Telegram::Bot::Memes');
 has musicDB => (is => 'rw', isa => 'Telegram::Bot::MusicDB');
 has randomNumber => (is => 'rw', isa => 'Telegram::Bot::RandomNumber');
-has ua => (is => 'rw', isa => 'LWP::UserAgent');
+has ua => (is => 'rw', isa => 'LWP::UserAgent', lazy => 1, builder => '_makeUserAgent');
 has userRepo => (is => 'rw', isa => 'Telegram::Bot::User::Repository');
 has uuidClient => (is => 'rw', isa => 'Telegram::Bot::UUIDClient');
 has weatherLocation => (is => 'rw', isa => 'Telegram::Bot::Weather::Location');
 
-
 sub _makeConfig {
 	my ($self) = @_;
 	return Telegram::Bot::Config->new();
+}
+
+sub _makeUserAgent {
+	my ($self) = @_;
+
+	my $ua = LWP::UserAgent->new;
+	$ua->timeout(120); # TODO: From config
+	$ua->env_proxy;
+
+	return $ua;
 }
 
 1;
