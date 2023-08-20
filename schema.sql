@@ -156,3 +156,12 @@ CREATE TABLE `user_timeout` (
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2023-08-18 23:55:51
+
+DROP TABLE IF EXISTS `karma`;
+CREATE TABLE `karma` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `term` varchar(128) NOT NULL,
+  `score` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `term` (`term`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
