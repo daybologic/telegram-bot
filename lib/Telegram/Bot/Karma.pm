@@ -42,7 +42,11 @@ has __db => (is => 'ro', isa => 'Telegram::Bot::DB', init_arg => 'db', required 
 Readonly my $SQL_UPDATE =>
     'INSERT INTO karma(term, score) VALUES(?, ?) ON DUPLICATE KEY UPDATE score = score + ?';
 
+Readonly my $SQL_SELECT => 'SELECT score FROM karma WHERE term = ?';
+
 has __sthUpdate => (is => 'rw', isa => 'DBI::st');
+has __sthGet => (is => 'rw', isa => 'DBI::st');
+has __term => (is => 'rw', isa => 'Str');
 
 sub run {
 	my ($self, $text) = @_;
@@ -50,7 +54,7 @@ sub run {
 
 	my ($term, $diff);
 	eval {
-		($term, $diff) = __extractCommand($text);
+		($term, $diff) = $self->__extractCommand($text);
 	};
 	if (my $evalError = $EVAL_ERROR) {
 		return "ERROR: $evalError";
@@ -59,11 +63,18 @@ sub run {
 	$self->__sthUpdate($self->__db->getHandle()->prepare($SQL_UPDATE)) unless ($self->__sthUpdate);
 	$self->__sthUpdate->execute($term, $diff, $diff);
 
-	return 'done';
+	$self->__sthGet($self->__db->getHandle()->prepare($SQL_SELECT)) unless ($self->__sthGet);
+	$self->__sthGet->execute($self->__term);
+	while (my $row = $self->__sthGet->fetchrow_hashref()) {
+		my $term = $self->__term;
+		return "$term is now at karma level $row->{score}";
+	}
+
+	return "$term is now at karma level 0"; # can't happen
 }
 
 sub __extractCommand {
-	my ($text) = @_;
+	my ($self, $text) = @_;
 
 	my $increaseOrNot = 0;
 	if ($text =~ m/\+\+$/) {
@@ -80,12 +91,10 @@ sub __extractCommand {
 	}
 
 	if ($text =~ m/^([a-z0-9]+)/i) {
-		return (lc($1), $diff);
+		return ($self->__term(lc($1)), $diff);
 	}
 
 	die("Term can't be extracted/detainted, perhaps unusual characters?\n");
 }
-
-#sub __makeU
 
 1;
