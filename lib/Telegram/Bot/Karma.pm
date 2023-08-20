@@ -46,7 +46,11 @@ Readonly my $SQL_SELECT => 'SELECT score FROM karma WHERE term = ?';
 
 has __sthUpdate => (is => 'rw', isa => 'DBI::st');
 has __sthGet => (is => 'rw', isa => 'DBI::st');
+
+# TODO: not concurrency-safe; Works because we are not concurrent; we might need a lock
+# to ensure run is a critical section, or refactor.
 has __term => (is => 'rw', isa => 'Str');
+has __increaseOrNot => (is => 'rw', isa => 'Bool');
 
 sub run {
 	my ($self, $text) = @_;
@@ -67,7 +71,8 @@ sub run {
 	$self->__sthGet->execute($self->__term);
 	while (my $row = $self->__sthGet->fetchrow_hashref()) {
 		my $term = $self->__term;
-		return "$term is now at karma level $row->{score}";
+		my $direction = $self->__increaseOrNot ? 'increased' : 'decreased';
+		return "Karma for $term $direction to $row->{score}";
 	}
 
 	return "$term is now at karma level 0"; # can't happen
@@ -76,9 +81,9 @@ sub run {
 sub __extractCommand {
 	my ($self, $text) = @_;
 
-	my $increaseOrNot = 0;
+	$self->__increaseOrNot(0);
 	if ($text =~ m/\+\+$/) {
-		$increaseOrNot = 1;
+		$self->__increaseOrNot(1);
 	#} else {
 		#die("Syntax: /k term++\n");
 	}
@@ -86,7 +91,7 @@ sub __extractCommand {
 	# FIXME: Can't handle -- '—' which is Unicode crap
 
 	my $diff = -1;
-	if ($increaseOrNot) {
+	if ($self->__increaseOrNot) {
 		$diff = 1; # TODO: should support '+++++++'
 	}
 
