@@ -54,7 +54,7 @@ has admins => (is => 'rw', isa => 'Telegram::Bot::Admins');
 has api => (is => 'rw', isa => 'WWW::Telegram::BotAPI');
 has audit => (is => 'rw', isa => 'Telegram::Bot::Audit');
 has ball8 => (is => 'rw', isa => 'Telegram::Bot::Ball8');
-has catClient => (is => 'rw', isa => 'Telegram::Bot::CatClient');
+has catClient => (is => 'rw', isa => 'Telegram::Bot::CatClient', lazy => 1, builder => '_makeCatClient');
 has config => (is => 'rw', isa => 'Telegram::Bot::Config', lazy => 1, builder => '_makeConfig');
 has db => (is => 'rw', isa => 'Telegram::Bot::DB');
 has drinksClient => (is => 'rw', isa => 'Telegram::Bot::DrinksClient');
@@ -86,6 +86,11 @@ sub _makeUserAgent {
 sub _makeKarma {
 	my ($self) = @_;
 	return Telegram::Bot::Karma->new();
+}
+
+sub _makeCatClient {
+	my ($self) = @_;
+	return Telegram::Bot::CatClient->new();
 }
 
 1;
