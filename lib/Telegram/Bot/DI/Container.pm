@@ -41,6 +41,7 @@ use Telegram::Bot::Config;
 use Telegram::Bot::DB;
 use Telegram::Bot::DrinksClient;
 use Telegram::Bot::GenderClient;
+use Telegram::Bot::Karma;
 use Telegram::Bot::Memes;
 use Telegram::Bot::MusicDB;
 use Telegram::Bot::RandomNumber;
@@ -58,6 +59,7 @@ has config => (is => 'rw', isa => 'Telegram::Bot::Config', lazy => 1, builder =>
 has db => (is => 'rw', isa => 'Telegram::Bot::DB');
 has drinksClient => (is => 'rw', isa => 'Telegram::Bot::DrinksClient');
 has genderClient => (is => 'rw', isa => 'Telegram::Bot::GenderClient');
+has karma => (is => 'rw', isa => 'Telegram::Bot::Karma');
 has memes => (is => 'rw', isa => 'Telegram::Bot::Memes');
 has musicDB => (is => 'rw', isa => 'Telegram::Bot::MusicDB');
 has randomNumber => (is => 'rw', isa => 'Telegram::Bot::RandomNumber');
