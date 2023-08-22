@@ -47,6 +47,7 @@ use Telegram::Bot::Config;
 use Telegram::Bot::DB;
 use Telegram::Bot::DrinksClient;
 use Telegram::Bot::GenderClient;
+use Telegram::Bot::Karma;
 use Telegram::Bot::Memes;
 use Telegram::Bot::MusicDB;
 use Telegram::Bot::RandomNumber;
@@ -88,6 +89,17 @@ my $visualCrossing;
 my $db;
 my $audit;
 my $userRepo;
+my $karma;
+
+sub karma {
+	my (@input) = @_;
+#	my $user = $input[0]->{from}{username};
+#	my $text = $input[0]->{text};
+
+#	my (@words) = split(m/\s+/, $text);
+#	return $karma->run($words[0], 1);
+	return $karma->run($input[0]->{text});
+}
 
 sub source {
 	return "Source code for the bot can be obtained from https://git.sr.ht/~m6kvm/telegram-bot\n" .
@@ -218,6 +230,8 @@ sub __makeAPI {
 		apiKey => $config->getSectionByName('Telegram::Bot::Weather::Client')->getValueByKey('api_key'),
 	});
 
+	$karma = Telegram::Bot::Karma->new({ db => $db });
+
 	$Data::Money::Currency::Converter::Repository::APILayer::apiKey =
 	    $config->getSectionByName('Data::Money::Currency::Converter::Repository::APILayer')
 	    ->getValueByKey('api_key');
@@ -299,6 +313,7 @@ my $commands = {
 		}
 	},
 	'8ball', => \&ball8,
+	'k' => \&karma,
 	'random' => \&randomNumber,
 	'horatio' => sub { return 'licking Ben\'s roast potato' },
 	'insult' => \&insult,
