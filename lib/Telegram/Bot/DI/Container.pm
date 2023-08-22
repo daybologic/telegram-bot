@@ -70,7 +70,7 @@ has weatherLocation => (is => 'rw', isa => 'Telegram::Bot::Weather::Location');
 
 sub _makeConfig {
 	my ($self) = @_;
-	return Telegram::Bot::Config->new();
+	return Telegram::Bot::Config->new(dic => $self);
 }
 
 sub _makeUserAgent {
@@ -85,12 +85,12 @@ sub _makeUserAgent {
 
 sub _makeKarma {
 	my ($self) = @_;
-	return Telegram::Bot::Karma->new();
+	return Telegram::Bot::Karma->new(dic => $self);
 }
 
 sub _makeCatClient {
 	my ($self) = @_;
-	return Telegram::Bot::CatClient->new();
+	return Telegram::Bot::CatClient->new(dic => $self);
 }
 
 1;

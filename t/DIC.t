@@ -39,8 +39,9 @@ extends 'Test::Module::Runnable';
 
 use English qw(-no_match_vars);
 use POSIX qw(EXIT_SUCCESS);
+use Readonly;
 use Telegram::Bot::DI::Container;
-use Test::Deep qw(cmp_deeply all isa methods bool re);
+use Test::Deep qw(all cmp_deeply isa methods);
 use Test::Exception;
 use Test::More;
 
@@ -56,9 +57,18 @@ sub testAttributesSimple {
 	my ($self) = @_;
 	plan tests => 3;
 
-	isa_ok($self->sut->catClient, 'Telegram::Bot::CatClient', 'catClient');
-	isa_ok($self->sut->config, 'Telegram::Bot::Config', 'config');
-	isa_ok($self->sut->karma, 'Telegram::Bot::Karma', 'karma');
+	Readonly my %MAP => (
+		'Telegram::Bot::CatClient' => 'catClient',
+		'Telegram::Bot::Config'    => 'config',
+		'Telegram::Bot::Karma'     => 'karma',
+	);
+
+	while (my ($package, $name) = each(%MAP)) {
+		cmp_deeply($self->sut->$name, all(
+			isa($package),
+			methods(dic => isa('Telegram::Bot::DI::Container')),
+		), $name);
+	}
 
 	return EXIT_SUCCESS;
 }
