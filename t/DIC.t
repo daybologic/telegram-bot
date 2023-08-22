@@ -54,9 +54,10 @@ sub setUp {
 
 sub testAttributesSimple {
 	my ($self) = @_;
-	plan tests => 1;
+	plan tests => 2;
 
 	isa_ok($self->sut->config, 'Telegram::Bot::Config', 'config');
+	isa_ok($self->sut->karma, 'Telegram::Bot::Karma', 'karma');
 
 	return EXIT_SUCCESS;
 }

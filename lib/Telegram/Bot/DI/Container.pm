@@ -59,7 +59,7 @@ has config => (is => 'rw', isa => 'Telegram::Bot::Config', lazy => 1, builder =>
 has db => (is => 'rw', isa => 'Telegram::Bot::DB');
 has drinksClient => (is => 'rw', isa => 'Telegram::Bot::DrinksClient');
 has genderClient => (is => 'rw', isa => 'Telegram::Bot::GenderClient');
-has karma => (is => 'rw', isa => 'Telegram::Bot::Karma');
+has karma => (is => 'rw', isa => 'Telegram::Bot::Karma', lazy => 1, builder => '_makeKarma');
 has memes => (is => 'rw', isa => 'Telegram::Bot::Memes');
 has musicDB => (is => 'rw', isa => 'Telegram::Bot::MusicDB');
 has randomNumber => (is => 'rw', isa => 'Telegram::Bot::RandomNumber');
@@ -81,6 +81,11 @@ sub _makeUserAgent {
 	$ua->env_proxy;
 
 	return $ua;
+}
+
+sub _makeKarma {
+	my ($self) = @_;
+	return Telegram::Bot::Karma->new();
 }
 
 1;
