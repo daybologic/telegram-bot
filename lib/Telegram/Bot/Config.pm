@@ -41,7 +41,7 @@ use Moose;
 use utf8;
 
 BEGIN {
-	our $VERSION = '2.0.0';
+	our $VERSION = '2.1.0';
 }
 
 Readonly my $FILE_NAME => 'etc/telegram-bot.conf';
