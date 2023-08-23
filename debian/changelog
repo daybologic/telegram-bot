@@ -1,3 +1,13 @@
+telegram-bot (2.1.0) stable; urgency=high
+
+  * Karma support!
+
+  * HOTFIX: Fix database disconnection; MySQL has gone away error.
+  * SECURITY: The security of /[meme] has been significantly improved,
+    urgent upgrade recommended
+
+ -- Rev. Duncan Ross Palmer <2e0eol@gmail.com>  Wed, 23 Aug 2023 10:13:02 +0100
+
 telegram-bot (2.0.0) stable; urgency=medium
 
   * Meme ownership; you must now have a Telegram username in order to add or remove
