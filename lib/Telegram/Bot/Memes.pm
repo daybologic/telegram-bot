@@ -257,8 +257,8 @@ sub __pathFromCache {
 sub __detaint {
 	my ($command) = @_;
 	$command = substr($command, 1) if (index($command, '/') == 0);
-	$command = $1 if ($command =~ m/([a-z0-9]+)/);
-	return $command;
+	$command = $1 if ($command =~ m/^([a-z0-9]+)/i);
+	return lc($command);
 }
 
 sub __generateS3URI {
