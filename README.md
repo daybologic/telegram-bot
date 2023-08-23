@@ -172,6 +172,23 @@ In order to see your current gender, type /gender
 
 It is not currently possible to remove your selected gender and revert to 'they'.
 
+#### Karma
+
+Karma is a way of storing scores against arbitary terms.  It is does in increments (you like something) or decrements,
+where you dislike something and want to reduce the score.  Nobody really gets any prizes out of this.
+
+To increase karma, replace term with any word:
+
+/k term++
+
+To decrease karma:
+
+/k term--
+
+This is in stored in a MariaDB backend.
+
+Reports aren't yet available, but you are given immediate feedback.
+
 #### Memes
 
 Dynamic meme handling is one of the core features of the bot; we allow meme use, addition, removal, and search.

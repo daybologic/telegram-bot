@@ -52,8 +52,11 @@ has __dsn => (is => 'ro', isa => 'Str', lazy => 1, default => \&__getDSN, init_a
 
 sub getHandle {
 	my ($self) = @_;
-	return $self->handle if ($self->handle);
-	return $self->handle($self->__connect()); # also sets handle
+
+	$self->handle($self->__connect())->{mysql_auto_reconnect} = 1
+	    unless ($self->handle);
+
+	return $self->handle;
 }
 
 sub __getConfig {
