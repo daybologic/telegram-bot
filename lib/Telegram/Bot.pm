@@ -80,7 +80,7 @@ my ($offset, $updates) = 0;
 my $musicDb = Telegram::Bot::MusicDB->new();
 my $uuidClient = Telegram::Bot::UUIDClient->new();
 my $drinksClient = Telegram::Bot::DrinksClient->new();
-my $genderClient = GenderClient->new();
+my $genderClient = Telegram::Bot::GenderClient->new();
 my $memes;
 my $startTime = time();
 my $config;

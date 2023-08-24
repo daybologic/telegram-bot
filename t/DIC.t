@@ -60,6 +60,7 @@ sub testAttributesSimple {
 		'Telegram::Bot::CatClient'    => 'catClient',
 		'Telegram::Bot::Config'       => 'config',
 		'Telegram::Bot::DrinksClient' => 'drinksClient',
+		'Telegram::Bot::GenderClient' => 'genderClient',
 		'Telegram::Bot::Karma'        => 'karma',
 	);
 
