@@ -45,7 +45,7 @@ Readonly my $S3_BUCKET => '58a75bba-1d73-11ee-afdd-5b1a31ab3736';
 Readonly my $S3_URI => 's3://%s/%s/%s.%s';
 
 has chatId => (isa => 'Int', is => 'rw', default => 0);
-
+has user => (isa => 'Str', is => 'rw', default => '');
 has adder => (isa => 'Telegram::Bot::Memes::Add', is => 'ro', init_arg => undef, lazy => 1, default => \&__makeAdder);
 
 my %__memeExtensionCache = ( );
@@ -57,16 +57,28 @@ sub run {
 	$text = __detaint($text);
 	return undef unless ($text);
 
+	my $result = undef;
 	if (my $path = __pathFromCache($text)) {
-		return $self->__telegramCommand($path, @words);
+		$result = $self->__telegramCommand($path, @words);
 	} else {
 		$self->__downloadMeme($text);
 		if (my $path = __pathFromCache($text)) {
-			return $self->__telegramCommand($path, @words);
+			$result = $self->__telegramCommand($path, @words);
 		}
 	}
 
-	return undef;
+	$self->dic->audit->memeUse({
+		meme => $text,
+		user => $self->user,
+	});
+
+	return $result;
+}
+
+sub setUser {
+	my ($self, $user) = @_;
+	$self->user($user);
+	return $self; # for call chaining
 }
 
 sub search {
@@ -215,7 +227,6 @@ sub __executeListingCommand {
 sub __telegramCommand {
 	my ($self, $path, @words) = @_;
 
-	$self->dic->audit->memeUse();
 	if ($path =~ m/gif$/ && $self->chatId != -407509267) {
 		return +{
 			animation => { file => $path },

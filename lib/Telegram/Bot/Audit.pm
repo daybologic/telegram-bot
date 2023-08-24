@@ -34,22 +34,91 @@ use Moose;
 
 extends 'Telegram::Bot::Base';
 
-#use Readonly;
+use Readonly;
+
+Readonly my $EVENT_START                   => 'START';
+Readonly my $EVENT_MEME_ADD_FAIL           => 'MEME_ADD_FAIL';
+Readonly my $EVENT_MEME_ADD_SUCCESS        => 'MEME_ADD_SUCCESS';
+Readonly my $EVENT_MEME_RM_FAIL            => 'MEME_RM_FAIL';
+Readonly my $EVENT_MEME_RM_SUCCESS         => 'MEME_RM_SUCCESS';
+Readonly my $EVENT_WEATHER_LOCATION_UPDATE => 'WEATHER_LOCATION_UPDATE';
+Readonly my $EVENT_WEATHER_API             => 'WEATHER_API';
+Readonly my $EVENT_WEATHER_LOOKUP          => 'WEATHER_LOOKUP';
+Readonly my $EVENT_CAT_API                 => 'CAT_API';
+Readonly my $EVENT_CAT_LOOKUP              => 'CAT_LOOKUP';
+Readonly my $EVENT_MEME_USE_SUCCESS        => 'MEME_USE_SUCCESS';
+Readonly my $EVENT_MEME_NOT_FOUND          => 'MEME_NOT_FOUND';
+Readonly my $EVENT_COMMAND_NOT_FOUND       => 'COMMAND_NOT_FOUND';
+Readonly my $EVENT_COUNTER_INC             => 'COUNTER_INC';
+Readonly my $EVENT_COUNTER_FETCH           => 'COUNTER_FETCH';
+Readonly my $EVENT_CURRENCY_API            => 'CURRENCY_API';
+Readonly my $EVENT_CURRENCY_LOOKUP         => 'CURRENCY_LOOKUP';
+Readonly my $EVENT_ADMIN_PROMOTE           => 'ADMIN_PROMOTE';
+Readonly my $EVENT_ADMIN_DEMOTE            => 'ADMIN_DEMOTE';
+Readonly my $EVENT_ADMIN_USER_BAN          => 'ADMIN_USER_BAN';
+Readonly my $EVENT_ADMIN_USER_UNBAN        => 'ADMIN_USER_UNBAN';
+Readonly my $EVENT_MEME_API                => 'MEME_API';
+Readonly my $EVENT_MEME_SEARCH             => 'MEME_SEARCH';
+Readonly my $EVENT_MUSIC_SEARCH            => 'MUSIC_SEARCH';
+Readonly my $EVENT_UUID_INFO               => 'UUID_INFO';
+Readonly my $EVENT_UUID_GEN                => 'UUID_GEN';
+Readonly my $EVENT_UUID_API                => 'UUID_API';
+Readonly my $EVENT_COST_AWS_LAMBDA         => 'COST_AWS_LAMBDA';
+Readonly my $EVENT_COST_AWS_S3             => 'COST_AWS_S3';
+Readonly my $EVENT_COST_AWS_DYNAMO         => 'COST_AWS_DYNAMO';
+Readonly my $EVENT_GENDER_SET              => 'GENDER_SET';
+Readonly my $EVENT_GENDER_API              => 'GENDER_API';
+Readonly my $EVENT_INSULTED                => 'INSULTED';
+Readonly my $EVENT_ADMIN_UNAUTH            => 'ADMIN_UNAUTH';
+Readonly my $EVENT_CRASH                   => 'CRASH';
+Readonly my $EVENT_KARMA_INC               => 'KARMA_INC';
+Readonly my $EVENT_KARMA_DEC               => 'KARMA_DEC';
+Readonly my $EVENT_KARMA_GET               => 'KARMA_GET';
+Readonly my $EVENT_KARMA_REPORT            => 'KARMA_REPORT';
+Readonly my $EVENT_COMMAND_RATE_LIMIT      => 'COMMAND_RATE_LIMIT';
+
+sub __getEventSession {
+	my ($self) = @_;
+
+	$self->dic->uuidClient->count(1);
+	$self->dic->uuidClient->version(1);
+
+	my $results = $self->dic->uuidClient->generate();
+	return $results->[0];
+}
+
+sub __typeLookup {
+	my ($self, $typeMnemonic) = @_;
+
+	my $sth = $self->dic->db->getHandle()->prepare('SELECT id FROM audit_event_type WHERE mnemonic = ?');
+	$sth->execute($typeMnemonic);
+
+	while (my $row = $sth->fetchrow_hashref()) {
+		return $row->{id};
+	}
+
+	return 0;
+}
 
 sub recordStartup {
 	my ($self) = @_;
-	# TODO: event ID must be different every time; not 640d9f32-3c81-11ee-8596-63ec67873f69
+
+	my $type = $self->__typeLookup($EVENT_START);
 	my $sth = $self->dic->db->getHandle()->prepare('INSERT INTO audit_event (type, event, is_system, notes) VALUES(?,?,?,?)');
-	$sth->execute(1, '640d9f32-3c81-11ee-8596-63ec67873f69', 1, "Telegram $Telegram::Bot::VERSION is starting up (2)");
+	$sth->execute($type, $self->__getEventSession(), 1, "Telegram $Telegram::Bot::VERSION is starting up (2)");
 
 	return;
 }
 
 sub memeUse {
-	my ($self) = @_;
+	my ($self, $args) = @_;
+	my ($meme, $user) = @{$args}{qw(meme user)};
 
+	my $type = $self->__typeLookup($EVENT_MEME_USE_SUCCESS);
+	$user = $self->dic->userRepo->username2Id($user);
+	my $event = $self->__getEventSession();
 	my $sth = $self->dic->db->getHandle()->prepare('INSERT INTO audit_event (type, event, user, notes) VALUES(?,?,?,?)');
-	$sth->execute(12, 'ea0028fa-427e-11ee-b29e-4f8a9c2b0b78', 1, 'TODO');
+	$sth->execute($type, $event, $user, "Meme name: '$meme'");
 
 	return;
 }
