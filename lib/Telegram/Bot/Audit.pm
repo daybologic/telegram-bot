@@ -46,4 +46,13 @@ sub recordStartup {
 	return;
 }
 
+sub memeUse {
+	my ($self) = @_;
+
+	my $sth = $self->dic->db->getHandle()->prepare('INSERT INTO audit_log (type, event, user, notes) VALUES(?,?,?,?)');
+	$sth->execute(12, 'ea0028fa-427e-11ee-b29e-4f8a9c2b0b78', 1, 'TODO');
+
+	return;
+}
+
 1;

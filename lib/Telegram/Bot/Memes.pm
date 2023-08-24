@@ -220,6 +220,7 @@ sub __executeListingCommand {
 sub __telegramCommand {
 	my ($self, $path, @words) = @_;
 
+	$self->dic->audit->memeUse();
 	if ($path =~ m/gif$/ && $self->chatId != -407509267) {
 		return +{
 			animation => { file => $path },
