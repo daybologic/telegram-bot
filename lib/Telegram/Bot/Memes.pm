@@ -32,7 +32,8 @@
 package Telegram::Bot::Memes;
 use Moose;
 
-use Data::Dumper;
+extends 'Telegram::Bot::Base';
+
 use JSON qw(decode_json);
 use POSIX qw(EXIT_SUCCESS);
 use Readonly;
@@ -46,12 +47,6 @@ Readonly my $S3_URI => 's3://%s/%s/%s.%s';
 has chatId => (isa => 'Int', is => 'rw', default => 0);
 
 has adder => (isa => 'Telegram::Bot::Memes::Add', is => 'ro', init_arg => undef, lazy => 1, default => \&__makeAdder);
-
-has api => (is => 'rw', isa => 'WWW::Telegram::BotAPI');
-
-has db => (is => 'ro', isa => 'Telegram::Bot::DB', required => 1);
-
-has userRepo => (is => 'ro', isa => 'Telegram::Bot::User::Repository', required => 1);
 
 my %__memeExtensionCache = ( );
 
@@ -122,8 +117,8 @@ sub remove {
 	my $extension = __memeExtensionCacheFetch($name);
 	return "No such meme '$name'" unless ($extension);
 
-	my $isOwner = $self->__isOwner($name, $self->userRepo->username2User($user));
-	unless ($isOwner || Telegram::Bot::getAdmins()->isAdmin($user)) {
+	my $isOwner = $self->__isOwner($name, $self->dic->userRepo->username2User($user));
+	unless ($isOwner || $self->dic->admins->isAdmin($user)) {
 		return "Sorry, \@$user, only the owner of the meme '$name', or an admin may remove it";
 	}
 
@@ -174,7 +169,7 @@ sub addToBucket {
 sub __isOwner {
 	my ($self, $name, $user) = @_;
 
-	my $sth = $self->db->getHandle()->prepare('SELECT owner FROM meme WHERE name = ?');
+	my $sth = $self->dic->db->getHandle()->prepare('SELECT owner FROM meme WHERE name = ?');
 	$sth->execute($name);
 
 	while (my $row = $sth->fetchrow_hashref()) {
@@ -189,7 +184,7 @@ sub __isOwner {
 sub __forgetOwner {
 	my ($self, $name) = @_;
 
-	my $sth = $self->db->getHandle()->prepare('DELETE FROM meme WHERE name = ?');
+	my $sth = $self->dic->db->getHandle()->prepare('DELETE FROM meme WHERE name = ?');
 	$sth->execute($name);
 
 	return;
@@ -319,7 +314,7 @@ sub __runCommand {
 sub __makeAdder {
 	my ($self) = @_;
 	return Telegram::Bot::Memes::Add->new({
-		api   => $self->api,
+		dic   => $self->dic,
 		owner => $self,
 	});
 }

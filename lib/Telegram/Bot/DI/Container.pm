@@ -50,42 +50,70 @@ use Telegram::Bot::UUIDClient;
 use Telegram::Bot::Weather::Location;
 use WWW::Telegram::BotAPI;
 
-has admins => (is => 'rw', isa => 'Telegram::Bot::Admins');
-has api => (is => 'rw', isa => 'WWW::Telegram::BotAPI');
-has audit => (is => 'rw', isa => 'Telegram::Bot::Audit');
-has ball8 => (is => 'rw', isa => 'Telegram::Bot::Ball8');
+has admins => (is => 'rw', isa => 'Telegram::Bot::Admins', lazy => 1, builder => '_makeAdmins');
+has api => (is => 'rw', isa => 'WWW::Telegram::BotAPI', lazy => 1, builder => '_makeAPI');
+has audit => (is => 'rw', isa => 'Telegram::Bot::Audit', lazy => 1, builder => '_makeAudit');
+has ball8 => (is => 'rw', isa => 'Telegram::Bot::Ball8', lazy => 1, builder => '_makeBall8');
 has catClient => (is => 'rw', isa => 'Telegram::Bot::CatClient', lazy => 1, builder => '_makeCatClient');
 has config => (is => 'rw', isa => 'Telegram::Bot::Config', lazy => 1, builder => '_makeConfig');
-has db => (is => 'rw', isa => 'Telegram::Bot::DB');
+has db => (is => 'rw', isa => 'Telegram::Bot::DB', lazy => 1, builder => '_makeDB');
 has drinksClient => (is => 'rw', isa => 'Telegram::Bot::DrinksClient', lazy => 1, builder => '_makeDrinksClient');
 has genderClient => (is => 'rw', isa => 'Telegram::Bot::GenderClient', lazy => 1, builder => '_makeGenderClient');
 has karma => (is => 'rw', isa => 'Telegram::Bot::Karma', lazy => 1, builder => '_makeKarma');
-has memes => (is => 'rw', isa => 'Telegram::Bot::Memes');
-has musicDB => (is => 'rw', isa => 'Telegram::Bot::MusicDB');
-has randomNumber => (is => 'rw', isa => 'Telegram::Bot::RandomNumber');
+has memes => (is => 'rw', isa => 'Telegram::Bot::Memes', lazy => 1, builder => '_makeMemes');
+has musicDB => (is => 'rw', isa => 'Telegram::Bot::MusicDB', lazy => 1, builder => '_makeMusicDB');
+has randomNumber => (is => 'rw', isa => 'Telegram::Bot::RandomNumber', lazy => 1, builder => '_makeRandomNumber');
 has ua => (is => 'rw', isa => 'LWP::UserAgent', lazy => 1, builder => '_makeUserAgent');
-has userRepo => (is => 'rw', isa => 'Telegram::Bot::User::Repository');
-has uuidClient => (is => 'rw', isa => 'Telegram::Bot::UUIDClient');
-has weatherLocation => (is => 'rw', isa => 'Telegram::Bot::Weather::Location');
+has userRepo => (is => 'rw', isa => 'Telegram::Bot::User::Repository', lazy => 1, builder => '_makeUserRepo');
+has uuidClient => (is => 'rw', isa => 'Telegram::Bot::UUIDClient', lazy => 1, builder => '_makeUuidClient');
+has weatherLocation => (is => 'rw', isa => 'Telegram::Bot::Weather::Location', lazy => 1, builder => '_makeWeatherLocation');
+
+sub _makeAPI {
+	my ($self) = @_;
+
+	my $token = $self->config->getSectionByName('Telegram::Bot')->getValueByKey('api_key');
+	die 'No API token' unless ($token);
+
+	return WWW::Telegram::BotAPI->new (
+		#async => 1, # WARNING: may fail if Mojo::UserAgent is not available!
+		token => $token,
+	);
+}
+
+sub _makeAdmins {
+	my ($self) = @_;
+	return Telegram::Bot::Admins->new(dic => $self);
+}
+
+sub _makeAudit {
+	my ($self) = @_;
+	return Telegram::Bot::Audit->new(dic => $self);
+}
+
+sub _makeBall8 {
+	my ($self) = @_;
+	return Telegram::Bot::Ball8->new(dic => $self);
+}
+
+
+sub _makeCatClient {
+	my ($self) = @_;
+	return Telegram::Bot::CatClient->new(dic => $self);
+}
 
 sub _makeConfig {
 	my ($self) = @_;
 	return Telegram::Bot::Config->new(dic => $self);
 }
 
-sub _makeUserAgent {
+sub _makeDB {
 	my ($self) = @_;
-
-	my $ua = LWP::UserAgent->new;
-	$ua->timeout(120); # TODO: From config
-	$ua->env_proxy;
-
-	return $ua;
+	return Telegram::Bot::DB->new(dic => $self);
 }
 
-sub _makeCatClient {
+sub _makeDrinksClient {
 	my ($self) = @_;
-	return Telegram::Bot::CatClient->new(dic => $self);
+	return Telegram::Bot::DrinksClient->new(dic => $self);
 }
 
 sub _makeGenderClient {
@@ -98,9 +126,44 @@ sub _makeKarma {
 	return Telegram::Bot::Karma->new(dic => $self);
 }
 
-sub _makeDrinksClient {
+sub _makeMemes {
 	my ($self) = @_;
-	return Telegram::Bot::DrinksClient->new(dic => $self);
+	return Telegram::Bot::Memes->new(dic => $self);
+}
+
+sub _makeMusicDB {
+	my ($self) = @_;
+	return Telegram::Bot::MusicDB->new(dic => $self);
+}
+
+sub _makeRandomNumber {
+	my ($self) = @_;
+	return Telegram::Bot::RandomNumber->new(dic => $self);
+}
+
+sub _makeUuidClient {
+	my($self) = @_;
+	return Telegram::Bot::UUIDClient->new(dic => $self);
+}
+
+sub _makeUserAgent {
+	my ($self) = @_;
+
+	my $ua = LWP::UserAgent->new;
+	$ua->timeout(120); # TODO: From config
+	$ua->env_proxy;
+
+	return $ua;
+}
+
+sub _makeUserRepo {
+	my ($self) = @_;
+	return Telegram::Bot::User::Repository->new(dic => $self);
+}
+
+sub _makeWeatherLocation {
+	my ($self) = @_;
+	return Telegram::Bot::Weather::Location->new(dic => $self);
 }
 
 1;

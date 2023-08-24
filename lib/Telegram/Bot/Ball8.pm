@@ -32,6 +32,8 @@
 package Telegram::Bot::Ball8;
 use Moose;
 
+extends 'Telegram::Bot::Base';
+
 use Readonly;
 
 Readonly my @YES_REMARK => (

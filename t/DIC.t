@@ -53,15 +53,44 @@ sub setUp {
 	return EXIT_SUCCESS;
 }
 
+sub testAPI {
+	my ($self) = @_;
+
+	Readonly my %MAP => (
+		'WWW::Telegram::BotAPI' => 'api',
+	);
+
+	plan tests => scalar(keys(%MAP));
+
+	# TODO: Hmm, what can we test about the API contruction?
+	while (my ($package, $name) = each(%MAP)) {
+		cmp_deeply($self->sut->$name, all(
+			isa($package),
+		), $name);
+	}
+
+	return EXIT_SUCCESS;
+}
+
 sub testAttributesSimple {
 	my ($self) = @_;
 
 	Readonly my %MAP => (
-		'Telegram::Bot::CatClient'    => 'catClient',
-		'Telegram::Bot::Config'       => 'config',
-		'Telegram::Bot::DrinksClient' => 'drinksClient',
-		'Telegram::Bot::GenderClient' => 'genderClient',
-		'Telegram::Bot::Karma'        => 'karma',
+		'Telegram::Bot::Admins'            => 'admins',
+		'Telegram::Bot::Audit'             => 'audit',
+		'Telegram::Bot::Ball8'             => 'ball8',
+		'Telegram::Bot::CatClient'         => 'catClient',
+		'Telegram::Bot::Config'            => 'config',
+		'Telegram::Bot::DB'                => 'db',
+		'Telegram::Bot::DrinksClient'      => 'drinksClient',
+		'Telegram::Bot::GenderClient'      => 'genderClient',
+		'Telegram::Bot::Memes'             => 'memes',
+		'Telegram::Bot::MusicDB'           => 'musicDB',
+		'Telegram::Bot::Karma'             => 'karma',
+		'Telegram::Bot::RandomNumber'      => 'randomNumber',
+		'Telegram::Bot::User::Repository'  => 'userRepo',
+		'Telegram::Bot::UUIDClient'        => 'uuidClient',
+		'Telegram::Bot::Weather::Location' => 'weatherLocation',
 	);
 
 	plan tests => scalar(keys(%MAP));
