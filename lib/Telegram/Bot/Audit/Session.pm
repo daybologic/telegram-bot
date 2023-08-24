@@ -124,13 +124,36 @@ sub memeRemoveSuccess {
 	my ($self, $args) = @_;
 	my ($meme, $user, $notes) = @{$args}{qw(meme user notes)};
 
+	my $type = $self->__typeLookup($EVENT_MEME_RM_SUCCESS);
+	$user = $self->dic->userRepo->username2Id($user);
+	my $sth = $self->dic->db->getHandle()->prepare('INSERT INTO audit_event (type, event, user, notes) VALUES(?,?,?,?)');
+	$sth->execute($type, $self->id, $user, $notes);
+
+	return;
+}
+
+sub memeAddSuccess {
+	my ($self, $args) = @_;
+	my ($meme, $user, $notes) = @{$args}{qw(meme user notes)};
+
 	my $type = $self->__typeLookup($EVENT_MEME_ADD_SUCCESS);
 	$user = $self->dic->userRepo->username2Id($user);
 	my $sth = $self->dic->db->getHandle()->prepare('INSERT INTO audit_event (type, event, user, notes) VALUES(?,?,?,?)');
 	$sth->execute($type, $self->id, $user, $notes);
 
 	return;
+}
 
+sub memeAddFail {
+	my ($self, $args) = @_;
+	my ($meme, $user, $notes) = @{$args}{qw(meme user notes)};
+
+	my $type = $self->__typeLookup($EVENT_MEME_ADD_FAIL);
+	$user = $self->dic->userRepo->username2Id($user);
+	my $sth = $self->dic->db->getHandle()->prepare('INSERT INTO audit_event (type, event, user, notes) VALUES(?,?,?,?)');
+	$sth->execute($type, $self->id, $user, $notes);
+
+	return;
 }
 
 1;

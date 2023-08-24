@@ -144,7 +144,7 @@ sub memeAddRemove {
 	my ($op, $name) = @words;
 	if ($op) {
 		if ($op eq 'add' || $op eq 'new') {
-			return $dic->memes->add($name, $picId, $user);
+			return $dic->memes->setUser($user)->add($name, $picId);
 		} elsif ($op eq 'remove' || $op eq 'delete' || $op eq 'del' || $op eq 'rm' || $op eq 'erase' || $op eq 'expunge' || $op eq 'purge') {
 			return $dic->memes->setUser($user)->remove($name);
 		} elsif ($op eq 'post') {

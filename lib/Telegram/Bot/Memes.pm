@@ -183,12 +183,18 @@ sub __removeAspects {
 }
 
 sub add {
-	my ($self, $name, $picId, $user) = @_;
-	return 'Sorry, you cannot add memes without having a Telegram username' unless ($user);
+	my ($self, $name, $picId) = @_;
+	return 'Sorry, you cannot add memes without having a Telegram username' unless ($self->user);
 	return 'Meme to add not specified' unless (defined($name) && length($name) > 0);
 	return 'Illegal meme name' if ($name !~ m/^[a-z0-9]+$/i);
 
 	if ($self->exists($name)) {
+		$self->dic->audit->acquireSession()->memeAddFail({
+			meme  => $name,
+			notes => "Meme conflict; '$name' already exists",
+			user  => $self->user,
+		});
+
 		return "A meme by the name '$name' aleady exists, use /$name to see it, or /meme rm $name to delete it";
 	}
 
@@ -196,7 +202,14 @@ sub add {
 		return 'There is no staged meme - please PM the bot with a photo or picture, and then try this message again';
 	}
 
-	my $response = $self->adder->add($name, $picId, $user);
+	my $response = $self->adder->add($name, $picId, $self->user);
+
+	$self->dic->audit->acquireSession()->memeAddSuccess({
+		meme  => $name,
+		notes => "Meme '$name' added",
+		user  => $self->user,
+	});
+
 	__memeExtensionCacheStore($name, 'jpg'); # Important; or isn't listable or removable
 	return $response;
 }
