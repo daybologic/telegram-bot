@@ -67,7 +67,7 @@ sub run {
 		}
 	}
 
-	$self->dic->audit->memeUse({
+	$self->dic->audit->acquireSession()->memeUse({
 		meme => $text,
 		user => $self->user,
 	});

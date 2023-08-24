@@ -185,7 +185,7 @@ sub insult {
 sub recordStartup {
 	my ($self) = @_;
 
-	$dic->audit->recordStartup();
+	$dic->audit->acquireSession()->recordStartup();
 
 	return;
 }
