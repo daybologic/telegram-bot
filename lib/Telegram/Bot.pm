@@ -45,6 +45,7 @@ use Telegram::Bot::Ball8;
 use Telegram::Bot::CatClient;
 use Telegram::Bot::Config;
 use Telegram::Bot::DB;
+use Telegram::Bot::DI::Container;
 use Telegram::Bot::DrinksClient;
 use Telegram::Bot::GenderClient;
 use Telegram::Bot::Karma;
@@ -64,32 +65,14 @@ BEGIN {
 	our $VERSION = '2.0.0';
 }
 
-my $api = __makeAPI();
-# ... but error handling is available as well.
-#my $result = eval { $api->getMe->{result}{username} }
-#    or die 'Got error message: ', $api->parse_error->{msg};
-#warn $result;
-
-#Mojo::IOLoop->start;
-
-# Bump up the timeout when Mojo::UserAgent is used (LWP::UserAgent uses 180s by default)
-$api->agent->can('inactivity_timeout') and $api->agent->inactivity_timeout(45);
-my $me = $api->getMe or die;
+my $dic = Telegram::Bot::DI::Container->new();
+my $api = $dic->api;
+my $me = $dic->api->getMe or die;
 my ($offset, $updates) = 0;
 
-my $musicDb = Telegram::Bot::MusicDB->new();
-my $uuidClient = Telegram::Bot::UUIDClient->new();
-my $drinksClient = Telegram::Bot::DrinksClient->new();
-my $genderClient = Telegram::Bot::GenderClient->new();
-my $memes;
 my $startTime = time();
-my $config;
-my $admins;
 my $visualCrossing;
-my $db;
-my $audit;
-my $userRepo;
-my $karma;
+__startup(); ## FIXME
 
 sub karma {
 	my (@input) = @_;
@@ -98,7 +81,7 @@ sub karma {
 
 #	my (@words) = split(m/\s+/, $text);
 #	return $karma->run($words[0], 1);
-	return $karma->run($input[0]->{text});
+	return $dic->karma->run($input[0]->{text});
 }
 
 sub source {
@@ -135,12 +118,12 @@ sub memeSearch {
 	$name =~ s/\s+//g; # no spaces
 	$name =~ s/^\#//; # Telegram tag not required but useful for tab completion
 
-	$memes->chatId($id);
-	my $results = $memes->search($name);
+	$dic->memes->chatId($id);
+	my $results = $dic->memes->search($name);
 	if (scalar(@$results) == 0) {
 		return "There is no meme like that.  Send me a PM or tag me in an image and then use '/meme add <name>'";
 	} elsif (scalar(@$results) == 1) {
-		if (my $meme = $memes->run($results->[0], @words)) {
+		if (my $meme = $dic->memes->run($results->[0], @words)) {
 			return $meme;
 		}
 	} else {
@@ -160,9 +143,9 @@ sub memeAddRemove {
 	my ($op, $name) = @words;
 	if ($op) {
 		if ($op eq 'add' || $op eq 'new') {
-			return $memes->add($name, $picId, $user);
+			return $dic->memes->add($name, $picId, $user);
 		} elsif ($op eq 'remove' || $op eq 'delete' || $op eq 'del' || $op eq 'rm' || $op eq 'erase' || $op eq 'expunge' || $op eq 'purge') {
-			return $memes->remove($name, $user);
+			return $dic->memes->remove($name, $user);
 		} elsif ($op eq 'post') {
 			my $url;
 			(undef, $url, @words) = @words;
@@ -187,63 +170,37 @@ sub memeAddRemove {
 }
 
 sub ball8 {
-	return Telegram::Bot::Ball8->new()->run();
+	return $dic->ball8->run();
 }
 
 sub randomNumber {
-	return Telegram::Bot::RandomNumber->new()->run();
+	return $dic->randomNumber->run();
 }
 
 sub insult {
 	return 'You manky Scotch git';
 }
 
-sub getAdmins {
-	die("Admins module is not loaded") unless ($admins);
-	return $admins;
-}
-
 sub recordStartup {
 	my ($self) = @_;
 
-	$audit->recordStartup();
+	$dic->audit->recordStartup();
 
 	return;
 }
 
-sub __makeAPI {
-	$config = Telegram::Bot::Config->new();
-	my $token = $config->getSectionByName(__PACKAGE__)->getValueByKey('api_key');
-	die 'No API token' unless ($token);
-
-	$db = Telegram::Bot::DB->new(config => $config);
-	$db->__connect(); # FIXME
-
-	$audit = Telegram::Bot::Audit->new(db => $db);
-
-	$admins = Telegram::Bot::Admins->new(config => $config);
-	$admins->load();
-
-	$userRepo = Telegram::Bot::User::Repository->new(db => $db);
+# FIXME: This method should not exist.  use DI Container!
+sub __startup {
+	$dic->db->__connect(); # FIXME
+	$dic->admins->load();
 
 	$visualCrossing = Geo::Weather::VisualCrossing->new({
-		apiKey => $config->getSectionByName('Telegram::Bot::Weather::Client')->getValueByKey('api_key'),
+		apiKey => $dic->config->getSectionByName('Telegram::Bot::Weather::Client')->getValueByKey('api_key'),
 	});
 
-	$karma = Telegram::Bot::Karma->new({ db => $db });
-
 	$Data::Money::Currency::Converter::Repository::APILayer::apiKey =
-	    $config->getSectionByName('Data::Money::Currency::Converter::Repository::APILayer')
+	    $dic->config->getSectionByName('Data::Money::Currency::Converter::Repository::APILayer')
 	    ->getValueByKey('api_key');
-
-	my $localApi = WWW::Telegram::BotAPI->new (
-		#async => 1, # WARNING: may fail if Mojo::UserAgent is not available!
-		token => $token,
-	);
-
-	$memes = Telegram::Bot::Memes->new(api => $localApi, db => $db, userRepo => $userRepo);
-
-	return $localApi;
 }
 
 # The commands that this bot supports.
@@ -285,7 +242,7 @@ my $commands = {
 		my @words = split(m/\s+/, $text);
 		$text = $words[1];
 		if ($text) {
-			my $results = $musicDb->search($text);
+			my $results = $dic->musicDb->search($text);
 			if (scalar(@$results)) {
 				return join("\n", @$results);
 			} else {
@@ -333,7 +290,7 @@ my $commands = {
 		my @words = split(m/\s+/, $text);
 		my ($currencyStandard, $amount) = @words;
 		$currencyStandard = uc(substr($currencyStandard, 1, 3));
-		my $gbpAmount = Data::Money::Amount->fromPounds($amount, 'GBP')->convert($currencyStandard);
+		my $gbpAmount = Data::Money::Amount->fromPounds($amount, 'GBP')->convert($currencyStandard); # FIXME: DIC
 		return $gbpAmount ? $gbpAmount->toString() : 'Something went wrong'; # TODO: should be able to get messages from library
 	},
 	'gbp' => sub {
@@ -342,7 +299,7 @@ my $commands = {
 		my @words = split(m/\s+/, $text);
 		my ($currencyStandard, $amount) = @words;
 		$currencyStandard = uc(substr($currencyStandard, 1, 3));
-		my $usdAmount = Data::Money::Amount->fromPounds($amount, 'USD')->convert($currencyStandard);
+		my $usdAmount = Data::Money::Amount->fromPounds($amount, 'USD')->convert($currencyStandard); # FIXME: DIC
 		return $usdAmount ? $usdAmount->toString() : 'Something went wrong'; # TODO: should be able to get messages from library
 	},
 	'weather' => sub {
@@ -353,7 +310,7 @@ my $commands = {
 		my @words = split(m/\s+/, $text);
 		shift(@words);
 
-		my $location = Telegram::Bot::Weather::Location->new(); # TODO: Global?
+		my $location = $dic->weatherLocation;
 
 		#detaint
 		my @place;
@@ -416,7 +373,7 @@ my $commands = {
 			} elsif ($word =~ m/^\d{1,2}$/) {
 				$count = $word;
 			} elsif ($word =~ m/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/io) {
-				$results = $uuidClient->info($word);
+				$results = $dic->uuidClient->info($word);
 			} else {
 				return "Usage: /uuid v[version] [count] [uuid]\n"
 				    . "Default UUID version is 1, count up to 99 is allowed, the default is 1.\n"
@@ -426,10 +383,10 @@ my $commands = {
 		}
 
 		unless ($results) {
-			printf(STDERR "count has been set to %s\n", $uuidClient->count($count));
-			printf(STDERR "version has been set to %s\n", $uuidClient->version($version));
+			printf(STDERR "count has been set to %s\n", $dic->uuidClient->count($count));
+			printf(STDERR "version has been set to %s\n", $dic->uuidClient->version($version));
 
-			$results = $uuidClient->generate();
+			$results = $dic->uuidClient->generate();
 		}
 
 		if (scalar(@$results) > 0) {
@@ -440,42 +397,42 @@ my $commands = {
 	},
 	'beer' => sub {
 		my $username = shift->{from}{username};
-		return $drinksClient->run($username // 'anonymous', 'beer');
+		return $dic->drinksClient->run($username // 'anonymous', 'beer');
 	},
 	'🍺' => sub {
 		my $username = shift->{from}{username};
-		return $drinksClient->run($username // 'anonymous', 'beer');
+		return $dic->drinksClient->run($username // 'anonymous', 'beer');
 	},
 	'coffee' => sub {
 		my $username = shift->{from}{username};
-		return $drinksClient->run($username // 'anonymous', 'coffee');
+		return $dic->drinksClient->run($username // 'anonymous', 'coffee');
 	},
 	'☕️' => sub {
 		my $username = shift->{from}{username};
-		return $drinksClient->run($username // 'anonymous', 'coffee');
+		return $dic->drinksClient->run($username // 'anonymous', 'coffee');
 	},
 	'tea' => sub {
 		my $username = shift->{from}{username};
-		return $drinksClient->run($username // 'anonymous', 'tea');
+		return $dic->drinksClient->run($username // 'anonymous', 'tea');
 	},
 	'🫖' => sub {
 		my $username = shift->{from}{username};
-		return $drinksClient->run($username // 'anonymous', 'tea');
+		return $dic->drinksClient->run($username // 'anonymous', 'tea');
 	},
 	'water' => sub {
 		my $username = shift->{from}{username};
-		return $drinksClient->run($username // 'anonymous', 'water');
+		return $dic->drinksClient->run($username // 'anonymous', 'water');
 	},
 	'💦' => sub {
 		my $username = shift->{from}{username};
-		return $drinksClient->run($username // 'anonymous', 'water');
+		return $dic->drinksClient->run($username // 'anonymous', 'water');
 	},
 	'gender' => sub {
 		my (@input) = @_;
 		my $text = $input[0]->{text};
 		my @words = split(m/\s+/, $text);
 		my $username = $input[0]->{from}{username};
-		return $genderClient->run($username, $words[1]);
+		return $dic->genderClient->run($username, $words[1]);
 	},
 	'uptime' => sub {
 		my $uname = `uname -a`;
@@ -501,7 +458,7 @@ my $commands = {
 		$text = $words[1];
 		my $message = 'unknown';
 		eval { $message = status_message($text) };
-		my $file = Telegram::Bot::CatClient->new->run($text);
+		my $file = $dic->catClient->run($text);
 		+{
 			method  => "sendPhoto",
 			photo   => {
@@ -516,8 +473,8 @@ my $commands = {
 		my $id = $input[0]->{chat}->{id};
 		my @words = split(m/\s+/, $text);
 
-		$memes->chatId($id);
-		if (my $meme = $memes->run(@words)) {
+		$dic->memes->chatId($id);
+		if (my $meme = $dic->memes->run(@words)) {
 			return $meme;
 		}
 

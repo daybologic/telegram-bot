@@ -74,10 +74,20 @@ sub _makeAPI {
 	my $token = $self->config->getSectionByName('Telegram::Bot')->getValueByKey('api_key');
 	die 'No API token' unless ($token);
 
-	return WWW::Telegram::BotAPI->new (
+	# ... but error handling is available as well.
+	#my $result = eval { $api->getMe->{result}{username} }
+	#    or die 'Got error message: ', $api->parse_error->{msg};
+	#warn $result;
+	#Mojo::IOLoop->start;
+	# Bump up the timeout when Mojo::UserAgent is used (LWP::UserAgent uses 180s by default)
+
+	my $api = WWW::Telegram::BotAPI->new (
 		#async => 1, # WARNING: may fail if Mojo::UserAgent is not available!
 		token => $token,
 	);
+
+	$api->agent->can('inactivity_timeout') and $api->agent->inactivity_timeout(45);
+	return $api;
 }
 
 sub _makeAdmins {
