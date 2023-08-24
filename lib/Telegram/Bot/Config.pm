@@ -30,14 +30,15 @@
 # SUCH DAMAGE.
 
 package Telegram::Bot::Config;
-use strict;
-use warnings;
+use Moose;
+
+extends 'Telegram::Bot::Base';
+
 use Config::INI;
 use Data::Dumper;
 use Telegram::Bot::Config::Section;
 use Readonly;
 use POSIX;
-use Moose;
 use utf8;
 
 BEGIN {

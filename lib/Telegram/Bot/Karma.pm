@@ -32,11 +32,11 @@
 package Telegram::Bot::Karma;
 use Moose;
 
+extends 'Telegram::Bot::Base';
+
 use English;
 use Readonly;
-use Telegram::Bot::DB;
-
-has __db => (is => 'ro', isa => 'Telegram::Bot::DB', init_arg => 'db', required => 1);
+use Telegram::Bot::DI::Container;
 
 #Readonly my SQL_UPDATE has __sthUpdate => 'UPDATE karma SET score = score + ? WHERE term = ?';
 Readonly my $SQL_UPDATE =>
@@ -64,10 +64,10 @@ sub run {
 		return "ERROR: $evalError";
 	}
 
-	$self->__sthUpdate($self->__db->getHandle()->prepare($SQL_UPDATE)) unless ($self->__sthUpdate);
+	$self->__sthUpdate($self->dic->db->getHandle()->prepare($SQL_UPDATE)) unless ($self->__sthUpdate);
 	$self->__sthUpdate->execute($term, $diff, $diff);
 
-	$self->__sthGet($self->__db->getHandle()->prepare($SQL_SELECT)) unless ($self->__sthGet);
+	$self->__sthGet($self->dic->db->getHandle()->prepare($SQL_SELECT)) unless ($self->__sthGet);
 	$self->__sthGet->execute($self->__term);
 	while (my $row = $self->__sthGet->fetchrow_hashref()) {
 		my $term = $self->__term;

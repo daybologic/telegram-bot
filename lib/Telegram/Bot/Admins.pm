@@ -30,21 +30,21 @@
 # SUCH DAMAGE.
 
 package Telegram::Bot::Admins;
-use strict;
-use warnings;
 use Moose;
+
+extends 'Telegram::Bot::Base';
+
 use Readonly;
 use Telegram::Bot::Admin;
 
 Readonly my $SECTION_NAME => 'Telegram::Bot';
 
 has admins => (is => 'rw', isa => 'ArrayRef[Telegram::Bot::Admin]', default => sub {[]});
-has config => (required => 1, isa => 'Telegram::Bot::Config', is => 'ro');
 
 sub load {
 	my ($self) = @_;
 
-	if (my $section = $self->config->getSectionByName($SECTION_NAME)) {
+	if (my $section = $self->dic->config->getSectionByName($SECTION_NAME)) {
 		if (my $valueStr = $section->getValueByKey('admins')) {
 			$valueStr =~ s/\s+//;
 			my @names = split(m/,/, $valueStr);

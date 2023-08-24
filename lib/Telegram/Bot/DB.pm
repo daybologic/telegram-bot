@@ -32,6 +32,8 @@
 package Telegram::Bot::DB;
 use Moose;
 
+extends 'Telegram::Bot::Base';
+
 use DBI;
 use English;
 use Readonly;
@@ -40,7 +42,6 @@ use Telegram::Bot::Config::Section;
 
 Readonly my $DRIVER => 'mysql';
 
-has config => (is => 'ro', isa => 'Telegram::Bot::Config', required => 1);
 has handle => (is => 'rw', isa => 'DBI::db', init_arg => undef);
 
 has __config => (is => 'ro', isa => 'Telegram::Bot::Config::Section', lazy => 1, default => \&__getConfig, init_arg => undef);
@@ -62,7 +63,7 @@ sub getHandle {
 sub __getConfig {
 	my ($self) = @_;
 
-	my $section = $self->config->getSectionByName($DRIVER);
+	my $section = $self->dic->config->getSectionByName($DRIVER);
 	die("Cannot find [$DRIVER] section; required for database access") unless ($section);
 
 	return $section;

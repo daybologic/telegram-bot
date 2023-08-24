@@ -32,12 +32,12 @@
 package Telegram::Bot::Memes::Add;
 use Moose;
 
-use Data::Dumper;
+extends 'Telegram::Bot::Base';
+
 use File::Copy;
 use File::Temp qw/ tempfile tempdir tmpnam /;
 use Telegram::Bot::Memes::Add::Resizer;
 
-has api => (is => 'ro', isa => 'WWW::Telegram::BotAPI', required => 1);
 has owner => (is => 'ro', isa => 'Telegram::Bot::Memes', required => 1);
 
 sub add {
@@ -73,8 +73,8 @@ sub resizer {
 sub __recordOwner {
 	my ($self, $name, $user) = @_;
 
-	my $sth = $self->owner->db->getHandle()->prepare('REPLACE INTO meme (name, owner) VALUES(?,?)');
-	$sth->execute($name, $self->owner->userRepo->username2Id($user));
+	my $sth = $self->dic->db->getHandle()->prepare('REPLACE INTO meme (name, owner) VALUES(?,?)');
+	$sth->execute($name, $self->dic->userRepo->username2Id($user));
 
 	return;
 }
@@ -87,15 +87,15 @@ sub __makeFileName {
 sub __fetchViaAPI {
 	my ($self, $fileId) = @_;
 
-	my $file = $self->api->api_request('getFile', {
+	my $file = $self->dic->api->api_request('getFile', {
 		file_id => $fileId,
 	});
 
 	my $resultFilePath = $file->{result}->{file_path};
-	my $token = $self->api->{token};
+	my $token = $self->dic->api->{token};
 	my $url = "https://api.telegram.org/file/bot${token}/${resultFilePath}";
 
-	my $response = $self->api->agent->get($url);
+	my $response = $self->dic->api->agent->get($url);
 	unless ($response->is_success) {
 		return "Can't get your meme via the API! - " . $response->status_line;
 	}

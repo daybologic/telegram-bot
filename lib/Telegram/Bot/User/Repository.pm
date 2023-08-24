@@ -32,11 +32,10 @@
 package Telegram::Bot::User::Repository;
 use Moose;
 
-use Data::Dumper;
+extends 'Telegram::Bot::Base';
+
 use Readonly;
 use Telegram::Bot::User;
-
-has __db => (is => 'ro', isa => 'Telegram::Bot::DB', init_arg => 'db', required => 1);
 
 sub fetchById {
 	my ($self) = @_;
@@ -46,7 +45,7 @@ sub fetchById {
 sub fetchByName {
 	my ($self, $user) = @_;
 
-	my $sth = $self->__db->getHandle()->prepare('SELECT id, name, enabled FROM user WHERE name = ?');
+	my $sth = $self->dic->db->getHandle()->prepare('SELECT id, name, enabled FROM user WHERE name = ?');
 	$sth->execute($user);
 
 	while (my $row = $sth->fetchrow_hashref()) {
@@ -74,7 +73,7 @@ sub create {
 		});
 	}
 
-	my $handle = $self->__db->getHandle();
+	my $handle = $self->dic->db->getHandle();
 	my $sth = $handle->prepare('INSERT INTO user (name, enabled) VALUES(?,?)');
 	$sth->execute($user->name, $user->enabled);
 	$user->id($handle->last_insert_id());
