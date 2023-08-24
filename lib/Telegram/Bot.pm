@@ -191,7 +191,6 @@ sub recordStartup {
 
 # FIXME: This method should not exist.  use DI Container!
 sub __startup {
-	$dic->db->__connect(); # FIXME
 	$dic->admins->load();
 
 	$visualCrossing = Geo::Weather::VisualCrossing->new({
