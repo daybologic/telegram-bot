@@ -77,9 +77,9 @@ Readonly my $EVENT_KARMA_GET               => 'KARMA_GET';
 Readonly my $EVENT_KARMA_REPORT            => 'KARMA_REPORT';
 Readonly my $EVENT_COMMAND_RATE_LIMIT      => 'COMMAND_RATE_LIMIT';
 
-has id => (is => 'ro', isa => 'Str', require => 1);
+has id => (is => 'ro', isa => 'Str', required => 1);
 
-has owner => (is => 'ro', isa => 'Telegram::Bot::Audit', require => 1);
+has owner => (is => 'ro', isa => 'Telegram::Bot::Audit', required => 1);
 
 sub __typeLookup {
 	my ($self, $typeMnemonic) = @_;
