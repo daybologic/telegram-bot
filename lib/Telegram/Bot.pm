@@ -62,7 +62,7 @@ use POSIX;
 use utf8;
 
 BEGIN {
-	our $VERSION = '2.0.0';
+	our $VERSION = '2.1.0';
 }
 
 my $dic = Telegram::Bot::DI::Container->new();
@@ -86,7 +86,7 @@ sub karma {
 
 sub source {
 	return "Source code for the bot can be obtained from https://git.sr.ht/~m6kvm/telegram-bot\n" .
-	    'Patches and memes may be sent to palmer@overchat.org with subject "telegram-bot"';
+	    'Patches and memes may be sent to 2e0eol@gmail.com with subject "telegram-bot"';
 }
 
 sub breakfast {
