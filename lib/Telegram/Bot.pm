@@ -135,7 +135,7 @@ sub memeSearch {
 sub memeAddRemove {
 	my ($picId, @input) = @_;
 	my $syntax = 0;
-	my $user = $input[0]->{from}{username};
+	my $user = $input[0]->{from}{username} || '';
 	my $text = $input[0]->{text};
 
 	my @words = split(m/\s+/, $text);
@@ -146,7 +146,7 @@ sub memeAddRemove {
 		if ($op eq 'add' || $op eq 'new') {
 			return $dic->memes->add($name, $picId, $user);
 		} elsif ($op eq 'remove' || $op eq 'delete' || $op eq 'del' || $op eq 'rm' || $op eq 'erase' || $op eq 'expunge' || $op eq 'purge') {
-			return $dic->memes->remove($name, $user);
+			return $dic->memes->setUser($user)->remove($name);
 		} elsif ($op eq 'post') {
 			my $url;
 			(undef, $url, @words) = @words;

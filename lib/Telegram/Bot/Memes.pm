@@ -67,10 +67,12 @@ sub run {
 		}
 	}
 
-	$self->dic->audit->acquireSession()->memeUse({
-		meme => $text,
-		user => $self->user,
-	});
+	if ($result) {
+		$self->dic->audit->acquireSession()->memeUse({
+			meme => $text,
+			user => $self->user,
+		});
+	}
 
 	return $result;
 }
@@ -120,24 +122,51 @@ sub exists {
 }
 
 sub remove {
-	my ($self, $name, $user) = @_;
-	return 'Sorry, you cannot remove memes without having a Telegram username' unless ($user);
+	my ($self, $name) = @_;
+	return 'Sorry, you cannot remove memes without having a Telegram username' unless ($self->user);
 	return 'Meme to erase not specified' unless (defined($name) && length($name) > 0);
 	return 'Illegal meme name' if ($name !~ m/^[a-z0-9]+$/i);
 
+	my $audit = $self->dic->audit->acquireSession();
+
 	$self->getList(); # causes extension cache to be refreshed periodically
 	my $extension = __memeExtensionCacheFetch($name);
-	return "No such meme '$name'" unless ($extension);
+	unless ($extension) {
+		my $notes = "No such meme '$name'";
+		$audit->memeRemoveFail({
+			meme  => $name,
+			notes => $notes,
+			user  => $self->user,
+		});
+		return $notes;
+	}
 
-	my $isOwner = $self->__isOwner($name, $self->dic->userRepo->username2User($user));
-	unless ($isOwner || $self->dic->admins->isAdmin($user)) {
+	my $isOwner = $self->__isOwner($name, $self->dic->userRepo->username2User($self->user));
+	unless ($isOwner || $self->dic->admins->isAdmin($self->user)) {
+		my $user = $self->user;
+		my $notes = "User '$user' is not an admin, nor owner of the meme '$name'";
+
+		$audit->memeRemoveFail({
+			meme  => $name,
+			notes => $notes,
+			user  => $self->user,
+		});
+
 		return "Sorry, \@$user, only the owner of the meme '$name', or an admin may remove it";
 	}
 
 	$self->__removeAspects($name, $extension);
 	$self->__forgetOwner($name);
 	__memeExtensionCacheRemove($name);
-	return "Meme '$name' erased";
+
+	my $notes = "Meme '$name' erased";
+	$audit->memeRemoveSuccess({
+		meme  => $name,
+		notes => $notes,
+		user  => $self->user,
+	});
+
+	return $notes;
 }
 
 sub __removeAspects {
