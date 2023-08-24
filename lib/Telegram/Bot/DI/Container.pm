@@ -57,7 +57,7 @@ has ball8 => (is => 'rw', isa => 'Telegram::Bot::Ball8');
 has catClient => (is => 'rw', isa => 'Telegram::Bot::CatClient', lazy => 1, builder => '_makeCatClient');
 has config => (is => 'rw', isa => 'Telegram::Bot::Config', lazy => 1, builder => '_makeConfig');
 has db => (is => 'rw', isa => 'Telegram::Bot::DB');
-has drinksClient => (is => 'rw', isa => 'Telegram::Bot::DrinksClient');
+has drinksClient => (is => 'rw', isa => 'Telegram::Bot::DrinksClient', lazy => 1, builder => '_makeDrinksClient');
 has genderClient => (is => 'rw', isa => 'Telegram::Bot::GenderClient');
 has karma => (is => 'rw', isa => 'Telegram::Bot::Karma', lazy => 1, builder => '_makeKarma');
 has memes => (is => 'rw', isa => 'Telegram::Bot::Memes');
@@ -83,14 +83,19 @@ sub _makeUserAgent {
 	return $ua;
 }
 
+sub _makeCatClient {
+	my ($self) = @_;
+	return Telegram::Bot::CatClient->new(dic => $self);
+}
+
 sub _makeKarma {
 	my ($self) = @_;
 	return Telegram::Bot::Karma->new(dic => $self);
 }
 
-sub _makeCatClient {
+sub _makeDrinksClient {
 	my ($self) = @_;
-	return Telegram::Bot::CatClient->new(dic => $self);
+	return Telegram::Bot::DrinksClient->new(dic => $self);
 }
 
 1;

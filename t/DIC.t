@@ -41,7 +41,7 @@ use English qw(-no_match_vars);
 use POSIX qw(EXIT_SUCCESS);
 use Readonly;
 use Telegram::Bot::DI::Container;
-use Test::Deep qw(all cmp_deeply isa methods);
+use Test::Deep qw(all cmp_deeply isa methods shallow);
 use Test::Exception;
 use Test::More;
 
@@ -55,18 +55,20 @@ sub setUp {
 
 sub testAttributesSimple {
 	my ($self) = @_;
-	plan tests => 3;
 
 	Readonly my %MAP => (
-		'Telegram::Bot::CatClient' => 'catClient',
-		'Telegram::Bot::Config'    => 'config',
-		'Telegram::Bot::Karma'     => 'karma',
+		'Telegram::Bot::CatClient'    => 'catClient',
+		'Telegram::Bot::Config'       => 'config',
+		'Telegram::Bot::DrinksClient' => 'drinksClient',
+		'Telegram::Bot::Karma'        => 'karma',
 	);
+
+	plan tests => scalar(keys(%MAP));
 
 	while (my ($package, $name) = each(%MAP)) {
 		cmp_deeply($self->sut->$name, all(
 			isa($package),
-			methods(dic => isa('Telegram::Bot::DI::Container')),
+			methods(dic => shallow($self->sut)),
 		), $name);
 	}
 
