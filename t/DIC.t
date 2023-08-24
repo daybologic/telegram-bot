@@ -41,7 +41,7 @@ use English qw(-no_match_vars);
 use POSIX qw(EXIT_SUCCESS);
 use Readonly;
 use Telegram::Bot::DI::Container;
-use Test::Deep qw(all cmp_deeply isa methods);
+use Test::Deep qw(all cmp_deeply isa methods shallow);
 use Test::Exception;
 use Test::More;
 
@@ -53,20 +53,52 @@ sub setUp {
 	return EXIT_SUCCESS;
 }
 
-sub testAttributesSimple {
+sub testAPI {
 	my ($self) = @_;
-	plan tests => 3;
 
 	Readonly my %MAP => (
-		'Telegram::Bot::CatClient' => 'catClient',
-		'Telegram::Bot::Config'    => 'config',
-		'Telegram::Bot::Karma'     => 'karma',
+		'WWW::Telegram::BotAPI' => 'api',
 	);
+
+	plan tests => scalar(keys(%MAP));
+
+	# TODO: Hmm, what can we test about the API contruction?
+	while (my ($package, $name) = each(%MAP)) {
+		cmp_deeply($self->sut->$name, all(
+			isa($package),
+		), $name);
+	}
+
+	return EXIT_SUCCESS;
+}
+
+sub testAttributesSimple {
+	my ($self) = @_;
+
+	Readonly my %MAP => (
+		'Telegram::Bot::Admins'            => 'admins',
+		'Telegram::Bot::Audit'             => 'audit',
+		'Telegram::Bot::Ball8'             => 'ball8',
+		'Telegram::Bot::CatClient'         => 'catClient',
+		'Telegram::Bot::Config'            => 'config',
+		'Telegram::Bot::DB'                => 'db',
+		'Telegram::Bot::DrinksClient'      => 'drinksClient',
+		'Telegram::Bot::GenderClient'      => 'genderClient',
+		'Telegram::Bot::Memes'             => 'memes',
+		'Telegram::Bot::MusicDB'           => 'musicDB',
+		'Telegram::Bot::Karma'             => 'karma',
+		'Telegram::Bot::RandomNumber'      => 'randomNumber',
+		'Telegram::Bot::User::Repository'  => 'userRepo',
+		'Telegram::Bot::UUIDClient'        => 'uuidClient',
+		'Telegram::Bot::Weather::Location' => 'weatherLocation',
+	);
+
+	plan tests => scalar(keys(%MAP));
 
 	while (my ($package, $name) = each(%MAP)) {
 		cmp_deeply($self->sut->$name, all(
 			isa($package),
-			methods(dic => isa('Telegram::Bot::DI::Container')),
+			methods(dic => shallow($self->sut)),
 		), $name);
 	}
 

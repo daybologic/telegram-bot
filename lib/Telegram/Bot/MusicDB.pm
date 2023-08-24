@@ -31,9 +31,10 @@
 
 package Telegram::Bot::MusicDB;
 use Moose;
-use Readonly;
 
 extends 'Telegram::Bot::Base';
+
+use Readonly;
 
 Readonly my $LIMIT => 20;
 

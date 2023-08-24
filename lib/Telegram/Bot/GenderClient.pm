@@ -29,28 +29,16 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-package GenderClient;
-use strict;
-use warnings;
-use LWP::UserAgent;
+package Telegram::Bot::GenderClient;
 use Moose;
+
+extends 'Telegram::Bot::Base';
+
 use Readonly;
 use URI;
 use URI::Encode;
 
 Readonly my $GENDER_LAMBDA_URL => 'https://z5odrowet74mkrowq7djkflfd40uhjyg.lambda-url.eu-west-2.on.aws?user=%s&platform=telegram';
-
-has __ua => (is => 'rw', isa => 'LWP::UserAgent', default => \&__makeUserAgent, lazy => 1);
-
-sub __makeUserAgent {
-	my ($self) = @_;
-
-	my $ua = LWP::UserAgent->new;
-	$ua->timeout(120);
-	$ua->env_proxy;
-
-	return $ua;
-}
 
 sub run {
 	my ($self, $username, $gender) = @_;
@@ -69,7 +57,7 @@ sub run {
 	my $encoder = URI::Encode->new({double_encode => 0});
 	$uri = $encoder->encode(sprintf($uri, $username));
 
-	return $self->__ua->get($uri)->decoded_content;
+	return $self->dic->ua->get($uri)->decoded_content;
 }
 
 1;
