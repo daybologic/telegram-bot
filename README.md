@@ -8,7 +8,6 @@ Welcome to the Telegram-bot! (@m6kvmdlcmdr) by Rev. Duncan Ross Palmer
 
 [Telegram](https://telegram.org) is a secure messenger used by a diverse audience and used on multiple platforms.
 It offers a rich API layer and bots can easily be authorized by having a conversation with a bot called [@BotFather](https://t.me/BotFather).
-If you would like to run your own copy of this telegram-bot, you will need to do this!  Start with this [tutorial](https://core.telegram.org/bots/tutorial).
 
 ## Documentation
 
@@ -20,10 +19,29 @@ The project started out as a way to quickly ask a remote copy of [yt-dlp](https:
 
 ## Setup / installation
 
-TODO: nb. most users will not be installing this bot, and therefore instructions will be perfected later.
+Note that most users can talk to the bot directly, using Telegram
+I direct you to [Features](#Features) instead, or [Talking to the Bot](#Talking to the Bot).
 
-For the moment, we will direct you to [Features](#Features) instead.
-The bot relies on too many external, unpackaged dependencies at the moment to set up by third parties.
+As the bot relies on many external, unpackaged dependencies at the time of writing, it is highly recommended that you use
+the [Git](https://git-scm.com) SCM in order to fetch everything necessary.  Potentially, in the future, we might support [Docker](https://www.docker.com)
+
+Firstly, obtain the Git SCM.  Setting Git up is outside the scope of this documentation.  Once this is installed, fetch the latest
+version of the project using:
+
+git clone --recursive git@git.sr.ht:~m6kvm/telegram-bot
+cd telegram-bot/
+cp debian/etc/telegram-bot.conf etc/debian/
+
+Now modify etc/debian/telegram-bot.conf and add keys as necessary from the various upstream vendors,
+and change personal preferences.
+
+Talk to the [@BotFather](https://t.me/BotFather).  Start with this [tutorial](https://core.telegram.org/bots/tutorial).
+Ensure the token it in the config, or the bot will not start.
+
+Finally, start a screen session using SCREEN(1),
+and run:
+
+bin/run-bot.sh
 
 ## Talking to the Bot
 
@@ -389,7 +407,7 @@ The majority of the code is written in Perl 5
 Please join the Community mailing lists and then send patches!
 
 Talk to the bot and run the command /source to see where whence source code may be obtained.
-Check which version of the bot you are using before considering running patches.  The easiest way to do this is with the /version command.
+Check which version of the bot you are using before considering running patches.  The easiest way to do this is with the /version command, or look for $VERSION in lib/Telegram/Bot.pm
 
 We thank thee in advance.
 
