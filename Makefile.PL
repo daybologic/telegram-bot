@@ -15,8 +15,8 @@ WriteMakefile(
 		'Config::INI'                  => 0, # libconfig-ini-perl
 		'Data::Money'                  => 0, # libdata-money-perl
 		'DateTime'                     => 0, # libdatetime-perl
-		'DBI'                          => 0, # libdbi-perl
 		'DBD::mysql'                   => 0, # libdbd-mysql-perl
+		'DBI'                          => 0, # libdbi-perl
 		'Geo::Weather::Visualcrossing' => 0, # libgeo-weather-visualcrossing-perl
 		'LWP::UserAgent'               => 0, # libwww-perl
 		'Moose'                        => 0, # libmoose-perl
@@ -27,8 +27,8 @@ WriteMakefile(
 		'Config::INI'                  => 0, # libconfig-ini-perl
 		'Data::Money'                  => 0, # libdata-money-perl
 		'DateTime'                     => 0, # libdatetime-perl
-		'DBI'                          => 0, # libdbi-perl
 		'DBD::mysql'                   => 0, # libdbd-mysql-perl
+		'DBI'                          => 0, # libdbi-perl
 		'Geo::Weather::Visualcrossing' => 0, # libgeo-weather-visualcrossing-perl
 		'LWP::UserAgent'               => 0, # libwww-perl
 		'Moose'                        => 0, # libmoose-perl

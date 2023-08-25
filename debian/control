@@ -8,8 +8,8 @@ Build-Depends-Indep:
  libconfig-ini-perl,
  libdata-money-perl,
  libdatetime-perl,
- libdbi-perl,
  libdbd-mysql-perl,
+ libdbi-perl,
  libgeo-weather-visualcrossing-perl,
  libmoose-perl,
  libtest-deep-perl,
@@ -34,8 +34,8 @@ Depends:
  libconfig-ini-perl,
  libdata-money-perl,
  libdatetime-perl,
- libdbi-perl,
  libdbd-mysql-perl,
+ libdbi-perl,
  libgeo-weather-visualcrossing-perl,
  libmoose-perl,
  libuniversal-require-perl,
@@ -43,6 +43,8 @@ Depends:
  libwww-perl,
  libwww-telegram-botapi-perl,
  perl,
+ perl-base,
+ perl-modules,
 Description: Multipurpose bot for Telegram
  Absolutely packed with features, used by The Firm,
  amongst others.
