@@ -40,7 +40,7 @@ use lib './externals/libdata-geo-weather-visualcrossing-perl/lib';
 use Data::Dumper;
 use Data::Money::Amount 0.2.0;
 use Data::Money::Currency::Converter::Repository::APILayer 0.2.0;
-use English;
+use English qw(-no_match_vars);
 use Geo::Weather::VisualCrossing;
 use HTTP::Status qw(status_message);
 use Readonly;

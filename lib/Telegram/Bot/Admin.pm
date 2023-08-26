@@ -32,7 +32,7 @@
 package Telegram::Bot::Admin;
 use strict;
 use warnings;
-use English;
+use English qw(-no_match_vars);
 use Readonly;
 use Moose;
 

@@ -34,7 +34,7 @@ use Moose;
 
 extends 'Telegram::Bot::Base';
 
-use English;
+use English qw(-no_match_vars);
 use Readonly;
 use Telegram::Bot::DI::Container;
 
