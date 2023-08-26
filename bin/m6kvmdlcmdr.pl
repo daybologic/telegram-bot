@@ -12,7 +12,6 @@ Readonly my $INSTALLED_ERROR => 42; # arbitary
 
 sub main {
 	if (my $exitCode = rootCheck()) {
-		print(STDERR "Don't run the bot as the super-user!\n");
 		return $exitCode;
 	}
 
@@ -20,8 +19,10 @@ sub main {
 }
 
 sub rootCheck {
-	return $INSTALLED_ERROR if ($EUID == 0);
-	return EXIT_SUCCESS;
+	return EXIT_SUCCESS if ($EUID > 0);
+
+	print(STDERR "Don't run the bot as the super-user!\n");
+	return $INSTALLED_ERROR;
 }
 
 exit(main());
