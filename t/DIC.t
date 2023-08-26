@@ -35,6 +35,8 @@ package DICTests;
 use strict;
 use warnings;
 use Moose;
+
+use lib 'externals/libtest-module-runnable-perl/lib';
 extends 'Test::Module::Runnable';
 
 use English qw(-no_match_vars);

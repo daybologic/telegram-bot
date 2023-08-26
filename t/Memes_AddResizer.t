@@ -33,6 +33,8 @@
 
 package Memes_AddResizerTests;
 use Moose;
+
+use lib 'externals/libtest-module-runnable-perl/lib';
 extends 'Test::Module::Runnable';
 
 use Cache::MemoryCache;

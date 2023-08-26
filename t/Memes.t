@@ -35,6 +35,8 @@ package MemesTests;
 use strict;
 use warnings;
 use Moose;
+
+use lib 'externals/libtest-module-runnable-perl/lib';
 extends 'Test::Module::Runnable';
 
 use Telegram::Bot::Memes;

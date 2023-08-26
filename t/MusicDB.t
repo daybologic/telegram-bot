@@ -39,6 +39,7 @@ use POSIX qw(EXIT_SUCCESS);
 use Telegram::Bot::MusicDB;
 use Test::More;
 
+use lib 'externals/libtest-module-runnable-perl/lib';
 extends 'Test::Module::Runnable';
 
 has __handle => (is => 'rw');
