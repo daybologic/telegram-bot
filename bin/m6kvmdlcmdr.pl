@@ -6,7 +6,7 @@ use warnings;
 use English qw(-no_match_vars);
 use POSIX qw(EXIT_SUCCESS);
 use Readonly;
-#use Telegram::Bot;
+use Telegram::Bot;
 
 Readonly my $INSTALLED_ERROR => 42; # arbitary
 

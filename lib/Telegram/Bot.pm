@@ -61,7 +61,6 @@ use Telegram::Bot::User::Repository;
 use Telegram::Bot::UUIDClient;
 use Telegram::Bot::Weather::Location;
 use Time::Duration;
-use WWW::Telegram::BotAPI;
 use URI::URL;
 use POSIX;
 use utf8;
