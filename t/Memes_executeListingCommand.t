@@ -37,7 +37,6 @@ use Moose;
 use lib 'externals/libtest-module-runnable-perl/lib';
 extends 'Test::Module::Runnable';
 
-use Data::Dumper;
 use Telegram::Bot::Memes;
 use English qw(-no_match_vars);
 use POSIX qw(EXIT_SUCCESS);

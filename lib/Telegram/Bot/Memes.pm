@@ -230,13 +230,18 @@ sub __executeListingCommand {
 	my $output = defined($mockOutput) ? $mockOutput : `$command`;
 	$output = decode_json($output);
 	foreach my $fileEnt (@{ $output->{Contents} }) {
-		push(@fileList, substr($fileEnt->{Key}, 3)); # Remove size-related prefix
+		push(@fileList, __removeSizePrefix($fileEnt->{Key}));
 		my ($memeName, $extension) = split(m/\./, $fileList[-1]);
 		__memeExtensionCacheStore($memeName, $extension);
 		$fileList[-1] = $memeName; # remove file exension
 	}
 
 	return \@fileList;
+}
+
+sub __removeSizePrefix {
+	my ($key) = @_;
+	return (split(m/\//, $key))[1];
 }
 
 sub __telegramCommand {
