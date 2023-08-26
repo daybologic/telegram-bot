@@ -44,6 +44,7 @@ Readonly my $IMAGE_ASPECT_CONFIG => 'preferred_aspect';
 Readonly my $IMAGE_ASPECT_DEFAULT => '4x';
 Readonly my $S3_BUCKET => '58a75bba-1d73-11ee-afdd-5b1a31ab3736';
 Readonly my $S3_URI => 's3://%s/%s/%s.%s';
+Readonly my $RESULTS_LIMIT => 25;
 
 has chatId => (isa => 'Int', is => 'rw', default => 0);
 
@@ -74,6 +75,7 @@ sub search {
 	my ($self, $critereon) = @_;
 
 	my @results = grep(/$critereon/, @{ $self->getList() });
+	splice(@results, $RESULTS_LIMIT, $#results) if (scalar(@results) > $RESULTS_LIMIT);
 
 	# Check for exact match; and force only one result to be returned
 	# This avoids an overlapping meme being inaccessible
