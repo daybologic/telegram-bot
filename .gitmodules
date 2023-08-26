@@ -1,0 +1,12 @@
+[submodule "externals/libgeo-weather-visualcrossing-perl"]
+	path = externals/libgeo-weather-visualcrossing-perl
+	url = git@git.sr.ht:~m6kvm/libgeo-weather-visualcrossing-perl
+[submodule "externals/libdata-money-perl"]
+	path = externals/libdata-money-perl
+	url = git@git.sr.ht:~m6kvm/libdata-money-perl
+[submodule "externals/libtest-module-runnable-perl"]
+	path = externals/libtest-module-runnable-perl
+	url = git@git.sr.ht:~m6kvm/libtest-module-runnable-perl
+[submodule "externals/libwww-telegram-botapi-perl"]
+	path = externals/libwww-telegram-botapi-perl
+	url = git@git.sr.ht:~m6kvm/libwww-telegram-botapi-perl

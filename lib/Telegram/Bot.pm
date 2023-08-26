@@ -32,10 +32,15 @@
 package Telegram::Bot;
 use strict;
 use warnings;
+
+# When running from the git clone --recursive checkout
+use lib './externals/libdata-money-perl/lib';
+use lib './externals/libdata-geo-weather-visualcrossing-perl/lib';
+
 use Data::Dumper;
 use Data::Money::Amount 0.2.0;
 use Data::Money::Currency::Converter::Repository::APILayer 0.2.0;
-use English;
+use English qw(-no_match_vars);
 use Geo::Weather::VisualCrossing;
 use HTTP::Status qw(status_message);
 use Readonly;
@@ -56,7 +61,6 @@ use Telegram::Bot::User::Repository;
 use Telegram::Bot::UUIDClient;
 use Telegram::Bot::Weather::Location;
 use Time::Duration;
-use WWW::Telegram::BotAPI;
 use URI::URL;
 use POSIX;
 use utf8;
@@ -85,8 +89,9 @@ sub karma {
 }
 
 sub source {
-	return "Source code for the bot can be obtained from https://git.sr.ht/~m6kvm/telegram-bot\n" .
-	    'Patches and memes may be sent to 2e0eol@gmail.com with subject "telegram-bot"';
+	return 'Source code for the bot can be obtained from '
+	    . "https://git.sr.ht/~m6kvm/telegram-bot/refs/v${Telegram::Bot::VERSION}\n"
+	    . 'Patches and memes may be sent to 2e0eol@gmail.com with subject "telegram-bot"';
 }
 
 sub breakfast {

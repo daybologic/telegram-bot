@@ -30,6 +30,7 @@
 # SUCH DAMAGE.
 
 package Telegram::Bot::DI::Container;
+use lib './externals/libwww-telegram-botapi-perl/lib';
 use Moose;
 
 use LWP::UserAgent;

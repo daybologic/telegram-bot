@@ -35,7 +35,7 @@ use Moose;
 extends 'Telegram::Bot::Base';
 
 use DBI;
-use English;
+use English qw(-no_match_vars);
 use Readonly;
 use Telegram::Bot::Config;
 use Telegram::Bot::Config::Section;

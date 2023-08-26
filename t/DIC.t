@@ -35,6 +35,8 @@ package DICTests;
 use strict;
 use warnings;
 use Moose;
+
+use lib 'externals/libtest-module-runnable-perl/lib';
 extends 'Test::Module::Runnable';
 
 use English qw(-no_match_vars);
@@ -42,7 +44,6 @@ use POSIX qw(EXIT_SUCCESS);
 use Readonly;
 use Telegram::Bot::DI::Container;
 use Test::Deep qw(all cmp_deeply isa methods shallow);
-use Test::Exception;
 use Test::More;
 
 sub setUp {

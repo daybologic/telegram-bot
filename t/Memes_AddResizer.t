@@ -33,6 +33,8 @@
 
 package Memes_AddResizerTests;
 use Moose;
+
+use lib 'externals/libtest-module-runnable-perl/lib';
 extends 'Test::Module::Runnable';
 
 use Cache::MemoryCache;
@@ -42,7 +44,6 @@ use Readonly;
 use Telegram::Bot::Memes::Add::Resizer;
 use Telegram::Bot::Memes::Handle;
 use Test::Deep qw(cmp_deeply all isa methods bool re);
-use Test::Exception;
 use Test::More;
 
 Readonly my $ROOT_PATH => 't/data';

@@ -1,11 +1,24 @@
 Source: telegram-bot
 Section: perl
 Priority: extra
-Maintainer: Duncan Ross Palmer <palmer@overchat.org>
+Maintainer: Rev. Duncan Ross Palmer <2e0eol@gmail.com>
 Build-Depends:
  debhelper (>= 13),
 Build-Depends-Indep:
+ libconfig-ini-perl,
+ libdata-money-perl,
+ libdatetime-perl,
+ libdbd-mysql-perl,
+ libdbi-perl,
+ libgeo-weather-visualcrossing-perl,
  libmoose-perl,
+ libtest-deep-perl,
+ libtest-module-runnable-perl,
+ libtest-output-perl,
+ libtime-duration-perl,
+ libuniversal-require-perl,
+ liburi-encode-perl,
+ libwww-perl,
  libwww-telegram-botapi-perl,
  perl,
  perl-base,
@@ -18,11 +31,22 @@ Depends:
  ${misc:Depends},
  ${perl:Depends},
  ${shlibs:Depends},
+ libconfig-ini-perl,
+ libdata-money-perl,
+ libdatetime-perl,
+ libdbd-mysql-perl,
+ libdbi-perl,
+ libgeo-weather-visualcrossing-perl,
+ libjson-maybexs-perl,
  libmoose-perl,
- libreadonly-perl,
+ libtime-duration-perl,
  libuniversal-require-perl,
+ liburi-encode-perl,
+ libwww-perl,
  libwww-telegram-botapi-perl,
  perl,
+ perl-base,
+ perl-modules,
 Description: Multipurpose bot for Telegram
  Absolutely packed with features, used by The Firm,
  amongst others.

@@ -35,13 +35,14 @@ package MemesTests;
 use strict;
 use warnings;
 use Moose;
+
+use lib 'externals/libtest-module-runnable-perl/lib';
 extends 'Test::Module::Runnable';
 
 use Telegram::Bot::Memes;
 use English qw(-no_match_vars);
 use POSIX qw(EXIT_SUCCESS);
 use Test::Deep qw(cmp_deeply all isa methods bool re);
-use Test::Exception;
 use Test::More;
 
 sub setUp {
