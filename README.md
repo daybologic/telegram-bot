@@ -38,6 +38,13 @@ and change personal preferences.
 Talk to the [@BotFather](https://t.me/BotFather).  Start with this [tutorial](https://core.telegram.org/bots/tutorial).
 Ensure the token it in the config, or the bot will not start.
 
+Run bin/install.sh
+
+This will create required cache directories.
+Then run
+
+sudo chown $USER /var/cache/telegram-bot
+
 Finally, start a screen session using SCREEN(1),
 and run:
 
