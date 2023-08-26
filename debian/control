@@ -13,7 +13,6 @@ Build-Depends-Indep:
  libgeo-weather-visualcrossing-perl,
  libmoose-perl,
  libtest-deep-perl,
- libtest-exception-perl,
  libtest-module-runnable-perl,
  libtest-output-perl,
  libuniversal-require-perl,

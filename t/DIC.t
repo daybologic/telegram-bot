@@ -42,7 +42,6 @@ use POSIX qw(EXIT_SUCCESS);
 use Readonly;
 use Telegram::Bot::DI::Container;
 use Test::Deep qw(all cmp_deeply isa methods shallow);
-use Test::Exception;
 use Test::More;
 
 sub setUp {

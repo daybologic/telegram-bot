@@ -33,7 +33,6 @@ WriteMakefile(
 		'LWP::UserAgent'               => 0, # libwww-perl
 		'Moose'                        => 0, # libmoose-perl
 		'Test::Deep'                   => 0, # libtest-deep-perl
-		'Test::Exception'              => 0, # libtest-exception-perl
 		'Test::Module::Runnable'       => 0, # libtest-module-runnable-perl
 		'Test::Output'                 => 0, # libtest-output-perl
 		'UNIVERSAL::require'           => 0, # libuniversal-require-perl
