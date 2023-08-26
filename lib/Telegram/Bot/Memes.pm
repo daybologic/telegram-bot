@@ -225,9 +225,9 @@ sub __buildListingCommand {
 }
 
 sub __executeListingCommand {
-	my ($self, $command) = @_;
+	my ($self, $command, $mockOutput) = @_;
 	my @fileList;
-	my $output = `$command`;
+	my $output = defined($mockOutput) ? $mockOutput : `$command`;
 	$output = decode_json($output);
 	foreach my $fileEnt (@{ $output->{Contents} }) {
 		push(@fileList, substr($fileEnt->{Key}, 3)); # Remove size-related prefix
