@@ -32,6 +32,11 @@
 package Telegram::Bot;
 use strict;
 use warnings;
+
+# When running from the git clone --recursive checkout
+use lib './externals/libdata-money-perl/lib';
+use lib './externals/libdata-geo-weather-visualcrossing-perl/lib';
+
 use Data::Dumper;
 use Data::Money::Amount 0.2.0;
 use Data::Money::Currency::Converter::Repository::APILayer 0.2.0;

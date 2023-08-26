@@ -32,7 +32,6 @@
 package Telegram::Bot::Admin;
 use strict;
 use warnings;
-use Data::Money::Amount;
 use English;
 use Readonly;
 use Moose;

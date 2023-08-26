@@ -34,7 +34,7 @@ use Moose;
 
 extends 'Telegram::Bot::Base';
 
-use Config::INI;
+use Config::INI::Reader;
 use Data::Dumper;
 use Telegram::Bot::Config::Section;
 use Readonly;
