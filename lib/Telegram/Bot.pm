@@ -100,13 +100,17 @@ sub xkcd {
 	my @words = split(m/\s+/, $text);
 	my $ident = $words[1];
 
-	if (my $url = $dic->xkcd->run($ident)) {
-		return +{
-			method  => 'sendPhoto',
-			photo   => {
-				file => $url,
-			},
-		};
+	if ($ident) {
+		if (my $url = $dic->xkcd->run($ident)) {
+			return +{
+				method  => 'sendPhoto',
+				photo   => {
+					file => $url,
+				},
+			};
+		}
+	} else {
+		return 'Usage: /xkcd <nnnn>';
 	}
 
 	return 'oops, no comic';
