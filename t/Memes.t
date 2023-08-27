@@ -151,7 +151,7 @@ sub testSearchDanger {
 	plan tests => 1;
 
 	my $result = $self->sut->search('danger');
-	cmp_deeply($result, ['dangerwillrobinson']);
+	cmp_deeply($result, ['dangerwillrobinson', 'dangerzone']) or diag(explain($result));
 
 	return EXIT_SUCCESS;
 }

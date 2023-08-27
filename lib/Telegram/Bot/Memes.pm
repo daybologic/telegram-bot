@@ -108,8 +108,12 @@ sub getList {
 
 sub getAspects {
 	my ($self) = @_;
-	my $section = $self->dic->config->getSectionByName(__PACKAGE__);
-	my $preference = $section->getValueByKey($IMAGE_ASPECT_CONFIG);
+
+	my ($section, $preference);
+	if ($self->dic) {
+		$section = $self->dic->config->getSectionByName(__PACKAGE__);
+		$preference = $section->getValueByKey($IMAGE_ASPECT_CONFIG) if ($section);
+	}
 	$preference = $IMAGE_ASPECT_DEFAULT unless ($preference);
 
 	my $preferenceSeen = 0;
