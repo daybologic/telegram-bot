@@ -112,15 +112,23 @@ sub getAspects {
 	my $preference = $section->getValueByKey($IMAGE_ASPECT_CONFIG);
 	$preference = $IMAGE_ASPECT_DEFAULT unless ($preference);
 
+	my $preferenceSeen = 0;
 	my @aspects = ('original', '4x', '2x', '1x');
 	for (my $i = 0; $i < scalar(@aspects); $i++) {
-		if ($aspects[$i] eq $preference && $i > 0) {
-			my $tmp = $aspects[0]; # save original preference
-			$aspects[0] = $preference; # override preference
-			$aspects[$i] = $tmp; # move original preference to this pos
-			last;
+		if ($aspects[$i] eq $preference) {
+			$preferenceSeen = 1;
+
+			if ($i > 0) {
+				my $tmp = $aspects[0]; # save original preference
+				$aspects[0] = $preference; # override preference
+				$aspects[$i] = $tmp; # move original preference to this pos
+				last;
+			}
 		}
 	}
+
+	die('[' . __PACKAGE__ . "] $IMAGE_ASPECT_CONFIG invalid/unrecognized: '$preference'")
+	    unless ($preferenceSeen);
 
 	return @aspects;
 }

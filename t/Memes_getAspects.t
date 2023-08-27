@@ -37,6 +37,7 @@ use Moose;
 use lib 'externals/libtest-module-runnable-perl/lib';
 extends 'Test::Module::Runnable';
 
+use Telegram::Bot::Config::Section;
 use Telegram::Bot::DI::Container;
 use Telegram::Bot::Memes;
 use English qw(-no_match_vars);
@@ -49,9 +50,14 @@ sub setUp {
 	my ($self) = @_;
 
 	my $dic = Telegram::Bot::DI::Container->new();
-
 	$self->sut(Telegram::Bot::Memes->new({ dic => $dic }));
 
+	return EXIT_SUCCESS;
+}
+
+sub tearDown {
+	my ($self) = @_;
+	$self->clearMocks();
 	return EXIT_SUCCESS;
 }
 
@@ -65,6 +71,28 @@ sub testDefaults {
 	cmp_deeply(\@results, \@ASPECTS, 'correct order');
 
 	return EXIT_SUCCESS;
+}
+
+sub testConfigOverride {
+	my ($self) = @_;
+	plan tests => 1;
+
+	Readonly my $OVERRIDE => '2x';
+	Readonly my @ASPECTS  => ($OVERRIDE, qw(4x original 1x));
+
+	Readonly my %KEYS => (
+		preferred_aspect => $OVERRIDE,
+	);
+
+	$self->mock('Telegram::Bot::Config', 'getSectionByName', [
+		Telegram::Bot::Config::Section->new(name => 'Telegram::Bot::Memes', 'keys' => \%KEYS),
+	]);
+
+	my @results = $self->sut->getAspects();
+	cmp_deeply(\@results, \@ASPECTS, 'correct order');
+
+	return EXIT_SUCCESS;
+
 }
 
 package main;
