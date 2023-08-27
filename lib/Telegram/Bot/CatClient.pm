@@ -41,6 +41,8 @@ use URI::Encode;
 
 Readonly my $CAT_URL => 'https://http.cat/%d';
 
+has rootPath => (is => 'ro', isa => 'Str', default => '/var/cache/telegram-bot/cat_client');
+
 sub run {
 	my ($self, $code) = @_;
 	return undef unless ($code);
@@ -65,14 +67,13 @@ sub run {
 
 sub __getFile {
 	my ($self, $code, $content) = @_;
-	mkdir('/tmp/palmer');
-	mkdir('/tmp/palmer/m6kvmdlcmdr');
-	my $name = sprintf('/tmp/palmer/m6kvmdlcmdr/%d.jpg', $code);
+	mkdir($self->rootPath);
+	my $name = sprintf('%s/%d.jpg', $self->rootPath, $code);
 	return $name if -f $name;
 
 	return undef unless ($content);
 
-	my $fh = IO::File->new("> $name");
+	my $fh = IO::File->new($name, 'w');
 	if (defined $fh) {
 		print $fh $content;
 		$fh->close();
