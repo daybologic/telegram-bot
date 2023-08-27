@@ -208,7 +208,7 @@ sub __startup {
 }
 
 # The commands that this bot supports.
-my $pic_id; # file_id of the last sent picture
+my %pic_id; # file_id of the last sent picture (per user)
 my $commands = {
 	'yt' => sub {
 		my (@input) = @_;
@@ -258,7 +258,11 @@ my $commands = {
 	},
 	'm' => \&memeSearch,
 	'meme' => sub {
-		memeAddRemove($pic_id, @_); # FIXME: Setting pic_id = undef after call doesn't work properly, even though I need to do it.
+		my (@input) = @_;
+		my $user = $input[0]->{from}{username} || 'anonymous';
+		my $answer = memeAddRemove($pic_id{$user}, @_);
+		$pic_id{$user} = undef;
+		return $answer;
 	},
 	'me' => sub {
 		my (@input) = @_;
@@ -493,12 +497,14 @@ $commands->{start} = "Hello! Try /" . join " - /", grep !/^_/, keys %$commands;
 my $message_types = {
 	# Save the picture ID to use it in `lastphoto`.
 	'photo' => sub {
-			$pic_id = shift->{photo}[-1]{file_id};
-			+{
-				method     => 'sendMessage',
-				text       => "OK I've seen your meme, now say /meme add <name>.\n"
-				    . 'NOTE: This operation is slow, please be patient, the bot may not respond for up to a minute.',
-			},
+		my (@input) = @_;
+		my $user = $input[0]->{from}{username} || 'anonymous';
+		$pic_id{$user} = shift->{photo}[-1]{file_id};
+		+{
+			method     => 'sendMessage',
+			text       => "OK I've seen your meme, now say /meme add <name>.\n"
+			    . 'NOTE: This operation is slow, please be patient, the bot may not respond for up to a minute.',
+		},
 	},
 };
 

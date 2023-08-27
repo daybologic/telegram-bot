@@ -40,9 +40,11 @@ use Readonly;
 use Telegram::Bot::Memes::Add;
 
 Readonly my $CACHE_PATTERN => '/var/cache/telegram-bot/memes/%s/%s.%s';
-Readonly my $IMAGE_ASPECT => '4x';
+Readonly my $IMAGE_ASPECT_CONFIG => 'preferred_aspect';
+Readonly my $IMAGE_ASPECT_DEFAULT => '4x';
 Readonly my $S3_BUCKET => '58a75bba-1d73-11ee-afdd-5b1a31ab3736';
 Readonly my $S3_URI => 's3://%s/%s/%s.%s';
+Readonly my $RESULTS_LIMIT => 25;
 
 has chatId => (isa => 'Int', is => 'rw', default => 0);
 
@@ -57,11 +59,11 @@ sub run {
 	$text = __detaint($text);
 	return undef unless ($text);
 
-	if (my $path = __pathFromCache($text)) {
+	if (my $path = $self->__pathFromCache($text)) {
 		return $self->__telegramCommand($path, @words);
 	} else {
 		$self->__downloadMeme($text);
-		if (my $path = __pathFromCache($text)) {
+		if (my $path = $self->__pathFromCache($text)) {
 			return $self->__telegramCommand($path, @words);
 		}
 	}
@@ -73,6 +75,7 @@ sub search {
 	my ($self, $critereon) = @_;
 
 	my @results = grep(/$critereon/, @{ $self->getList() });
+	splice(@results, $RESULTS_LIMIT, $#results) if (scalar(@results) > $RESULTS_LIMIT);
 
 	# Check for exact match; and force only one result to be returned
 	# This avoids an overlapping meme being inaccessible
@@ -92,8 +95,42 @@ sub getList {
 	if (__memeExtensionCacheCount() > 0) {
 		return __memeExtensionCacheKeys();
 	} else {
-		return $self->__executeListingCommand($self->__buildListingCommand());
+		my %fileList = (); # Merge all aspects into one list
+		foreach my $imageAspect ($self->getAspects()) {
+			my $fileListPerAspect = $self->__executeListingCommand($self->__buildListingCommand($imageAspect));
+			foreach my $file (@$fileListPerAspect) {
+				$fileList{$file}++;
+			}
+		}
+		return [keys(%fileList)];
 	}
+}
+
+sub getAspects {
+	my ($self) = @_;
+	my $section = $self->dic->config->getSectionByName(__PACKAGE__);
+	my $preference = $section->getValueByKey($IMAGE_ASPECT_CONFIG);
+	$preference = $IMAGE_ASPECT_DEFAULT unless ($preference);
+
+	my $preferenceSeen = 0;
+	my @aspects = ('original', '4x', '2x', '1x');
+	for (my $i = 0; $i < scalar(@aspects); $i++) {
+		if ($aspects[$i] eq $preference) {
+			$preferenceSeen = 1;
+
+			if ($i > 0) {
+				my $tmp = $aspects[0]; # save original preference
+				$aspects[0] = $preference; # override preference
+				$aspects[$i] = $tmp; # move original preference to this pos
+				last;
+			}
+		}
+	}
+
+	die('[' . __PACKAGE__ . "] $IMAGE_ASPECT_CONFIG invalid/unrecognized: '$preference'")
+	    unless ($preferenceSeen);
+
+	return @aspects;
 }
 
 sub exists {
@@ -131,7 +168,7 @@ sub remove {
 sub __removeAspects {
 	my ($self, $name, $extension) = @_;
 
-	foreach my $aspect ('original', '4x', '2x', '1x') { # TODO: Can iterate through aspects?
+	foreach my $aspect ($self->getAspects()) {
 		$self->__runCommand(__buildDeleteCommand($name, $extension, $aspect));
 		if (my $path = __makeCachePattern($name, $extension, $aspect)) {
 			unlink($path);
@@ -191,25 +228,30 @@ sub __forgetOwner {
 }
 
 sub __buildListingCommand {
-	my ($self) = @_;
+	my ($self, $imageAspect) = @_;
 
 	return sprintf("aws --output json s3api list-objects --bucket %s --prefix '%s/'",
-	    $S3_BUCKET, $IMAGE_ASPECT);
+	    $S3_BUCKET, $imageAspect);
 }
 
 sub __executeListingCommand {
-	my ($self, $command) = @_;
+	my ($self, $command, $mockOutput) = @_;
 	my @fileList;
-	my $output = `$command`;
+	my $output = defined($mockOutput) ? $mockOutput : `$command`;
 	$output = decode_json($output);
 	foreach my $fileEnt (@{ $output->{Contents} }) {
-		push(@fileList, substr($fileEnt->{Key}, 3)); # Remove size-related prefix
+		push(@fileList, __removeSizePrefix($fileEnt->{Key}));
 		my ($memeName, $extension) = split(m/\./, $fileList[-1]);
 		__memeExtensionCacheStore($memeName, $extension);
 		$fileList[-1] = $memeName; # remove file exension
 	}
 
 	return \@fileList;
+}
+
+sub __removeSizePrefix {
+	my ($key) = @_;
+	return (split(m/\//, $key))[1];
 }
 
 sub __telegramCommand {
@@ -231,17 +273,21 @@ sub __telegramCommand {
 }
 
 sub __pathFromCache {
-	my ($name) = @_;
+	my ($self, $name) = @_;
 
 	if (my $extension = __memeExtensionCacheFetch($name)) {
-		my $path = __makeCachePattern($name, $extension);
-		warn "Checking if '$path' exists";
-		return $path if (-f $path);
-	} else {
-		foreach my $extension (qw(png gif jpg JPG jpeg)) {
-			my $path = __makeCachePattern($name, $extension);
+		foreach my $aspect ($self->getAspects()) {
+			my $path = __makeCachePattern($name, $extension, $aspect);
 			warn "Checking if '$path' exists";
 			return $path if (-f $path);
+		}
+	} else {
+		foreach my $extension (qw(png gif jpg JPG jpeg)) {
+			foreach my $aspect ($self->getAspects()) {
+				my $path = __makeCachePattern($name, $extension, $aspect);
+				warn "Checking if '$path' exists";
+				return $path if (-f $path);
+			}
 		}
 	}
 
@@ -260,22 +306,22 @@ sub __detaint {
 
 sub __generateS3URI {
 	my ($name, $ext, $aspect) = @_;
-	$aspect = $IMAGE_ASPECT unless ($aspect);
+	$aspect = $IMAGE_ASPECT_DEFAULT unless ($aspect);
 	return sprintf($S3_URI, $S3_BUCKET, $aspect, $name, $ext);
 }
 
 sub __makeCachePattern {
 	my ($name, $ext, $aspect) = @_;
-	$aspect = $IMAGE_ASPECT unless ($aspect);
+	$aspect = $IMAGE_ASPECT_DEFAULT unless ($aspect);
 	sprintf($CACHE_PATTERN, $aspect, $name, $ext);
 }
 
 sub __buildCommand {
-	my ($name, $ext) = @_;
+	my ($name, $ext, $aspect) = @_;
 	return sprintf(
 		'aws s3 cp %s %s',
-		__generateS3URI($name, $ext),
-		__makeCachePattern($name, $ext),
+		__generateS3URI($name, $ext, $aspect),
+		__makeCachePattern($name, $ext, $aspect),
 	);
 }
 
@@ -301,8 +347,10 @@ sub __downloadMeme {
 
 	$self->getList(); # causes extension cache to be refreshed periodically
 	if (my $extension = __memeExtensionCacheFetch($name)) {
-		my $command = __buildCommand($name, $extension);
-		$self->__runCommand($command);
+		foreach my $imageAspect ($self->getAspects()) {
+			my $command = __buildCommand($name, $extension, $imageAspect);
+			$self->__runCommand($command);
+		}
 	}
 
 	return;
