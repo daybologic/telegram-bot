@@ -321,6 +321,13 @@ and the Perl library [Geo::Weather::VisualCrossing](https://git.sr.ht/~m6kvm/lib
 
 You will need this library and an API token from Visual Crossing in order to use this feature, if you plan to use the bot yourself, or develop the feature.
 
+#### XKCD
+
+The website [XKCD](https://xkcd.com) produces a regular comic, and each one is numbered.
+If you know the number of the comic, usage:
+
+/xkcd nnnn
+
 #### Miscellaneous
 
 ##### /me (ignored)
