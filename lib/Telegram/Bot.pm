@@ -94,6 +94,28 @@ sub source {
 	    . 'Patches and memes may be sent to 2e0eol@gmail.com with subject "telegram-bot"';
 }
 
+sub xkcd {
+	my (@input) = @_;
+	my $text = $input[0]->{text};
+	my @words = split(m/\s+/, $text);
+	my $ident = $words[1];
+
+	if ($ident) {
+		if (my $url = $dic->xkcd->run($ident)) {
+			return +{
+				method  => 'sendPhoto',
+				photo   => {
+					file => $url,
+				},
+			};
+		}
+	} else {
+		return 'Usage: /xkcd <nnnn>';
+	}
+
+	return 'oops, no comic';
+}
+
 sub breakfast {
 	my (@input) = @_;
 	my $user = $input[0]->{from}{username} || 'jesscharlton';
@@ -156,7 +178,7 @@ sub memeAddRemove {
 			(undef, $url, @words) = @words;
 			return +{
 				method  => 'sendPhoto',
-				photo   => $url,
+				photo   => { file => $url },
 				caption => join(' ', @words),
 			};
 
@@ -277,7 +299,8 @@ my $commands = {
 			return '';
 		}
 	},
-	'8ball', => \&ball8,
+	'8ball' => \&ball8,
+	'xkcd' => \&xkcd,
 	'k' => \&karma,
 	'random' => \&randomNumber,
 	'horatio' => sub { return 'licking Ben\'s roast potato' },

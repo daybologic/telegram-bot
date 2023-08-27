@@ -92,6 +92,7 @@ sub testAttributesSimple {
 		'Telegram::Bot::User::Repository'  => 'userRepo',
 		'Telegram::Bot::UUIDClient'        => 'uuidClient',
 		'Telegram::Bot::Weather::Location' => 'weatherLocation',
+		'Telegram::Bot::XKCD'              => 'xkcd',
 	);
 
 	plan tests => scalar(keys(%MAP));
