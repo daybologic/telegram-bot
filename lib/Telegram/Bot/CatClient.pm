@@ -73,7 +73,7 @@ sub __getFile {
 
 	return undef unless ($content);
 
-	my $fh = IO::File->new("> $name");
+	my $fh = IO::File->new($name, 'w');
 	if (defined $fh) {
 		print $fh $content;
 		$fh->close();
