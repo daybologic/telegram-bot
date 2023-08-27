@@ -49,6 +49,7 @@ use Telegram::Bot::RandomNumber;
 use Telegram::Bot::User::Repository;
 use Telegram::Bot::UUIDClient;
 use Telegram::Bot::Weather::Location;
+use Telegram::Bot::XKCD;
 use WWW::Telegram::BotAPI;
 
 has admins => (is => 'rw', isa => 'Telegram::Bot::Admins', lazy => 1, builder => '_makeAdmins');
@@ -68,6 +69,7 @@ has ua => (is => 'rw', isa => 'LWP::UserAgent', lazy => 1, builder => '_makeUser
 has userRepo => (is => 'rw', isa => 'Telegram::Bot::User::Repository', lazy => 1, builder => '_makeUserRepo');
 has uuidClient => (is => 'rw', isa => 'Telegram::Bot::UUIDClient', lazy => 1, builder => '_makeUuidClient');
 has weatherLocation => (is => 'rw', isa => 'Telegram::Bot::Weather::Location', lazy => 1, builder => '_makeWeatherLocation');
+has xkcd => (is => 'rw', isa => 'Telegram::Bot::XKCD', lazy => 1, builder => '_makeXkcd');
 
 sub _makeAPI {
 	my ($self) = @_;
@@ -175,6 +177,11 @@ sub _makeUserRepo {
 sub _makeWeatherLocation {
 	my ($self) = @_;
 	return Telegram::Bot::Weather::Location->new(dic => $self);
+}
+
+sub _makeXkcd {
+	my ($self) = @_;
+	return Telegram::Bot::XKCD->new(dic => $self);
 }
 
 1;
