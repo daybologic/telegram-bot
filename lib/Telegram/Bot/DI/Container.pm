@@ -34,6 +34,7 @@ use lib './externals/libwww-telegram-botapi-perl/lib';
 use Moose;
 
 use LWP::UserAgent;
+use Log::Log4perl;
 use Telegram::Bot::Admins;
 use Telegram::Bot::Audit;
 use Telegram::Bot::Ball8;
@@ -62,6 +63,7 @@ has db => (is => 'rw', isa => 'Telegram::Bot::DB', lazy => 1, builder => '_makeD
 has drinksClient => (is => 'rw', isa => 'Telegram::Bot::DrinksClient', lazy => 1, builder => '_makeDrinksClient');
 has genderClient => (is => 'rw', isa => 'Telegram::Bot::GenderClient', lazy => 1, builder => '_makeGenderClient');
 has karma => (is => 'rw', isa => 'Telegram::Bot::Karma', lazy => 1, builder => '_makeKarma');
+has logger => (is => 'rw', isa => 'Log::Log4perl::Logger', lazy => 1, builder => '_makeLogger');
 has memes => (is => 'rw', isa => 'Telegram::Bot::Memes', lazy => 1, builder => '_makeMemes');
 has musicDB => (is => 'rw', isa => 'Telegram::Bot::MusicDB', lazy => 1, builder => '_makeMusicDB');
 has randomNumber => (is => 'rw', isa => 'Telegram::Bot::RandomNumber', lazy => 1, builder => '_makeRandomNumber');
@@ -137,6 +139,11 @@ sub _makeGenderClient {
 sub _makeKarma {
 	my ($self) = @_;
 	return Telegram::Bot::Karma->new(dic => $self);
+}
+
+sub _makeLogger {
+	Log::Log4perl->init('etc/log4perl.conf');
+	return Log::Log4perl->get_logger('house');
 }
 
 sub _makeMemes {

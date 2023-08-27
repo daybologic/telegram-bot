@@ -43,6 +43,7 @@ use Data::Money::Currency::Converter::Repository::APILayer 0.2.0;
 use English qw(-no_match_vars);
 use Geo::Weather::VisualCrossing;
 use HTTP::Status qw(status_message);
+#use Log::Log4perl;
 use Readonly;
 use Telegram::Bot::Admins;
 use Telegram::Bot::Audit;
@@ -218,6 +219,7 @@ sub recordStartup {
 
 # FIXME: This method should not exist.  use DI Container!
 sub __startup {
+	$dic->logger->trace('TODO: Legacy __startup called');
 	$dic->admins->load();
 
 	$visualCrossing = Geo::Weather::VisualCrossing->new({

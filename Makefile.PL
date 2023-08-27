@@ -20,6 +20,7 @@ WriteMakefile(
 		'Geo::Weather::Visualcrossing' => 0, # libgeo-weather-visualcrossing-perl
 		'JSON::MaybeXS'                => 0, # libjson-maybexs-perl
 		'LWP::UserAgent'               => 0, # libwww-perl
+		'Log::Log4perl'                => 0, # liblog-log4perl-perl
 		'Moose'                        => 0, # libmoose-perl
 		'Time::Duration'               => 0, # libtime-duration-perl
 		'UNIVERSAL::require'           => 0, # libuniversal-require-perl
@@ -33,6 +34,7 @@ WriteMakefile(
 		'DBI'                          => 0, # libdbi-perl
 		'Geo::Weather::Visualcrossing' => 0, # libgeo-weather-visualcrossing-perl
 		'LWP::UserAgent'               => 0, # libwww-perl
+		'Log::Log4perl'                => 0, # liblog-log4perl-perl
 		'Moose'                        => 0, # libmoose-perl
 		'Time::Duration'               => 0, # libtime-duration-perl
 		'Test::Deep'                   => 0, # libtest-deep-perl
