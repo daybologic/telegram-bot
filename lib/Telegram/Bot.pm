@@ -378,7 +378,7 @@ my $commands = {
 	'error' => sub {
 		# TODO: You should use https://s5ock2i7gptq4b6h5rlvw6szva0wojrd.lambda-url.eu-west-2.on.aws/ now
 		my $key = 1 + int(rand(462));
-		my $error = `aws --profile palmer dynamodb get-item --table-name excuses4 --key='{ "ident": { "S": "$key" } }' --cli-read-timeout 1800 | jq -a -r .Item.english.S`;
+		my $error = `aws --profile telegram dynamodb get-item --table-name excuses4 --key='{ "ident": { "S": "$key" } }' --cli-read-timeout 1800 | jq -a -r .Item.english.S`;
 		return $error;
 	},
 	'tableflip' => sub {
