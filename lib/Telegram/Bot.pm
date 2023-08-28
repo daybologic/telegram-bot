@@ -136,6 +136,7 @@ sub version {
 
 sub memeSearch {
 	my (@input) = @_;
+	my $user = $input[0]->{from}{username};
 	my $text = $input[0]->{text};
 	my $id = $input[0]->{chat}->{id};
 
@@ -149,9 +150,9 @@ sub memeSearch {
 	$dic->memes->chatId($id);
 	my $results = $dic->memes->search($name);
 	if (scalar(@$results) == 0) {
-		return "There is no meme like that.  Send me a PM or tag me in an image and then use '/meme add <name>'";
+		return "There is no meme like that.  Send me an image in a PM and then use '/meme add <name>'";
 	} elsif (scalar(@$results) == 1) {
-		if (my $meme = $dic->memes->run($results->[0], @words)) {
+		if (my $meme = $dic->memes->setUser($user)->run($results->[0], @words)) {
 			return $meme;
 		}
 	} else {
@@ -162,7 +163,7 @@ sub memeSearch {
 sub memeAddRemove {
 	my ($picId, @input) = @_;
 	my $syntax = 0;
-	my $user = $input[0]->{from}{username};
+	my $user = $input[0]->{from}{username} || '';
 	my $text = $input[0]->{text};
 
 	my @words = split(m/\s+/, $text);
@@ -171,9 +172,9 @@ sub memeAddRemove {
 	my ($op, $name) = @words;
 	if ($op) {
 		if ($op eq 'add' || $op eq 'new') {
-			return $dic->memes->add($name, $picId, $user);
+			return $dic->memes->setUser($user)->add($name, $picId);
 		} elsif ($op eq 'remove' || $op eq 'delete' || $op eq 'del' || $op eq 'rm' || $op eq 'erase' || $op eq 'expunge' || $op eq 'purge') {
-			return $dic->memes->remove($name, $user);
+			return $dic->memes->setUser($user)->remove($name);
 		} elsif ($op eq 'post') {
 			my $url;
 			(undef, $url, @words) = @words;
@@ -212,7 +213,7 @@ sub insult {
 sub recordStartup {
 	my ($self) = @_;
 
-	$dic->audit->recordStartup();
+	$dic->audit->acquireSession()->recordStartup();
 
 	return;
 }
@@ -510,12 +511,13 @@ my $commands = {
 	},
 	'_unknown' => sub {
 		my (@input) = @_;
+		my $user = $input[0]->{from}{username};
 		my $text = $input[0]->{text};
 		my $id = $input[0]->{chat}->{id};
 		my @words = split(m/\s+/, $text);
 
 		$dic->memes->chatId($id);
-		if (my $meme = $dic->memes->run(@words)) {
+		if (my $meme = $dic->memes->setUser($user)->run(@words)) {
 			return $meme;
 		}
 
