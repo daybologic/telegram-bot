@@ -61,11 +61,11 @@ sub run {
 	return undef unless ($text);
 
 	my $result = undef;
-	if (my $path = __pathFromCache($text)) {
+	if (my $path = $self->__pathFromCache($text)) {
 		$result = $self->__telegramCommand($path, @words);
 	} else {
 		$self->__downloadMeme($text);
-		if (my $path = __pathFromCache($text)) {
+		if (my $path = $self->__pathFromCache($text)) {
 			$result = $self->__telegramCommand($path, @words);
 		}
 	}
