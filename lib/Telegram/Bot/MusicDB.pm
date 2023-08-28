@@ -65,7 +65,7 @@ sub __reload {
 			chomp($line);
 			push(@{ $self->__db }, $line);
 		}
-		$self->_warn(sprintf("%d tracks loaded\n", scalar(@{ $self->__db })));
+		$self->dic->logger->info(sprintf("%d tracks loaded\n", scalar(@{ $self->__db })));
 		$fh->close();
 	}
 
@@ -80,7 +80,7 @@ sub search {
 	my @results = grep(/$criteria/i, @{ $self->__db });
 	$#results = $self->limit - 1 if (scalar(@results) > $self->limit);
 
-	$self->_warn(sprintf(
+	$self->dic->logger->debug(sprintf(
 		"Query '%s' returned %d results (%d entries total)\n",
 		$criteria,
 		scalar(@results),

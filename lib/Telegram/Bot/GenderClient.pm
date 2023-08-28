@@ -57,7 +57,10 @@ sub run {
 	my $encoder = URI::Encode->new({double_encode => 0});
 	$uri = $encoder->encode(sprintf($uri, $username));
 
-	return $self->dic->ua->get($uri)->decoded_content;
+	$self->dic->logger->debug("GET: $uri");
+	my $decodedContent = $self->dic->ua->get($uri)->decoded_content;
+	$self->dic->logger->trace($decodedContent);
+	return $decodedContent;
 }
 
 1;

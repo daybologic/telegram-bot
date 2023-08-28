@@ -56,7 +56,7 @@ sub generate {
 	$uri->query_form(\%opts);
 
 	my @results;
-	printf(STDERR "%s\n", $uri);
+	$self->dic->logger->trace($uri);
 
 	my $response = $self->dic->ua->get($uri);
 	if ($response->is_success) {
@@ -65,10 +65,10 @@ sub generate {
 			push(@results, sprintf("%s\n", $result->{value}));
 		}
 	} else {
-		printf(STDERR "%s\n", $response->status_line);
+		$self->dic->logger->error($response->status_line);
 	}
 
-	printf(STDERR "%d results generated.\n", scalar(@results));
+	$self->dic->logger->debug(sprintf('%d results generated.', scalar(@results)));
 	return \@results;
 }
 

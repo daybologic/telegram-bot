@@ -10,11 +10,12 @@ if [ `id -u` -ne 0 ]; then
 fi
 
 CACHEDIR='/var/cache/telegram-bot'
-mkdir -p "$CACHEDIR"
-chmod 0700 "$CACHEDIR"
+LOGDIR='/var/log/telegram-bot'
+mkdir -p "$CACHEDIR" "$LOGDIR"
+chmod 0700 "$CACHEDIR" "$LOGDIR"
 
 # FIXME: Need a UID for the bot
-chown palmer "$CACHEDIR"
+chown palmer "$CACHEDIR" "$LOGDIR"
 
 # TODO: The following will only work on Debian; need to bang out
 # on other operating systems.
@@ -25,6 +26,7 @@ sudo apt install \
 	libdbi-perl \
 	libjson-maybexs-perl \
 	libtime-duration-perl \
+	liblog-log4perl-perl \
 	libmoose-perl \
 	libuniversal-require-perl \
 	liburi-encode-perl \

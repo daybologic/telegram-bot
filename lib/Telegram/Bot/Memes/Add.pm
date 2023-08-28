@@ -44,7 +44,7 @@ sub add {
 	my ($self, $name, $fileId, $user) = @_;
 
 	my $filePath = $self->__fetchViaAPI($fileId);
-	warn $filePath;
+	$self->dic->logger->trace($filePath);
 
 	my $resizer = $self->resizer($filePath, $name);
 	$self->owner->addToBucket($resizer->original->path, $name, 'original');

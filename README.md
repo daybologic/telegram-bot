@@ -30,7 +30,7 @@ version of the project using:
 
 git clone --recursive git@git.sr.ht:~m6kvm/telegram-bot
 cd telegram-bot/
-cp debian/etc/telegram-bot.conf etc/debian/
+cp debian/etc/*.conf etc/debian/
 
 Now modify etc/debian/telegram-bot.conf and add keys as necessary from the various upstream vendors,
 and change personal preferences.
