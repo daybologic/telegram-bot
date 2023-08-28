@@ -143,7 +143,7 @@ sub _makeKarma {
 
 sub _makeLogger {
 	Log::Log4perl->init('etc/log4perl.conf');
-	return Log::Log4perl->get_logger('house');
+	return Log::Log4perl->get_logger('telegram.bot');
 }
 
 sub _makeMemes {
