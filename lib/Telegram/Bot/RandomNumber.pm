@@ -32,6 +32,8 @@
 package Telegram::Bot::RandomNumber;
 use Moose;
 
+extends 'Telegram::Bot::Base';
+
 use Readonly;
 
 Readonly my $LIMIT => 65536;

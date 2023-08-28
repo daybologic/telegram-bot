@@ -36,12 +36,21 @@ use lib 'lib';
 use File::Temp qw(tempfile);
 use Moose;
 use POSIX qw(EXIT_SUCCESS);
+use Telegram::Bot::DI::Container;
 use Telegram::Bot::MusicDB;
 use Test::More;
 
+use lib 'externals/libtest-module-runnable-perl/lib';
 extends 'Test::Module::Runnable';
 
+has __dic => (is => 'rw', isa => 'Telegram::Bot::DI::Container');
 has __handle => (is => 'rw');
+
+sub setUp {
+	my ($self, %params) = @_;
+	$self->__dic(Telegram::Bot::DI::Container->new());
+	return $self->SUPER::setUp(%params);
+}
 
 sub tearDown {
 	my ($self, %params) = @_;
@@ -53,7 +62,7 @@ sub testDefaultLocation {
 	my ($self) = @_;
 	plan tests => 1;
 
-	$self->sut(Telegram::Bot::MusicDB->new());
+	$self->sut(Telegram::Bot::MusicDB->new({ dic => $self->__dic }));
 
 	my $username = qx(whoami);
 	chomp($username);
@@ -143,8 +152,9 @@ sub __makeSUT {
 	__makeDatabase($handle) if ($populate);
 
 	$self->sut(Telegram::Bot::MusicDB->new(
+		dic        => $self->__dic,
 		__location => $location,
-		_quiet      => 1,
+		_quiet     => 1,
 	));
 
 	return $self->sut;

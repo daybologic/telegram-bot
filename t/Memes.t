@@ -35,19 +35,21 @@ package MemesTests;
 use strict;
 use warnings;
 use Moose;
+
+use lib 'externals/libtest-module-runnable-perl/lib';
 extends 'Test::Module::Runnable';
 
+use Telegram::Bot::DI::Container;
 use Telegram::Bot::Memes;
 use English qw(-no_match_vars);
 use POSIX qw(EXIT_SUCCESS);
 use Test::Deep qw(cmp_deeply all isa methods bool re);
-use Test::Exception;
 use Test::More;
 
 sub setUp {
 	my ($self) = @_;
 
-	$self->sut(Telegram::Bot::Memes->new());
+	$self->sut(Telegram::Bot::Memes->new({ dic => Telegram::Bot::DI::Container->new() }));
 
 	return EXIT_SUCCESS;
 }
@@ -150,7 +152,7 @@ sub testSearchDanger {
 	plan tests => 1;
 
 	my $result = $self->sut->search('danger');
-	cmp_deeply($result, ['dangerwillrobinson']);
+	cmp_deeply($result, ['dangerwillrobinson', 'dangerzone']) or diag(explain($result));
 
 	return EXIT_SUCCESS;
 }

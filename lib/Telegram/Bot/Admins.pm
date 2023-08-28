@@ -30,21 +30,21 @@
 # SUCH DAMAGE.
 
 package Telegram::Bot::Admins;
-use strict;
-use warnings;
 use Moose;
+
+extends 'Telegram::Bot::Base';
+
 use Readonly;
 use Telegram::Bot::Admin;
 
 Readonly my $SECTION_NAME => 'Telegram::Bot';
 
 has admins => (is => 'rw', isa => 'ArrayRef[Telegram::Bot::Admin]', default => sub {[]});
-has config => (required => 1, isa => 'Telegram::Bot::Config', is => 'ro');
 
 sub load {
 	my ($self) = @_;
 
-	if (my $section = $self->config->getSectionByName($SECTION_NAME)) {
+	if (my $section = $self->dic->config->getSectionByName($SECTION_NAME)) {
 		if (my $valueStr = $section->getValueByKey('admins')) {
 			$valueStr =~ s/\s+//;
 			my @names = split(m/,/, $valueStr);
@@ -59,13 +59,13 @@ sub makeAdmin {
 	my ($self, $name) = @_;
 	return Telegram::Bot::Admin->new(
 		type  => __detectType($name),
-		value => __logAddingAdmin(lc($name)),
+		value => $self->__logAddingAdmin(lc($name)),
 	);
 }
 
 sub __logAddingAdmin {
-	my ($name) = @_;
-	warn "Added admin '$name'";
+	my ($self, $name) = @_;
+	$self->dic->logger->info("Added admin '$name'");
 	return $name;
 }
 
@@ -81,12 +81,12 @@ sub isAdmin {
 
 	foreach my $admin (@{ $self->admins }) {
 		if ($admin->value eq lc($name)) {
-			warn("name '$name' is an admin");
+			$self->dic->logger->debug("name '$name' is an admin");
 			return 1;
 		}
 	}
 
-	warn("name '$name' is *NOT* an admin");
+	$self->dic->logger->debug("name '$name' is *NOT* an admin");
 	return 0;
 }
 

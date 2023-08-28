@@ -32,15 +32,10 @@
 package Telegram::Bot::Base;
 use Moose;
 
+use Telegram::Bot::DI::Container;
+
 has _quiet => (isa => 'Bool', is => 'rw', default => 0);
 
-sub _warn {
-	my ($self, $message) = @_;
-
-	return if ($self->_quiet);
-	warn($message);
-
-	return;
-}
+has dic => (isa => 'Telegram::Bot::DI::Container', is => 'rw');
 
 1;

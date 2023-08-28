@@ -1,3 +1,5 @@
+#!/usr/bin/perl
+#
 # telegram-bot
 # Copyright (c) 2023, Rev. Duncan Ross Palmer (2E0EOL),
 # All rights reserved.
@@ -29,65 +31,71 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-package Telegram::Bot::MusicDB;
+package MemesExecuteListingCommandTests;
 use Moose;
 
-extends 'Telegram::Bot::Base';
+use lib 'externals/libtest-module-runnable-perl/lib';
+extends 'Test::Module::Runnable';
 
+use Telegram::Bot::Memes;
+use English qw(-no_match_vars);
+use POSIX qw(EXIT_SUCCESS);
 use Readonly;
+use Test::Deep qw(cmp_deeply all isa methods bool re);
+use Test::More;
 
-Readonly my $LIMIT => 20;
-
-has __db => (isa => 'ArrayRef[Str]', is => 'rw', default => sub {
-	return [ ];
-});
-
-has __location => (is => 'ro', lazy => 1, isa => 'Str', default => sub {
-	return "/var/lib/$ENV{USER}/telegram-bot/music-database.list";
-});
-
-has limit => (is => 'rw', isa => 'Int', default => $LIMIT);
-
-sub BUILD {
+sub setUp {
 	my ($self) = @_;
-	$self->__reload();
-	return;
+
+	$self->sut(Telegram::Bot::Memes->new());
+
+	return EXIT_SUCCESS;
 }
 
-sub __reload {
+sub test {
 	my ($self) = @_;
 
-	@{ $self->__db } = (); # flush
+	Readonly my @ASPECTS => (qw(original 4x 2x 1x));
+	plan tests => scalar(@ASPECTS);
 
-	my $fh = IO::File->new();
-	if ($fh->open($self->__location, 'r')) {
-		while (my $line = <$fh>) {
-			chomp($line);
-			push(@{ $self->__db }, $line);
-		}
-		$self->dic->logger->info(sprintf("%d tracks loaded\n", scalar(@{ $self->__db })));
-		$fh->close();
+	foreach my $aspect (@ASPECTS) {
+		my $result = $self->sut->__executeListingCommand('/bin/true', __makeJson($aspect));
+		cmp_deeply($result, ['alreadydidsomething', 'bernie'], 'meme name list; two items');
 	}
 
-	return;
+	return EXIT_SUCCESS;
 }
 
-sub search {
-	my ($self, $criteria) = @_;
+sub __makeJson {
+	my ($aspect) = @_;
 
-	$criteria =~ s/\W//g;
-
-	my @results = grep(/$criteria/i, @{ $self->__db });
-	$#results = $self->limit - 1 if (scalar(@results) > $self->limit);
-
-	$self->dic->logger->debug(sprintf(
-		"Query '%s' returned %d results (%d entries total)\n",
-		$criteria,
-		scalar(@results),
-		scalar(@{ $self->__db }),
-	));
-
-	return \@results;
+	return sprintf('{
+		"Contents": [
+			{
+				"Key": "%s/alreadydidsomething.jpg",
+				"LastModified": "2023-08-10T14:41:21+00:00",
+				"ETag": "\"fffffffffffffffffffffffffffff499\"",
+				"Size": 35882,
+				"StorageClass": "STANDARD",
+				"Owner": {
+					"ID": "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff51a"
+				}
+			},
+			{
+				"Key": "%s/bernie.jpg",
+				"LastModified": "2023-08-23T15:40:42+00:00",
+				"ETag": "\"fffffffffffffffffffffffffffff264\"",
+				"Size": 314263,
+				"StorageClass": "STANDARD",
+				"Owner": {
+					"ID": "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff51a"
+				}
+			}
+		]
+	}', $aspect, $aspect);
 }
 
-1;
+package main;
+use strict;
+use warnings;
+exit(MemesExecuteListingCommandTests->new->run);

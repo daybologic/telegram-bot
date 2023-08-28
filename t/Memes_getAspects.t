@@ -1,3 +1,5 @@
+#!/usr/bin/perl
+#
 # telegram-bot
 # Copyright (c) 2023, Rev. Duncan Ross Palmer (2E0EOL),
 # All rights reserved.
@@ -29,65 +31,80 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-package Telegram::Bot::MusicDB;
+package MemesGetAspectsTests;
 use Moose;
 
-extends 'Telegram::Bot::Base';
+use lib 'externals/libtest-module-runnable-perl/lib';
+extends 'Test::Module::Runnable';
 
+use Telegram::Bot::Config::Section;
+use Telegram::Bot::Config;
+use Telegram::Bot::DI::Container;
+use Telegram::Bot::Memes;
+use English qw(-no_match_vars);
+use POSIX qw(EXIT_SUCCESS);
 use Readonly;
+use Test::Deep qw(cmp_deeply all isa methods bool re);
+use Test::More;
 
-Readonly my $LIMIT => 20;
+has config => (is => 'rw', isa => 'Telegram::Bot::Config');
 
-has __db => (isa => 'ArrayRef[Str]', is => 'rw', default => sub {
-	return [ ];
-});
-
-has __location => (is => 'ro', lazy => 1, isa => 'Str', default => sub {
-	return "/var/lib/$ENV{USER}/telegram-bot/music-database.list";
-});
-
-has limit => (is => 'rw', isa => 'Int', default => $LIMIT);
-
-sub BUILD {
-	my ($self) = @_;
-	$self->__reload();
-	return;
-}
-
-sub __reload {
+sub setUp {
 	my ($self) = @_;
 
-	@{ $self->__db } = (); # flush
+	my $dic = Telegram::Bot::DI::Container->new();
+	$self->config(Telegram::Bot::Config->new({ dic => $dic }));
 
-	my $fh = IO::File->new();
-	if ($fh->open($self->__location, 'r')) {
-		while (my $line = <$fh>) {
-			chomp($line);
-			push(@{ $self->__db }, $line);
-		}
-		$self->dic->logger->info(sprintf("%d tracks loaded\n", scalar(@{ $self->__db })));
-		$fh->close();
-	}
+	$self->sut(Telegram::Bot::Memes->new({ dic => $dic }));
 
-	return;
+	return EXIT_SUCCESS;
 }
 
-sub search {
-	my ($self, $criteria) = @_;
-
-	$criteria =~ s/\W//g;
-
-	my @results = grep(/$criteria/i, @{ $self->__db });
-	$#results = $self->limit - 1 if (scalar(@results) > $self->limit);
-
-	$self->dic->logger->debug(sprintf(
-		"Query '%s' returned %d results (%d entries total)\n",
-		$criteria,
-		scalar(@results),
-		scalar(@{ $self->__db }),
-	));
-
-	return \@results;
+sub tearDown {
+	my ($self) = @_;
+	$self->clearMocks();
+	return EXIT_SUCCESS;
 }
 
-1;
+sub testDefaults {
+	my ($self) = @_;
+	plan tests => 1;
+
+	Readonly my @ASPECTS => (qw(original 4x 2x 1x));
+
+	my @results = $self->sut->getAspects();
+	cmp_deeply(\@results, \@ASPECTS, 'correct order');
+
+	return EXIT_SUCCESS;
+}
+
+sub testConfigOverride {
+	my ($self) = @_;
+	plan tests => 1;
+
+	Readonly my $OVERRIDE => '2x';
+	Readonly my @ASPECTS  => ($OVERRIDE, qw(4x original 1x));
+
+	Readonly my %KEYS => (
+		preferred_aspect => $OVERRIDE,
+	);
+
+	$self->mock('Telegram::Bot::Config', 'getSectionByName', [
+		Telegram::Bot::Config::Section->new({
+			'keys' => \%KEYS,
+			name   => 'Telegram::Bot::Memes',
+			owner  => $self->config,
+		}),
+	]);
+
+	my @results = $self->sut->getAspects();
+	cmp_deeply(\@results, \@ASPECTS, 'correct order');
+
+	return EXIT_SUCCESS;
+
+}
+
+package main;
+use strict;
+use warnings;
+exit(MemesGetAspectsTests->new->run);

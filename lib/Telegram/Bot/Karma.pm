@@ -32,11 +32,11 @@
 package Telegram::Bot::Karma;
 use Moose;
 
-use English;
-use Readonly;
-use Telegram::Bot::DB;
+extends 'Telegram::Bot::Base';
 
-has __db => (is => 'ro', isa => 'Telegram::Bot::DB', init_arg => 'db', required => 1);
+use English qw(-no_match_vars);
+use Readonly;
+use Telegram::Bot::DI::Container;
 
 #Readonly my SQL_UPDATE has __sthUpdate => 'UPDATE karma SET score = score + ? WHERE term = ?';
 Readonly my $SQL_UPDATE =>
@@ -61,21 +61,28 @@ sub run {
 		($term, $diff) = $self->__extractCommand($text);
 	};
 	if (my $evalError = $EVAL_ERROR) {
+		$self->dic->logger->warn($evalError);
 		return "ERROR: $evalError";
 	}
 
-	$self->__sthUpdate($self->__db->getHandle()->prepare($SQL_UPDATE)) unless ($self->__sthUpdate);
+	$self->__sthUpdate($self->dic->db->getHandle()->prepare($SQL_UPDATE)) unless ($self->__sthUpdate);
 	$self->__sthUpdate->execute($term, $diff, $diff);
 
-	$self->__sthGet($self->__db->getHandle()->prepare($SQL_SELECT)) unless ($self->__sthGet);
+	$self->__sthGet($self->dic->db->getHandle()->prepare($SQL_SELECT)) unless ($self->__sthGet);
 	$self->__sthGet->execute($self->__term);
 	while (my $row = $self->__sthGet->fetchrow_hashref()) {
 		my $term = $self->__term;
 		my $direction = $self->__increaseOrNot ? 'increased' : 'decreased';
-		return "Karma for $term $direction to $row->{score}";
+		return $self->__debugLogAndReturn("Karma for $term $direction to $row->{score}");
 	}
 
-	return "$term is now at karma level 0"; # can't happen
+	return $self->__debugLogAndReturn("$term is now at karma level 0"); # "can't happen"
+}
+
+sub __debugLogAndReturn {
+	my ($self, $msg) = @_;
+	$self->dic->logger->debug($msg);
+	return $msg;
 }
 
 sub __extractCommand {

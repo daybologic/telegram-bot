@@ -31,7 +31,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-package MemesTests_generateS3URI;
+package DICTests;
 use strict;
 use warnings;
 use Moose;
@@ -39,18 +39,80 @@ use Moose;
 use lib 'externals/libtest-module-runnable-perl/lib';
 extends 'Test::Module::Runnable';
 
-use Telegram::Bot::Memes;
 use English qw(-no_match_vars);
 use POSIX qw(EXIT_SUCCESS);
-use Test::Deep qw(cmp_deeply all isa methods bool re);
+use Readonly;
+use Telegram::Bot::DI::Container;
+use Test::Deep qw(all cmp_deeply isa methods shallow);
 use Test::More;
 
-sub test {
+sub setUp {
 	my ($self) = @_;
-	plan tests => 1;
 
-	my $result = Telegram::Bot::Memes::__generateS3URI('troll', 'png');
-	is($result, 's3://58a75bba-1d73-11ee-afdd-5b1a31ab3736/4x/troll.png', "URL: '$result'");
+	$self->sut(Telegram::Bot::DI::Container->new());
+
+	return EXIT_SUCCESS;
+}
+
+sub testAPI {
+	my ($self) = @_;
+
+	Readonly my %MAP => (
+		'WWW::Telegram::BotAPI' => 'api',
+	);
+
+	plan tests => scalar(keys(%MAP));
+
+	# TODO: Hmm, what can we test about the API contruction?
+	while (my ($package, $name) = each(%MAP)) {
+		cmp_deeply($self->sut->$name, all(
+			isa($package),
+		), $name);
+	}
+
+	return EXIT_SUCCESS;
+}
+
+sub testAttributesSimple {
+	my ($self) = @_;
+
+	Readonly my %MAP => (
+		'Telegram::Bot::Admins'            => 'admins',
+		'Telegram::Bot::Audit'             => 'audit',
+		'Telegram::Bot::Ball8'             => 'ball8',
+		'Telegram::Bot::CatClient'         => 'catClient',
+		'Telegram::Bot::Config'            => 'config',
+		'Telegram::Bot::DB'                => 'db',
+		'Telegram::Bot::DrinksClient'      => 'drinksClient',
+		'Telegram::Bot::GenderClient'      => 'genderClient',
+		'Telegram::Bot::Memes'             => 'memes',
+		'Telegram::Bot::MusicDB'           => 'musicDB',
+		'Telegram::Bot::Karma'             => 'karma',
+		'Telegram::Bot::RandomNumber'      => 'randomNumber',
+		'Telegram::Bot::User::Repository'  => 'userRepo',
+		'Telegram::Bot::UUIDClient'        => 'uuidClient',
+		'Telegram::Bot::Weather::Location' => 'weatherLocation',
+		'Telegram::Bot::XKCD'              => 'xkcd',
+	);
+
+	plan tests => scalar(keys(%MAP));
+
+	while (my ($package, $name) = each(%MAP)) {
+		cmp_deeply($self->sut->$name, all(
+			isa($package),
+			methods(dic => shallow($self->sut)),
+		), $name);
+	}
+
+	return EXIT_SUCCESS;
+}
+
+sub testUA {
+	my ($self) = @_;
+	plan tests => 2;
+
+	isa_ok($self->sut->ua, 'LWP::UserAgent', 'ua');
+	is($self->sut->ua->timeout, 120, 'timeout');
 
 	return EXIT_SUCCESS;
 }
@@ -58,4 +120,4 @@ sub test {
 package main;
 use strict;
 use warnings;
-exit(MemesTests_generateS3URI->new->run);
+exit(DICTests->new->run);

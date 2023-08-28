@@ -30,18 +30,17 @@
 # SUCH DAMAGE.
 
 package Telegram::Bot::Config;
-use strict;
-use warnings;
-use Config::INI;
-use Data::Dumper;
-use Telegram::Bot::Config::Section;
-use Readonly;
-use POSIX;
 use Moose;
+
+extends 'Telegram::Bot::Base';
+
+use Config::INI::Reader;
+use Readonly;
+use Telegram::Bot::Config::Section;
 use utf8;
 
 BEGIN {
-	our $VERSION = '2.1.0';
+	our $VERSION = '2.2.0';
 }
 
 Readonly my $FILE_NAME => 'etc/telegram-bot.conf';
@@ -66,7 +65,7 @@ sub __load {
 
 sub __makeSection {
 	my ($self, $name, $keys) = @_;
-	return Telegram::Bot::Config::Section->new(name => $name, 'keys' => $keys);
+	return Telegram::Bot::Config::Section->new(name => $name, 'keys' => $keys, owner => $self);
 }
 
 1;

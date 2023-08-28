@@ -29,7 +29,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-package Telegram::Bot::CatClient;
+package Telegram::Bot::XKCD;
 use Moose;
 
 extends 'Telegram::Bot::Base';
@@ -39,49 +39,100 @@ use Readonly;
 use URI;
 use URI::Encode;
 
-Readonly my $CAT_URL => 'https://http.cat/%d';
+Readonly my $URL => 'https://xkcd.com/%d/';
 
-has rootPath => (is => 'ro', isa => 'Str', default => '/var/cache/telegram-bot/cat_client');
+has rootPath => (is => 'ro', isa => 'Str', default => '/var/cache/telegram-bot/xkcd');
 
 sub run {
-	my ($self, $code) = @_;
-	return undef unless ($code);
+	my ($self, $ident) = @_;
+	return undef unless ($ident);
 
-	my $file = $self->__getFile($code, undef);
+	my $file = $self->__getCachedFile($ident);
 	return $file if ($file);
 
-	my $uri = URI->new($CAT_URL);
+	if (my $html = $self->__getHtml($ident)) {
+		if (my $pngLocation = __pngFromHtml($html)) {
+			return $self->__downloadImageToCache($ident, $pngLocation);
+		}
+	}
+
+	return undef;
+}
+
+sub __pngFromHtml {
+	my ($html) = @_;
+	my @lines = split(m/\n/, $html);
+
+	foreach my $line (@lines) {
+		if ($line =~ m/^Image URL .*(https.*png|jpg)/i) {
+			return $1;
+		}
+	}
+
+	return undef;
+}
+
+sub __getCachedFile {
+	my ($self, $ident) = @_;
+	mkdir($self->rootPath);
+	my $path = $self->__cachePath($ident);
+	return $path if -f $path;
+	return undef;
+}
+
+sub __cachePath {
+	my ($self, $ident) = @_;
+	return sprintf('%s/%d.png', $self->rootPath, $ident);
+}
+
+sub __getHtml {
+	my ($self, $ident) = @_;
+
+	my $uri = URI->new($URL);
 	my $encoder = URI::Encode->new({double_encode => 0});
-	$uri = $encoder->encode(sprintf($uri, int($code)));
+	$uri = $encoder->encode(sprintf($uri, int($ident)));
 
 	my $response = $self->dic->ua->get($uri);
 	if ($response->is_success) {
-		printf(STDERR "HTTP cat %d: %s\n", $code, $uri);
-		return $self->__getFile($code, $response->decoded_content);
+		printf(STDERR "xkcd %d: %s\n", $ident, $uri);
+		my $html = $response->content;
+		return $html;
 	} else {
 		printf(STDERR "%s\n", $response->status_line);
 	}
 
-	return $self->run(404);
+	return undef;
 }
 
-sub __getFile {
-	my ($self, $code, $content) = @_;
-	mkdir($self->rootPath);
-	my $name = sprintf('%s/%d.jpg', $self->rootPath, $code);
-	return $name if -f $name;
+sub __downloadImageToCache {
+	my ($self, $ident, $pngLocation) = @_;
 
-	return undef unless ($content);
+	my $uri = URI->new($pngLocation);
+	my $encoder = URI::Encode->new({double_encode => 0});
+	$uri = $encoder->encode($pngLocation);
 
-	my $fh = IO::File->new($name, 'w');
+	my $response = $self->dic->ua->get($uri);
+	if ($response->is_success) {
+		return __writeFile($self->__cachePath($ident), $response->content);
+	} else {
+		printf(STDERR "%s\n", $response->status_line);
+	}
+
+	return undef;
+}
+
+
+sub __writeFile {
+	my ($path, $content) = @_;
+	my $fh = IO::File->new($path, 'w');
 	if (defined $fh) {
 		print $fh $content;
 		$fh->close();
 	} else {
-		die("Sorry, cannot create $name: $!");
+		die("Sorry, cannot create $path: $!");
 	}
 
-	return $name;
+	return $path;
 }
 
 1;

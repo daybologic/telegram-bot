@@ -29,28 +29,16 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-package DrinksClient;
-use strict;
-use warnings;
-use LWP::UserAgent;
+package Telegram::Bot::DrinksClient;
 use Moose;
+
+extends 'Telegram::Bot::Base';
+
 use Readonly;
 use URI;
 use URI::Encode;
 
 Readonly my $LAMBDA_URL => 'https://4rkhnkrdqaaqfijye73f2zfb6a0ypkpr.lambda-url.eu-west-2.on.aws/?user=%s&type=%s&platform=telegram';
-
-has __ua => (is => 'rw', isa => 'LWP::UserAgent', default => \&__makeUserAgent, lazy => 1);
-
-sub __makeUserAgent {
-	my ($self) = @_;
-
-	my $ua = LWP::UserAgent->new;
-	$ua->timeout(120);
-	$ua->env_proxy;
-
-	return $ua;
-}
 
 sub run {
 	my ($self, $username, $type) = @_;
@@ -59,14 +47,17 @@ sub run {
 	my $encoder = URI::Encode->new({double_encode => 0});
 	$uri = $encoder->encode(sprintf($uri, $username, $type));
 
-	my $response = $self->__ua->get($uri);
+	$self->dic->logger->debug("GET: $uri");
+	my $response = $self->dic->ua->get($uri);
 	if ($response->is_success) {
-		return $response->decoded_content;
+		my $content = $response->decoded_content;
+		$self->dic->logger->trace($content);
+		return $content;
 	} else {
-		printf(STDERR "%s\n", $response->status_line);
+		$self->dic->logger->error($response->status_line);
 	}
 
-	return $response
+	return $response;
 }
 
 1;

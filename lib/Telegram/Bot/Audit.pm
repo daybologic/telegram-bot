@@ -32,19 +32,42 @@
 package Telegram::Bot::Audit;
 use Moose;
 
-#use Readonly;
-use Telegram::Bot;
-use Telegram::Bot::DB;
+extends 'Telegram::Bot::Base';
 
-has __db => (is => 'ro', isa => 'Telegram::Bot::DB', init_arg => 'db', required => 1);
+use Readonly;
+use Telegram::Bot::Audit::Session;
 
-sub recordStartup {
+sub acquireSession {
 	my ($self) = @_;
-	# TODO: event ID must be different every time; not 640d9f32-3c81-11ee-8596-63ec67873f69
-	my $sth = $self->__db->getHandle()->prepare('INSERT INTO audit_event (type, event, is_system, notes) VALUES(?,?,?,?)');
-	$sth->execute(1, '640d9f32-3c81-11ee-8596-63ec67873f69', 1, "Telegram $Telegram::Bot::VERSION is starting up (2)");
-
-	return;
+	return Telegram::Bot::Audit::Session->new({
+		dic   => $self->dic,
+		id    => $self->__getEventSession(),
+		owner => $self,
+	});
 }
+
+sub __getEventSession {
+	my ($self) = @_;
+
+	$self->dic->uuidClient->count(1);
+	$self->dic->uuidClient->version(1);
+
+	my $results = $self->dic->uuidClient->generate();
+	return $results->[0];
+}
+
+sub _typeLookup {
+	my ($self, $typeMnemonic) = @_;
+
+	my $sth = $self->dic->db->getHandle()->prepare('SELECT id FROM audit_event_type WHERE mnemonic = ?');
+	$sth->execute($typeMnemonic);
+
+	while (my $row = $sth->fetchrow_hashref()) {
+		return $row->{id};
+	}
+
+	return 0;
+}
+
 
 1;
