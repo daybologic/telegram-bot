@@ -42,13 +42,13 @@ use Telegram::Bot::Memes::Add;
 Readonly my $CACHE_PATTERN => '/var/cache/telegram-bot/memes/%s/%s.%s';
 Readonly my $IMAGE_ASPECT_CONFIG => 'preferred_aspect';
 Readonly my $IMAGE_ASPECT_DEFAULT => '4x';
-Readonly my $S3_BUCKET => '58a75bba-1d73-11ee-afdd-5b1a31ab3736';
+Readonly my $S3_BUCKET_DEFAULT => '58a75bba-1d73-11ee-afdd-5b1a31ab3736';
 Readonly my $S3_URI => 's3://%s/%s/%s.%s';
 Readonly my $RESULTS_LIMIT => 25;
 
-has chatId => (isa => 'Int', is => 'rw', default => 0);
-
 has adder => (isa => 'Telegram::Bot::Memes::Add', is => 'ro', init_arg => undef, lazy => 1, default => \&__makeAdder);
+has bucket => (isa => 'Str', is => 'rw', default => $S3_BUCKET_DEFAULT);
+has chatId => (isa => 'Int', is => 'rw', default => 0);
 
 my %__memeExtensionCache = ( );
 
@@ -173,7 +173,7 @@ sub __removeAspects {
 	my ($self, $name, $extension) = @_;
 
 	foreach my $aspect ($self->getAspects()) {
-		$self->__runCommand(__buildDeleteCommand($name, $extension, $aspect));
+		$self->__runCommand($self->__buildDeleteCommand($name, $extension, $aspect));
 		if (my $path = __makeCachePattern($name, $extension, $aspect)) {
 			unlink($path);
 		}
@@ -203,7 +203,7 @@ sub add {
 
 sub addToBucket {
 	my ($self, $path, $name, $aspect) = @_;
-	$self->__runCommand(__buildUploadCommand($name, $path, $aspect));
+	$self->__runCommand($self->__buildUploadCommand($name, $path, $aspect));
 	return;
 }
 
@@ -235,7 +235,7 @@ sub __buildListingCommand {
 	my ($self, $imageAspect) = @_;
 
 	return sprintf("aws --output json s3api list-objects --bucket %s --prefix '%s/'",
-	    $S3_BUCKET, $imageAspect);
+	    $self->bucket, $imageAspect);
 }
 
 sub __executeListingCommand {
@@ -309,9 +309,9 @@ sub __detaint {
 }
 
 sub __generateS3URI {
-	my ($name, $ext, $aspect) = @_;
+	my ($self, $name, $ext, $aspect) = @_;
 	$aspect = $IMAGE_ASPECT_DEFAULT unless ($aspect);
-	return sprintf($S3_URI, $S3_BUCKET, $aspect, $name, $ext);
+	return sprintf($S3_URI, $self->bucket, $aspect, $name, $ext);
 }
 
 sub __makeCachePattern {
@@ -321,28 +321,28 @@ sub __makeCachePattern {
 }
 
 sub __buildCommand {
-	my ($name, $ext, $aspect) = @_;
+	my ($self, $name, $ext, $aspect) = @_;
 	return sprintf(
 		'aws s3 cp %s %s',
-		__generateS3URI($name, $ext, $aspect),
+		$self->__generateS3URI($name, $ext, $aspect),
 		__makeCachePattern($name, $ext, $aspect),
 	);
 }
 
 sub __buildUploadCommand {
-	my ($name, $path, $aspect) = @_;
+	my ($self, $name, $path, $aspect) = @_;
 	return sprintf(
 		'aws s3 cp %s %s',
 		$path,
-		__generateS3URI($name, 'jpg', $aspect),
+		$self->__generateS3URI($name, 'jpg', $aspect),
 	);
 }
 
 sub __buildDeleteCommand {
-	my ($name, $ext, $aspect) = @_;
+	my ($self, $name, $ext, $aspect) = @_;
 	return sprintf(
 		'aws s3 rm %s',
-		__generateS3URI($name, $ext, $aspect),
+		$self->__generateS3URI($name, $ext, $aspect),
 	);
 }
 
@@ -352,7 +352,7 @@ sub __downloadMeme {
 	$self->getList(); # causes extension cache to be refreshed periodically
 	if (my $extension = __memeExtensionCacheFetch($name)) {
 		foreach my $imageAspect ($self->getAspects()) {
-			my $command = __buildCommand($name, $extension, $imageAspect);
+			my $command = $self->__buildCommand($name, $extension, $imageAspect);
 			$self->__runCommand($command);
 		}
 	}
