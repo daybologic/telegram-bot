@@ -2,7 +2,7 @@
 
 [![sourcehut release](Emoji_u1f916.svg)](https://git.sr.ht/~m6kvm/telegram-bot)
 
-Welcome to the Telegram-bot! (@m6kvmdlcmdr) by Rev. Duncan Ross Palmer
+Welcome to the Telegram-bot! (@m6kvmbot) by Rev. Duncan Ross Palmer
 
 ## What is Telegram?
 
@@ -69,7 +69,7 @@ bin/run-bot.sh
 
 ## Talking to the Bot
 
-Find the bot online under the name [m6kvmdlcmdr](https://t.me/m6kvmdlcmdrbot) (@m6kvmdlcmdrbot).
+Find the bot online under the name [m6kvmbot](https://t.me/m6kvmbot) (@m6kvmbot).
 The exact username is due to a requirement by Telegram for all bots' usernames to end with the word 'bot'.
 
 If you run the bot yourself, substitute your preferred username - but remember that aforementioned requirement.
