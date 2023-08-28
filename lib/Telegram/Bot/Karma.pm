@@ -61,6 +61,7 @@ sub run {
 		($term, $diff) = $self->__extractCommand($text);
 	};
 	if (my $evalError = $EVAL_ERROR) {
+		$self->dic->logger->warn($evalError);
 		return "ERROR: $evalError";
 	}
 
@@ -72,10 +73,16 @@ sub run {
 	while (my $row = $self->__sthGet->fetchrow_hashref()) {
 		my $term = $self->__term;
 		my $direction = $self->__increaseOrNot ? 'increased' : 'decreased';
-		return "Karma for $term $direction to $row->{score}";
+		return $self->__debugLogAndReturn("Karma for $term $direction to $row->{score}");
 	}
 
-	return "$term is now at karma level 0"; # can't happen
+	return $self->__debugLogAndReturn("$term is now at karma level 0"); # "can't happen"
+}
+
+sub __debugLogAndReturn {
+	my ($self, $msg) = @_;
+	$self->dic->logger->debug($msg);
+	return $msg;
 }
 
 sub __extractCommand {

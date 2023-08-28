@@ -30,18 +30,15 @@
 # SUCH DAMAGE.
 
 package Telegram::Bot::Config::Section;
-use strict;
-use warnings;
-use Data::Dumper;
-use Readonly;
-use POSIX;
 use Moose;
+use Readonly;
 use utf8;
 
 BEGIN {
 	our $VERSION = '2.1.0';
 }
 
+has owner => (is => 'ro', isa => 'Telegram::Bot::Config', required => 1);
 has 'keys' => (is => 'rw');
 has name => (isa => 'Str', is => 'rw');
 
@@ -50,7 +47,9 @@ sub getValueByKey {
 
 	my $name = $self->name;
 	if (!exists($self->keys->{$key})) {
-		warn("Accessing key '$key' in section '$name' - but it does not exist");
+		# This might appear to be quite a high level of warning, but the user's config is likely out of date
+		# compared to the upstream master and probably needs to be investigated and updated.
+		$self->owner->dic->logger->warn("Accessing key '$key' in section '$name' - but it does not exist");
 		return undef;
 	}
 

@@ -59,13 +59,13 @@ sub makeAdmin {
 	my ($self, $name) = @_;
 	return Telegram::Bot::Admin->new(
 		type  => __detectType($name),
-		value => __logAddingAdmin(lc($name)),
+		value => $self->__logAddingAdmin(lc($name)),
 	);
 }
 
 sub __logAddingAdmin {
-	my ($name) = @_;
-	warn "Added admin '$name'";
+	my ($self, $name) = @_;
+	$self->dic->logger->info("Added admin '$name'");
 	return $name;
 }
 
@@ -81,12 +81,12 @@ sub isAdmin {
 
 	foreach my $admin (@{ $self->admins }) {
 		if ($admin->value eq lc($name)) {
-			warn("name '$name' is an admin");
+			$self->dic->logger->debug("name '$name' is an admin");
 			return 1;
 		}
 	}
 
-	warn("name '$name' is *NOT* an admin");
+	$self->dic->logger->debug("name '$name' is *NOT* an admin");
 	return 0;
 }
 

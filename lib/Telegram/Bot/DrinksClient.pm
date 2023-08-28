@@ -47,14 +47,17 @@ sub run {
 	my $encoder = URI::Encode->new({double_encode => 0});
 	$uri = $encoder->encode(sprintf($uri, $username, $type));
 
+	$self->dic->logger->debug("GET: $uri");
 	my $response = $self->dic->ua->get($uri);
 	if ($response->is_success) {
-		return $response->decoded_content;
+		my $content = $response->decoded_content;
+		$self->dic->logger->trace($content);
+		return $content;
 	} else {
-		printf(STDERR "%s\n", $response->status_line);
+		$self->dic->logger->error($response->status_line);
 	}
 
-	return $response
+	return $response;
 }
 
 1;

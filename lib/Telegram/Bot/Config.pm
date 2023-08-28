@@ -35,10 +35,8 @@ use Moose;
 extends 'Telegram::Bot::Base';
 
 use Config::INI::Reader;
-use Data::Dumper;
-use Telegram::Bot::Config::Section;
 use Readonly;
-use POSIX;
+use Telegram::Bot::Config::Section;
 use utf8;
 
 BEGIN {
@@ -67,7 +65,7 @@ sub __load {
 
 sub __makeSection {
 	my ($self, $name, $keys) = @_;
-	return Telegram::Bot::Config::Section->new(name => $name, 'keys' => $keys);
+	return Telegram::Bot::Config::Section->new(name => $name, 'keys' => $keys, owner => $self);
 }
 
 1;

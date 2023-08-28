@@ -231,12 +231,20 @@ sub __startup {
 	    ->getValueByKey('api_key');
 }
 
-# The commands that this bot supports.
 my %pic_id; # file_id of the last sent picture (per user)
+sub __setPicId {
+	my ($user, $picId) = @_;
+	$pic_id{$user} = $picId;
+	$picId = $picId ? "'$picId'" : '<undef>';
+	$dic->logger->debug("Set user '$user' staged meme to $picId");
+	return;
+}
+
+# The commands that this bot supports.
 my $commands = {
 	'yt' => sub {
 		my (@input) = @_;
-		warn Dumper $input[0];
+		$dic->logger->trace(Dumper $input[0]);
 		my $text = $input[0]->{text};
 
 		if ($text =~ m/^\/yt\s+(https.*)/) {
@@ -285,7 +293,7 @@ my $commands = {
 		my (@input) = @_;
 		my $user = $input[0]->{from}{username} || 'anonymous';
 		my $answer = memeAddRemove($pic_id{$user}, @_);
-		$pic_id{$user} = undef;
+		__setPicId($user, undef);
 		return $answer;
 	},
 	'me' => sub {
@@ -524,7 +532,7 @@ my $message_types = {
 	'photo' => sub {
 		my (@input) = @_;
 		my $user = $input[0]->{from}{username} || 'anonymous';
-		$pic_id{$user} = shift->{photo}[-1]{file_id};
+		__setPicId($user, shift->{photo}[-1]{file_id});
 		+{
 			method     => 'sendMessage',
 			text       => "OK I've seen your meme, now say /meme add <name>.\n"
@@ -533,7 +541,9 @@ my $message_types = {
 	},
 };
 
-printf "Hello! I am %s. Starting...\n", $me->{result}{username};
+my $startMsg = sprintf("Hello! I am %s. Starting...", $me->{result}{username});
+printf("%s\n", $startMsg);
+$dic->logger->info($startMsg);
 recordStartup();
 
 my $breakfastDone = 0;
@@ -607,16 +617,16 @@ while (1) {
 	backgroundTasks();
 
     unless ($updates and ref $updates eq "HASH" and $updates->{ok}) {
-        warn "WARNING: getUpdates returned a false value - trying again...";
+        $dic->logger->warn('getUpdates returned a false value - trying again...');
         next;
     }
 
     for my $u (@{$updates->{result}}) {
-        warn $u->{message}{chat}{id};
+        $dic->logger->trace('chat id ' . $u->{message}{chat}{id});
         $offset = $u->{update_id} + 1 if $u->{update_id} >= $offset;
         if (my $text = $u->{message}{text}) { # Text message
-            printf "Incoming text message from \@%s\n", ($u->{message}{from}{username} // '<undef>');
-            printf "Text: %s\n", $text;
+            $dic->logger->debug(sprintf("Incoming text message from \@%s\n", ($u->{message}{from}{username} // '<undef>')));
+            $dic->logger->debug(sprintf("Text: %s\n", $text));
             next if (index($text, '/') != 0); # Not a command
             my ($cmd, @params) = split / /, $text;
             my $res = $commands->{substr($cmd, 1)} || $commands->{_unknown};
@@ -630,7 +640,7 @@ while (1) {
 			ref $res ? %$res : ( text => $res )
 		    });
             };
-            print "Reply sent.\n";
+            $dic->logger->debug('Reply sent');
         }
         # Handle other message types.
         for my $type (keys %{$u->{message} || {}}) {
