@@ -38,6 +38,7 @@ use lib 'externals/libtest-module-runnable-perl/lib';
 extends 'Test::Module::Runnable';
 
 use Telegram::Bot::Config::Section;
+use Telegram::Bot::Config;
 use Telegram::Bot::DI::Container;
 use Telegram::Bot::Memes;
 use English qw(-no_match_vars);
@@ -46,10 +47,14 @@ use Readonly;
 use Test::Deep qw(cmp_deeply all isa methods bool re);
 use Test::More;
 
+has config => (is => 'rw', isa => 'Telegram::Bot::Config');
+
 sub setUp {
 	my ($self) = @_;
 
 	my $dic = Telegram::Bot::DI::Container->new();
+	$self->config(Telegram::Bot::Config->new({ dic => $dic }));
+
 	$self->sut(Telegram::Bot::Memes->new({ dic => $dic }));
 
 	return EXIT_SUCCESS;
@@ -85,7 +90,11 @@ sub testConfigOverride {
 	);
 
 	$self->mock('Telegram::Bot::Config', 'getSectionByName', [
-		Telegram::Bot::Config::Section->new(name => 'Telegram::Bot::Memes', 'keys' => \%KEYS),
+		Telegram::Bot::Config::Section->new({
+			'keys' => \%KEYS,
+			name   => 'Telegram::Bot::Memes',
+			owner  => $self->config,
+		}),
 	]);
 
 	my @results = $self->sut->getAspects();
