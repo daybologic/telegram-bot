@@ -67,7 +67,7 @@ use POSIX;
 use utf8;
 
 BEGIN {
-	our $VERSION = '2.1.0';
+	our $VERSION = '2.2.0';
 }
 
 my $dic = Telegram::Bot::DI::Container->new();

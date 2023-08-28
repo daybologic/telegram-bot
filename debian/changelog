@@ -1,3 +1,17 @@
+telegram-bot (2.2.0) stable; urgency=medium
+
+  * /xkcd support
+  * high-quality memes
+  * basic auditing support
+  * logger (log4perl)
+  * BUGFIX: Staging meme area is no longer vulnerable to interlacing attack
+  * SECURITY: /cat using proper cache directory, not /tmp/
+  * Improvements to installation system
+  * S3 bucket name may be changed for third-party users
+  * Dependencies checked out via Git for easier development
+
+ -- Rev. Duncan Ross Palmer <2e0eol@gmail.com>  Mon, 28 Aug 2023 11:04:52 +0100
+
 telegram-bot (2.1.0) stable; urgency=high
 
   * Karma support!

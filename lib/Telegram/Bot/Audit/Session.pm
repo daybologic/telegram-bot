@@ -91,7 +91,7 @@ sub recordStartup {
 
 	my $type = $self->__typeLookup($EVENT_START);
 	my $sth = $self->dic->db->getHandle()->prepare('INSERT INTO audit_event (type, event, is_system, notes) VALUES(?,?,?,?)');
-	$sth->execute($type, $self->id, 1, "Telegram $Telegram::Bot::VERSION is starting up (2)");
+	$sth->execute($type, $self->id, 1, "Telegram Bot $Telegram::Bot::VERSION is starting up");
 
 	return;
 }
