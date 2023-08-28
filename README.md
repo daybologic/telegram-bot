@@ -30,10 +30,17 @@ version of the project using:
 
 git clone --recursive git@git.sr.ht:~m6kvm/telegram-bot
 cd telegram-bot/
-cp debian/etc/*.conf etc/debian/
+cp debian/etc/\*.conf etc/debian/
+
+mkdir ~/.aws
+cp debian/etc/config debian/etc/credentials ~/.aws/
 
 Now modify etc/debian/telegram-bot.conf and add keys as necessary from the various upstream vendors,
 and change personal preferences.
+
+Create a bucket with read/write privileges at S3 for meme features.  The bucket key must be set in the config,
+and the credentials must be set in the ~/.aws/ config under the profile 'telegram'.
+You also need a DynamoDB table called 'excuses4' if you want to use the /error feature.  nb. this feature is not really production ready, so any patches are appreciated.
 
 Talk to the [@BotFather](https://t.me/BotFather).  Start with this [tutorial](https://core.telegram.org/bots/tutorial).
 Ensure the token it in the config, or the bot will not start.
