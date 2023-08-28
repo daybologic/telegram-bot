@@ -52,6 +52,16 @@ Then run
 
 sudo chown $USER /var/cache/telegram-bot
 
+### Database
+
+Set up a [MariaDB](https://mariadb.org) database, and pipe the following credentials and schema in using:
+
+mariadb -u root -h HOST < schema.sql
+mariadb -u root -h HOST telegram_bot < grants.sql
+mariadb -u root -h HOST telegram_bot < data.sql
+
+Note that grants.sql contains a false password, which you will need to reset to a known value, and copy into etc/telegram-bot.conf
+
 Finally, start a screen session using SCREEN(1),
 and run:
 

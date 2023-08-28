@@ -49,6 +49,7 @@ Readonly my $RESULTS_LIMIT => 25;
 has adder => (isa => 'Telegram::Bot::Memes::Add', is => 'ro', init_arg => undef, lazy => 1, default => \&__makeAdder);
 has bucket => (isa => 'Str', is => 'rw', lazy => 1, default => \&__makeBucket);
 has chatId => (isa => 'Int', is => 'rw', default => 0);
+has user => (isa => 'Str', is => 'rw', default => '');
 
 my %__memeExtensionCache = ( );
 
@@ -59,16 +60,30 @@ sub run {
 	$text = __detaint($text);
 	return undef unless ($text);
 
-	if (my $path = $self->__pathFromCache($text)) {
-		return $self->__telegramCommand($path, @words);
+	my $result = undef;
+	if (my $path = __pathFromCache($text)) {
+		$result = $self->__telegramCommand($path, @words);
 	} else {
 		$self->__downloadMeme($text);
-		if (my $path = $self->__pathFromCache($text)) {
-			return $self->__telegramCommand($path, @words);
+		if (my $path = __pathFromCache($text)) {
+			$result = $self->__telegramCommand($path, @words);
 		}
 	}
 
-	return undef;
+	if ($result) {
+		$self->dic->audit->acquireSession()->memeUse({
+			meme => $text,
+			user => $self->user,
+		});
+	}
+
+	return $result;
+}
+
+sub setUser {
+	my ($self, $user) = @_;
+	$self->user($user);
+	return $self; # for call chaining
 }
 
 sub search {
@@ -149,24 +164,51 @@ sub exists {
 }
 
 sub remove {
-	my ($self, $name, $user) = @_;
-	return 'Sorry, you cannot remove memes without having a Telegram username' unless ($user);
+	my ($self, $name) = @_;
+	return 'Sorry, you cannot remove memes without having a Telegram username' unless ($self->user);
 	return 'Meme to erase not specified' unless (defined($name) && length($name) > 0);
 	return 'Illegal meme name' if ($name !~ m/^[a-z0-9]+$/i);
 
+	my $audit = $self->dic->audit->acquireSession();
+
 	$self->getList(); # causes extension cache to be refreshed periodically
 	my $extension = __memeExtensionCacheFetch($name);
-	return "No such meme '$name'" unless ($extension);
+	unless ($extension) {
+		my $notes = "No such meme '$name'";
+		$audit->memeRemoveFail({
+			meme  => $name,
+			notes => $notes,
+			user  => $self->user,
+		});
+		return $notes;
+	}
 
-	my $isOwner = $self->__isOwner($name, $self->dic->userRepo->username2User($user));
-	unless ($isOwner || $self->dic->admins->isAdmin($user)) {
+	my $isOwner = $self->__isOwner($name, $self->dic->userRepo->username2User($self->user));
+	unless ($isOwner || $self->dic->admins->isAdmin($self->user)) {
+		my $user = $self->user;
+		my $notes = "User '$user' is not an admin, nor owner of the meme '$name'";
+
+		$audit->memeRemoveFail({
+			meme  => $name,
+			notes => $notes,
+			user  => $self->user,
+		});
+
 		return "Sorry, \@$user, only the owner of the meme '$name', or an admin may remove it";
 	}
 
 	$self->__removeAspects($name, $extension);
 	$self->__forgetOwner($name);
 	__memeExtensionCacheRemove($name);
-	return "Meme '$name' erased";
+
+	my $notes = "Meme '$name' erased";
+	$audit->memeRemoveSuccess({
+		meme  => $name,
+		notes => $notes,
+		user  => $self->user,
+	});
+
+	return $notes;
 }
 
 sub __removeAspects {
@@ -183,12 +225,18 @@ sub __removeAspects {
 }
 
 sub add {
-	my ($self, $name, $picId, $user) = @_;
-	return 'Sorry, you cannot add memes without having a Telegram username' unless ($user);
+	my ($self, $name, $picId) = @_;
+	return 'Sorry, you cannot add memes without having a Telegram username' unless ($self->user);
 	return 'Meme to add not specified' unless (defined($name) && length($name) > 0);
 	return 'Illegal meme name' if ($name !~ m/^[a-z0-9]+$/i);
 
 	if ($self->exists($name)) {
+		$self->dic->audit->acquireSession()->memeAddFail({
+			meme  => $name,
+			notes => "Meme conflict; '$name' already exists",
+			user  => $self->user,
+		});
+
 		return "A meme by the name '$name' aleady exists, use /$name to see it, or /meme rm $name to delete it";
 	}
 
@@ -196,7 +244,14 @@ sub add {
 		return 'There is no staged meme - please PM the bot with a photo or picture, and then try this message again';
 	}
 
-	my $response = $self->adder->add($name, $picId, $user);
+	my $response = $self->adder->add($name, $picId, $self->user);
+
+	$self->dic->audit->acquireSession()->memeAddSuccess({
+		meme  => $name,
+		notes => "Meme '$name' added",
+		user  => $self->user,
+	});
+
 	__memeExtensionCacheStore($name, 'jpg'); # Important; or isn't listable or removable
 	return $response;
 }
