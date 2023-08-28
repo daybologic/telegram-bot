@@ -47,7 +47,7 @@ Readonly my $S3_URI => 's3://%s/%s/%s.%s';
 Readonly my $RESULTS_LIMIT => 25;
 
 has adder => (isa => 'Telegram::Bot::Memes::Add', is => 'ro', init_arg => undef, lazy => 1, default => \&__makeAdder);
-has bucket => (isa => 'Str', is => 'rw', default => $S3_BUCKET_DEFAULT);
+has bucket => (isa => 'Str', is => 'rw', lazy => 1, default => \&__makeBucket);
 has chatId => (isa => 'Int', is => 'rw', default => 0);
 
 my %__memeExtensionCache = ( );
@@ -372,6 +372,22 @@ sub __makeAdder {
 		dic   => $self->dic,
 		owner => $self,
 	});
+}
+
+sub __makeBucket {
+	my ($self) = @_;
+	my $value = $self->__getConfigSection()->getValueByKey('bucket');
+	return $value if ($value);
+	return $S3_BUCKET_DEFAULT;
+}
+
+sub __getConfigSection() {
+	my ($self) = @_;
+
+	my $section = $self->dic->config->getSectionByName(__PACKAGE__);
+	die('Cannot find [' . __PACKAGE__ . '] section') unless ($section);
+
+	return $section;
 }
 
 sub __memeExtensionCacheStore {
