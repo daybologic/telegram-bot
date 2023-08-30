@@ -36,7 +36,6 @@ extends 'Telegram::Bot::Base';
 
 use Readonly;
 use JSON qw(decode_json);
-use LWP::UserAgent;
 use MIME::Base64;
 use URI;
 
