@@ -110,7 +110,6 @@ sub _makeBall8 {
 	return Telegram::Bot::Ball8->new(dic => $self);
 }
 
-
 sub _makeCatClient {
 	my ($self) = @_;
 	return Telegram::Bot::CatClient->new(dic => $self);
@@ -172,6 +171,22 @@ sub _makeUserAgent {
 	my $ua = LWP::UserAgent->new;
 	$ua->timeout(120); # TODO: From config
 	$ua->env_proxy;
+
+	$ua->add_handler(
+		'request_send', sub {
+			my ($msg) = @_; # HTTP::Message
+			$self->logger->trace($msg->dump(maxlength => 0)),
+			return;
+		},
+	);
+
+	$ua->add_handler(
+		'response_done', sub {
+			my ($msg) = @_; # HTTP::Message
+			$self->logger->trace($msg->dump(maxlength => 4096)),
+			return;
+		},
+	);
 
 	return $ua;
 }
