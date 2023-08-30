@@ -64,7 +64,9 @@ sub __pngFromHtml {
 	my @lines = split(m/\n/, $html);
 
 	foreach my $line (@lines) {
-		if ($line =~ m/^Image URL .*(https.*png|jpg)/i) {
+		if ($line =~ m/^Image URL .*(https.*png)/i) {
+			return $1;
+		} elsif ($line =~ m/^Image URL .*(https.*jpg)/i) {
 			return $1;
 		}
 	}
