@@ -125,7 +125,12 @@ sub breakfast {
 	shift(@words); # Sack off 'breakfast'
 	my $name = $words[0] ? $words[0] : $user;
 	$name = '@' . $name if (index($name, '@') != 0);
-	return "Has old $name had their breakfast yet?";
+
+	my $gender = $dic->genderClient->get($user);
+	my $pgender = 'their';
+	$pgender = 'his' if ($gender eq 'male');
+	$pgender = 'her' if ($gender eq 'female');
+	return "Has old $name had $pgender breakfast yet?";
 }
 
 sub version {

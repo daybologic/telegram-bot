@@ -63,4 +63,17 @@ sub run {
 	return $decodedContent;
 }
 
+sub get {
+	my ($self, $username) = @_;
+
+	my $result = $self->run($username);
+	if ($result =~ m/female/i) {
+		return 'female';
+	} elsif ($result =~ m/male/i) {
+		return 'male';
+	}
+
+	return '';
+}
+
 1;
