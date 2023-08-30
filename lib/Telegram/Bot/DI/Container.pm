@@ -168,7 +168,13 @@ sub _makeUuidClient {
 sub _makeUserAgent {
 	my ($self) = @_;
 
-	my $ua = LWP::UserAgent->new;
+	my $ua;
+	if ($self->api->agent->isa('LWP::UserAgent')) {
+		$ua = $self->api->agent; # inherit; one ring to rule them all
+	} else {
+		$ua = LWP::UserAgent->new();
+	}
+
 	$ua->timeout(120); # TODO: From config
 	$ua->env_proxy;
 
