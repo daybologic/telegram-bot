@@ -29,54 +29,24 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-package Telegram::Bot::GenderClient;
+package Telegram::Bot::Gender;
 use Moose;
 
-extends 'Telegram::Bot::Base';
-
+use Moose::Util::TypeConstraints qw(enum);
 use Readonly;
-use Telegram::Bot::Gender;
-use URI;
-use URI::Encode;
 
-Readonly my $GENDER_LAMBDA_URL => 'https://z5odrowet74mkrowq7djkflfd40uhjyg.lambda-url.eu-west-2.on.aws?user=%s&platform=telegram';
+has value => (is => 'ro', isa => enum(['male', 'female', 'unspecified']), required => 1);
 
-sub run {
-	my ($self, $username, $gender) = @_;
+sub their {
+	my ($self) = @_;
 
-	if ($gender && substr($gender, 0, 1) eq '@') {
-		$username = substr($gender, 1);
-		$gender = undef;
+	if ($self->value =~ m/female/i) {
+		return 'her';
+	} elsif ($self->value =~ m/male/i) {
+		return 'his';
 	}
 
-	$username = '' unless ($username);
-
-	my $uri = $GENDER_LAMBDA_URL;
-	$uri .= '&gender=' . $gender if ($gender);
-	$uri = URI->new($uri);
-
-	my $encoder = URI::Encode->new({double_encode => 0});
-	$uri = $encoder->encode(sprintf($uri, $username));
-
-	$self->dic->logger->debug("GET: $uri");
-	my $decodedContent = $self->dic->ua->get($uri)->decoded_content;
-	$self->dic->logger->trace($decodedContent);
-	return $decodedContent;
-}
-
-sub get {
-	my ($self, $username) = @_;
-
-	my $result = $self->run($username);
-	if ($result =~ m/^we don't know/i) {
-		$result = 'unspecified';
-	} elsif ($result =~ m/female/i) {
-		$result = 'female';
-	} else {
-		$result = 'male'; # bit sub-standard.  Need JSON API or local API
-	}
-
-	return Telegram::Bot::Gender->new(value => $result);
+	return 'their';
 }
 
 1;
