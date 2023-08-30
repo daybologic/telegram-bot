@@ -94,11 +94,11 @@ sub __getHtml {
 
 	my $response = $self->dic->ua->get($uri);
 	if ($response->is_success) {
-		printf(STDERR "xkcd %d: %s\n", $ident, $uri);
+		$self->dic->logger->debug(sprintf('xkcd %d: %s', $ident, $uri));
 		my $html = $response->content;
 		return $html;
 	} else {
-		printf(STDERR "%s\n", $response->status_line);
+		$self->dic->logger->error($response->status_line);
 	}
 
 	return undef;
@@ -115,7 +115,7 @@ sub __downloadImageToCache {
 	if ($response->is_success) {
 		return __writeFile($self->__cachePath($ident), $response->content);
 	} else {
-		printf(STDERR "%s\n", $response->status_line);
+		$self->dic->logger->error($response->status_line);
 	}
 
 	return undef;
