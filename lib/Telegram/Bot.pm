@@ -235,25 +235,25 @@ sub __startup {
 	    ->getValueByKey('api_key');
 }
 
-my %pic_id; # file_id of the last sent picture (per user)
 sub __setPicId {
 	my ($user, $picId) = @_;
-	$pic_id{$user} = $picId;
+
 	#TODO: Need a way to apply a universal domain in case other software uses the same memcached
 	$dic->cache->set("picId_${user}", $picId, 3600-3);
 
 	$picId = $picId ? "'$picId'" : '<undef>';
 	$dic->logger->debug("Set user '$user' staged meme to $picId");
+
 	return;
 }
 
 sub __getPicId {
 	my ($user) = @_;
-	return $pic_id{$user};
+
 	my $picId = $dic->cache->get("picId_${user}");
 	$dic->logger->debug("picId from cache for user $user: " . ($picId ? $picId : '<undef>'));
-	#return $picId;
-	return undef;# FIXME
+
+	return $picId;
 }
 
 # The commands that this bot supports.
