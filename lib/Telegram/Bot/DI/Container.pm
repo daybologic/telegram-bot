@@ -118,6 +118,7 @@ sub _makeCache {
 	my $memcached = Cache::Memcached->new({
 		debug              => 1,
 		compress_threshold => 10_000,
+		namespace          => 'Telegram::Bot/', # TODO: Do you need support for many Telegram bots on one machine?  Perhaps a number in the config?
 		servers            => [ '/var/sock/memcached', [ "127.0.0.1:11211", 2 ] ],
 	});
 
