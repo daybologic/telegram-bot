@@ -239,9 +239,21 @@ my %pic_id; # file_id of the last sent picture (per user)
 sub __setPicId {
 	my ($user, $picId) = @_;
 	$pic_id{$user} = $picId;
+	#TODO: Need a way to apply a universal domain in case other software uses the same memcached
+	$dic->cache->set("picId_${user}", $picId, 3600-3);
+
 	$picId = $picId ? "'$picId'" : '<undef>';
 	$dic->logger->debug("Set user '$user' staged meme to $picId");
+	__getPicId($user); # FIXME: Remove this line, debugging only
 	return;
+}
+
+sub __getPicId { # FIXME: Not used yet, debugging.
+	my ($user) = @_;
+	my $picId = $dic->cache->get("picId_${user}");
+	$dic->logger->debug("picId from cache for user $user: " . ($picId ? $picId : '<undef>'));
+	#return $picId;
+	return undef;# FIXME
 }
 
 # The commands that this bot supports.

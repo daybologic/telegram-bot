@@ -12,6 +12,7 @@ WriteMakefile(
 	AUTHOR       => 'Rev. Duncan Ross Palmer (2e0eol@gmail.com)',
 	ABSTRACT     => 'Multipurpose bot for Telegram',
 	PREREQ_PM => {
+		'Cache::Memcached'             => 0, # libcache-memcached-perl
 		'Config::INI'                  => 0, # libconfig-ini-perl
 		'Data::Money'                  => 0, # libdata-money-perl
 		'DateTime'                     => 0, # libdatetime-perl

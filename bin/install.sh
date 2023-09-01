@@ -20,6 +20,7 @@ chown palmer "$CACHEDIR" "$LOGDIR"
 # TODO: The following will only work on Debian; need to bang out
 # on other operating systems.
 sudo apt install \
+	libcache-memcached-perl \
 	libconfig-ini-perl \
 	libdatetime-perl \
 	libdbd-mysql-perl \
