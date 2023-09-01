@@ -244,12 +244,12 @@ sub __setPicId {
 
 	$picId = $picId ? "'$picId'" : '<undef>';
 	$dic->logger->debug("Set user '$user' staged meme to $picId");
-	__getPicId($user); # FIXME: Remove this line, debugging only
 	return;
 }
 
-sub __getPicId { # FIXME: Not used yet, debugging.
+sub __getPicId {
 	my ($user) = @_;
+	return $pic_id{$user};
 	my $picId = $dic->cache->get("picId_${user}");
 	$dic->logger->debug("picId from cache for user $user: " . ($picId ? $picId : '<undef>'));
 	#return $picId;
@@ -308,7 +308,7 @@ my $commands = {
 	'meme' => sub {
 		my (@input) = @_;
 		my $user = $input[0]->{from}{username} || 'anonymous';
-		my $answer = memeAddRemove($pic_id{$user}, @_);
+		my $answer = memeAddRemove(__getPicId($user), @_);
 		__setPicId($user, undef);
 		return $answer;
 	},
