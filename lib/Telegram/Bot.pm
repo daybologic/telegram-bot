@@ -235,11 +235,21 @@ sub __startup {
 	    ->getValueByKey('api_key');
 }
 
+sub __getPicIdKey {
+	my ($user) = @_;
+	return "picId_${user}";
+}
+
 sub __setPicId {
 	my ($user, $picId) = @_;
 
 	#TODO: Need a way to apply a universal domain in case other software uses the same memcached
-	$dic->cache->set("picId_${user}", $picId, 3600-3);
+	my $key = __getPicIdKey($user);
+	if ($picId) {
+		$dic->cache->set($key, $picId, 3600-3);
+	} else {
+		$dic->cache->delete($key);
+	}
 
 	$picId = $picId ? "'$picId'" : '<undef>';
 	$dic->logger->debug("Set user '$user' staged meme to $picId");
@@ -250,7 +260,7 @@ sub __setPicId {
 sub __getPicId {
 	my ($user) = @_;
 
-	my $picId = $dic->cache->get("picId_${user}");
+	my $picId = $dic->cache->get(__getPicIdKey($user));
 	$dic->logger->debug("picId from cache for user $user: " . ($picId ? $picId : '<undef>'));
 
 	return $picId;
