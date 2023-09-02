@@ -115,14 +115,27 @@ sub _makeBall8 {
 sub _makeCache {
 	my ($self) = @_;
 
+	my $id = $self->config->getSectionByName('cache')->getValueByKey('id');
 	my $memcached = Cache::Memcached->new({
 		debug              => 1,
 		compress_threshold => 10_000,
-		namespace          => 'Telegram::Bot/', # TODO: Do you need support for many Telegram bots on one machine?  Perhaps a number in the config?
+		namespace          => __makeCacheNamespace($id),
 		servers            => [ '/var/sock/memcached', [ "127.0.0.1:11211", 2 ] ],
 	});
 
 	return $memcached;
+}
+
+sub __makeCacheNamespace {
+	my ($id) = @_;
+
+	if ($id) {
+		$id = int($id) % 65536;
+	} else {
+		$id = 0;
+	}
+
+	return sprintf('Telegram::Bot/%s/%d/', $Telegram::Bot::VERSION, $id);
 }
 
 sub _makeCatClient {
