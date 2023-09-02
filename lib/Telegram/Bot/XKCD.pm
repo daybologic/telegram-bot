@@ -50,9 +50,13 @@ sub run {
 	my $file = $self->__getCachedFile($ident);
 	return $file if ($file);
 
-	if (my $html = $self->__getHtml($ident)) {
+	if (my $photoId = $self->__getPhotoIdFromCache($ident)) {
+		return $photoId;
+	} elsif (my $html = $self->__getHtml($ident)) {
 		if (my $pngLocation = __pngFromHtml($html)) {
-			return $self->__downloadImageToCache($ident, $pngLocation);
+			if (my $path = $self->__downloadImageToCache($ident, $pngLocation)) {
+				return { file => $path };
+			}
 		}
 	}
 
@@ -135,6 +139,28 @@ sub __writeFile {
 	}
 
 	return $path;
+}
+
+sub __makeCacheKey {
+	my ($ident) = @_;
+	return join('/', 'xkcd', $ident);
+}
+
+sub __getPhotoIdFromCache {
+	my ($self, $ident) = @_;
+
+	my $key = __makeCacheKey($ident);
+	if (my $id = $self->dic->cache->get($key)) {
+		$self->dic->logger->trace(sprintf("Recovered id '%s' from cache for comic %d, using key '%s'",
+		    $id, $ident, $key));
+
+		return $id;
+	}
+
+	$self->dic->logger->trace(sprintf("No photoId in cache for key '%s' (comic %d)",
+	    $key, $ident));
+
+	return undef;
 }
 
 1;
