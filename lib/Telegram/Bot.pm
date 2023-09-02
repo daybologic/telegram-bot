@@ -77,6 +77,7 @@ my ($offset, $updates) = 0;
 
 my $startTime = time();
 my $visualCrossing;
+my $photoIdCallback = undef;
 __startup(); ## FIXME
 
 sub karma {
@@ -103,13 +104,17 @@ sub xkcd {
 
 	if ($ident) {
 		if (my $result = $dic->xkcd->run($ident)) {
+			if (ref($result) eq 'HASH') { # initial response, not cached
+				$photoIdCallback = sub {
+					my $photoId = shift;
+					$dic->xkcd->storePhotoIdInCache($ident, $photoId);
+				};
+			}
+
 			return +{
 				method => 'sendPhoto',
 				photo  => $result,
 			};
-
-#1				$self->__storePhotoIdInCache($ident);
-			# FIXME: How do we get the photoId back from Telegram?
 		}
 	} else {
 		return 'Usage: /xkcd <nnnn>';
@@ -661,14 +666,22 @@ while (1) {
             $res = $res->($u->{message}, @params) if ref $res eq "CODE";
             next unless $res;
             my $method = ref $res && $res->{method} ? delete $res->{method} : "sendMessage";
-		my $resultDebugOnly;
+		my $apiResponse;
 		eval {
-			$resultDebugOnly = $api->$method({
+			$apiResponse = $api->$method({
 				chat_id => $u->{message}{chat}{id},
 				ref $res ? %$res : ( text => $res )
 			});
 		};
-		$dic->logger->trace("From API on calling $method: " . Dumper $resultDebugOnly);
+		$dic->logger->trace("From API on calling $method: " . Dumper $apiResponse->{result});
+		if ($apiResponse && $apiResponse->{result}->{photo}) {
+			if ($photoIdCallback) {
+				$photoIdCallback->($apiResponse->{result}->{photo}->[-1]->{file_id});
+				$photoIdCallback = undef;
+			}
+		} elsif ($photoIdCallback) {
+			$photoIdCallback = undef;
+		}
 		$dic->logger->debug('Reply sent');
         }
         # Handle other message types.

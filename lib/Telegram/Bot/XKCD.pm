@@ -47,11 +47,10 @@ sub run {
 	my ($self, $ident) = @_;
 	return undef unless ($ident);
 
-	my $file = $self->__getCachedFile($ident);
-	return $file if ($file);
-
 	if (my $photoId = $self->__getPhotoIdFromCache($ident)) {
 		return $photoId;
+	} elsif (my $file = $self->__getCachedFile($ident)) {
+		return { file => $file };
 	} elsif (my $html = $self->__getHtml($ident)) {
 		if (my $pngLocation = __pngFromHtml($html)) {
 			if (my $path = $self->__downloadImageToCache($ident, $pngLocation)) {
@@ -61,6 +60,19 @@ sub run {
 	}
 
 	return undef;
+}
+
+sub storePhotoIdInCache {
+	my ($self, $ident, $photoId) = @_;
+	return unless ($photoId);
+
+	my $key = __makeCacheKey($ident);
+	$self->dic->cache->set($key, $photoId, 2419200);
+
+	$self->dic->logger->trace(sprintf("Saved comic %d photoId '%s' into cache with key '%s'",
+	    $ident, $photoId, $key));
+
+	return;
 }
 
 sub __pngFromHtml {
@@ -126,7 +138,6 @@ sub __downloadImageToCache {
 
 	return undef;
 }
-
 
 sub __writeFile {
 	my ($path, $content) = @_;
