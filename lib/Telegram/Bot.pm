@@ -162,6 +162,21 @@ sub memeSearch {
 		return "There is no meme like that.  Send me an image in a PM and then use '/meme add <name>'";
 	} elsif (scalar(@$results) == 1) {
 		if (my $meme = $dic->memes->setUser($user)->run($results->[0], @words)) {
+			my $fromCache = 1;
+			if ($meme->{method} eq 'sendAnimation' && ref($meme->{animation}) eq 'HASH') {
+				$fromCache = 0;
+			} elsif ($meme->{method} eq 'sendPhoto' && ref($meme->{photo}) eq 'HASH') {
+				$fromCache = 0;
+			}
+			warn 'fromCache is ' . $fromCache;
+
+			if (!$fromCache) {
+				$photoIdCallback = sub {
+					my $photoId = shift;
+					$dic->memes->storePhotoIdInCache($name, $extension, $aspect, $photoId);
+				};
+			}
+
 			return $meme;
 		}
 	} else {
@@ -324,7 +339,7 @@ my $commands = {
 		my (@input) = @_;
 		my $user = $input[0]->{from}{username} || 'anonymous';
 		my $answer = memeAddRemove(__getPicId($user), @_);
-		__setPicId($user, undef);
+		__setPicId($user, undef); # clear the staging area
 		return $answer;
 	},
 	'me' => sub {

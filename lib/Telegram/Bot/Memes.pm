@@ -61,12 +61,12 @@ sub run {
 	return undef unless ($text);
 
 	my $result = undef;
-	if (my $path = $self->__pathFromCache($text)) {
-		$result = $self->__telegramCommand($path, @words);
+	if (my $photo = $self->__photoFromCache($text)) {
+		$result = $self->__telegramCommand($photo, @words);
 	} else {
 		$self->__downloadMeme($text);
-		if (my $path = $self->__pathFromCache($text)) {
-			$result = $self->__telegramCommand($path, @words);
+		if (my $photo = $self->__photoFromCache($text)) {
+			$result = $self->__telegramCommand($photo, @words);
 		}
 	}
 
@@ -314,11 +314,18 @@ sub __removeSizePrefix {
 }
 
 sub __telegramCommand {
-	my ($self, $path, @words) = @_;
+	my ($self, $photo, @words) = @_;
 
-	if ($path =~ m/gif$/ && $self->chatId != -407509267) {
+	# FIXME: How do you know if an image was a gif?
+	if (
+		$self->chatId != -407509267
+		&& $photo
+		&& ref($photo)
+		&& ref($photo) eq 'HASH'
+		&& $photo->{file} =~ m/gif$/
+	) {
 		return +{
-			animation => { file => $path },
+			animation => $photo,
 			caption   => join(' ', @words),
 			method    => 'sendAnimation',
 		};
@@ -327,30 +334,52 @@ sub __telegramCommand {
 	return +{
 		caption => join(' ', @words),
 		method  => 'sendPhoto',
-		photo   => { file => $path },
+		photo   => $photo,
 	};
 }
 
-sub __pathFromCache {
+sub storePhotoIdInCache {
+	my ($self, $name, $extension, $aspect, $photoId) = @_;
+
+	my $key = __makeCacheKey($name, $extension, $aspect); # FIXME: What key?
+	$self->dic->cache->set($key, $photoId, 180);
+
+	return;
+}
+
+sub __photoFromCache {
 	my ($self, $name) = @_;
 
 	if (my $extension = __memeExtensionCacheFetch($name)) {
 		foreach my $aspect ($self->getAspects()) {
+			if (my $id = $self->dic->cache->get(__makeCacheKey($name, $extension, $aspect))) {
+				return $id;
+			}
+
 			my $path = __makeCachePattern($name, $extension, $aspect);
 			$self->dic->logger->trace("Checking if '$path' exists (used extension cache)");
-			return $path if (-f $path);
+			return { file => $path } if (-f $path);
 		}
 	} else {
 		foreach my $extension (qw(png gif jpg JPG jpeg)) {
 			foreach my $aspect ($self->getAspects()) {
+				if (my $id = $self->dic->cache->get(__makeCacheKey($name, $extension, $aspect))) {
+					return $id;
+				}
+
 				my $path = __makeCachePattern($name, $extension, $aspect);
 				$self->dic->logger->trace("Checking if '$path' exists (not in extension cache)");
-				return $path if (-f $path);
+				return { file => $path } if (-f $path);
 			}
 		}
 	}
 
 	return undef;
+}
+
+sub __makeCacheKey {
+	my ($name, $extension, $aspect) = @_;
+	return sprintf('%s/%s.%s', $aspect, $name, $extension);
 }
 
 sub __detaint {
