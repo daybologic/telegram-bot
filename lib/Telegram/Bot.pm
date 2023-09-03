@@ -657,7 +657,7 @@ while (1) {
         $dic->logger->trace('chat id ' . $u->{message}{chat}{id});
         $offset = $u->{update_id} + 1 if $u->{update_id} >= $offset;
         if (my $text = $u->{message}{text}) { # Text message
-            $dic->logger->debug(sprintf("Incoming text message from \@%s\n", ($u->{message}{from}{username} // '<undef>')));
+            $dic->logger->debug(sprintf("Incoming text message from \@%s", ($u->{message}{from}{username} // '<undef>')));
             $dic->logger->trace(sprintf("Text: %s\n", $text));
             next if (index($text, '/') != 0); # Not a command
             my ($cmd, @params) = split / /, $text;
