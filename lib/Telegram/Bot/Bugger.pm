@@ -126,6 +126,7 @@ Readonly my @ARTICLES => (
 	"Palmer's sink",
 	'stamp duty',
 	'an exhaust pipe',
+	'a trash compactor',
 );
 
 sub run {
