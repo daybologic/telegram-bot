@@ -219,7 +219,7 @@ sub insult {
 }
 
 sub recordStartup {
-	$dic->logger->info(sprintf("Hello! I am %s. Starting...", $me->{result}{username}));
+	$dic->logger->info(sprintf("Telegram-bot (@%s). Starting.  For full documentation, say /source to the bot.  To increase debug, send SIGUSR1 to %s", $me->{result}{username}, $$));
 	$dic->audit->acquireSession()->recordStartup();
 
 	return;
