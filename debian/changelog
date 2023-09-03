@@ -1,3 +1,19 @@
+telegram-bot (2.3.0) stable; urgency=medium
+
+  * Logging:
+    Color logging to console
+    Change to TRACE log level by sending SIGUSR1 (revert with SIGUSR2)
+    All LWP::UserAgent (remote web services) and Telegram API goes through the same logger
+    Log-level improvements
+
+  * New command: /bugger
+  * wait until user command finishes running before shutdown
+  * Drinks client respects /gender
+
+  * XKCD support for JPEG images fixed
+
+ -- Rev. Duncan Ross Palmer <2e0eol@gmail.com>  Sun, 03 Sep 2023 22:01:33 +0100
+
 telegram-bot (2.2.0) stable; urgency=medium
 
   * /xkcd support
