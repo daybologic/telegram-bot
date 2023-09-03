@@ -220,6 +220,7 @@ sub insult {
 sub recordStartup {
 	my ($self) = @_;
 
+	$dic->logger->info(sprintf("Hello! I am %s. Starting...", $me->{result}{username}));
 	$dic->audit->acquireSession()->recordStartup();
 
 	return;
@@ -551,9 +552,6 @@ my $message_types = {
 	},
 };
 
-my $startMsg = sprintf("Hello! I am %s. Starting...", $me->{result}{username});
-printf("%s\n", $startMsg);
-$dic->logger->info($startMsg);
 recordStartup();
 
 my $breakfastDone = 0;
