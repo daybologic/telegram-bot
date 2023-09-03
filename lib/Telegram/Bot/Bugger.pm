@@ -36,6 +36,8 @@ extends 'Telegram::Bot::Base';
 
 use Readonly;
 
+has previous => (isa => 'Int', is => 'rw', default => -1);
+
 Readonly my @ARTICLES => (
 	"a fish fork",
 	"a sheep shearer",
@@ -127,7 +129,14 @@ Readonly my @ARTICLES => (
 );
 
 sub run {
-	my $idx = int(rand(scalar(@ARTICLES)));
+	my ($self) = @_;
+
+	my $idx;
+	do {
+		$idx = int(rand(scalar(@ARTICLES)));
+	} while ($idx == $self->previous);
+
+	$self->previous($idx);
 	return 'Well bugger me with ' . $ARTICLES[$idx];
 }
 
