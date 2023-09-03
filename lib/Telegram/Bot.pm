@@ -227,7 +227,7 @@ sub recordStartup {
 
 # FIXME: This method should not exist.  use DI Container!
 sub __startup {
-	$dic->logger->trace('TODO: Legacy __startup called');
+	$dic->logger->warn('TODO: Legacy __startup called');
 	$dic->admins->load();
 
 	$visualCrossing = Geo::Weather::VisualCrossing->new({
@@ -636,7 +636,7 @@ while (1) {
         $offset = $u->{update_id} + 1 if $u->{update_id} >= $offset;
         if (my $text = $u->{message}{text}) { # Text message
             $dic->logger->debug(sprintf("Incoming text message from \@%s\n", ($u->{message}{from}{username} // '<undef>')));
-            $dic->logger->debug(sprintf("Text: %s\n", $text));
+            $dic->logger->trace(sprintf("Text: %s\n", $text));
             next if (index($text, '/') != 0); # Not a command
             my ($cmd, @params) = split / /, $text;
             my $res = $commands->{substr($cmd, 1)} || $commands->{_unknown};
