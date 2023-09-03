@@ -227,14 +227,15 @@ sub recordStartup {
 }
 
 sub logLevelChange {
+	my ($delta) = @_;
 	my $logger = $dic->logger;
 
-	my $delta = 1;
-	$logger->{_sigTrace} = !$logger->{_sigTrace}; # toggle
-
-	if ($logger->{_sigTrace}) {
+	if ($delta > 0) {
 		$logger->more_logging($delta);
+		$logger->info('Increased log level via SIGUSR1');
 	} else {
+		$delta = abs($delta);
+		$logger->info('Decreased log level via SIGUSR2');
 		$logger->less_logging($delta);
 	}
 
@@ -242,7 +243,9 @@ sub logLevelChange {
 }
 
 sub installSignals {
-	$SIG{USR1} = \&logLevelChange;
+	$SIG{USR1} = sub { logLevelChange(1) };
+	$SIG{USR2} = sub { logLevelChange(-1) };
+
 	return;
 }
 
