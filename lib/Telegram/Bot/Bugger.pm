@@ -49,14 +49,14 @@ Readonly my @ARTICLES => (
 	"an acquired medicinal ice cream",
 	"a spotted dick",
 	"a trance track",
-	"a Telegram".
+	"a Telegram",
 	"a SIP router",
 	"a bottle of craft beer",
 	"an iPhone",
 	"an Android phone",
 	"Thursday",
 	"a mug of coffee",
-	"a pint of lard".
+	"a pint of lard",
 	"a pie from The Raven of Bath",
 	'a spade',
 	'a wee dram',
@@ -100,7 +100,7 @@ Readonly my @ARTICLES => (
 	"an eggplant",
 	"the aubergine",
 	"Mohammed Fayed",
-	"a walrus-face".
+	"a walrus-face",
 	"The Nautilus",
 	"a border router",
 	"an edge connector",
@@ -120,7 +120,7 @@ Readonly my @ARTICLES => (
 	'a rubber dinghy',
 	'a telescope',
 	'a pair of binoculars',
-	'the Greatest Living Artist'.
+	'The Greatest Living Artist',
 	"Benedict's gardener",
 	"Benedict's laptop",
 	"Palmer's sink",
