@@ -35,6 +35,7 @@ use Moose;
 extends 'Telegram::Bot::Base';
 
 use Readonly;
+use Telegram::Bot::Gender;
 use URI;
 use URI::Encode;
 
@@ -57,10 +58,23 @@ sub run {
 	my $encoder = URI::Encode->new({double_encode => 0});
 	$uri = $encoder->encode(sprintf($uri, $username));
 
-	$self->dic->logger->debug("GET: $uri");
 	my $decodedContent = $self->dic->ua->get($uri)->decoded_content;
-	$self->dic->logger->trace($decodedContent);
 	return $decodedContent;
+}
+
+sub get {
+	my ($self, $username) = @_;
+
+	my $result = $self->run($username);
+	if ($result =~ m/^we don't know/i) {
+		$result = 'unspecified';
+	} elsif ($result =~ m/female/i) {
+		$result = 'female';
+	} else {
+		$result = 'male'; # bit sub-standard.  Need JSON API or local API
+	}
+
+	return Telegram::Bot::Gender->new(value => $result);
 }
 
 1;

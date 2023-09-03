@@ -64,7 +64,9 @@ sub __pngFromHtml {
 	my @lines = split(m/\n/, $html);
 
 	foreach my $line (@lines) {
-		if ($line =~ m/^Image URL .*(https.*png|jpg)/i) {
+		if ($line =~ m/^Image URL .*(https.*png)/i) {
+			return $1;
+		} elsif ($line =~ m/^Image URL .*(https.*jpg)/i) {
 			return $1;
 		}
 	}
@@ -94,11 +96,11 @@ sub __getHtml {
 
 	my $response = $self->dic->ua->get($uri);
 	if ($response->is_success) {
-		printf(STDERR "xkcd %d: %s\n", $ident, $uri);
+		$self->dic->logger->debug(sprintf('xkcd %d: %s', $ident, $uri));
 		my $html = $response->content;
 		return $html;
 	} else {
-		printf(STDERR "%s\n", $response->status_line);
+		$self->dic->logger->error($response->status_line);
 	}
 
 	return undef;
@@ -115,7 +117,7 @@ sub __downloadImageToCache {
 	if ($response->is_success) {
 		return __writeFile($self->__cachePath($ident), $response->content);
 	} else {
-		printf(STDERR "%s\n", $response->status_line);
+		$self->dic->logger->error($response->status_line);
 	}
 
 	return undef;

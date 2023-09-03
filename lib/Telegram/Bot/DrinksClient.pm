@@ -47,11 +47,17 @@ sub run {
 	my $encoder = URI::Encode->new({double_encode => 0});
 	$uri = $encoder->encode(sprintf($uri, $username, $type));
 
-	$self->dic->logger->debug("GET: $uri");
 	my $response = $self->dic->ua->get($uri);
 	if ($response->is_success) {
 		my $content = $response->decoded_content;
-		$self->dic->logger->trace($content);
+		if ($content =~ m/ their /) {
+			my $gender = $self->dic->genderClient->get($username);
+			if ($gender->value eq 'female') {
+				$content =~ s/ their / her /;
+			} elsif ($gender->value eq 'male') {
+				$content =~ s/ their / his /;
+			}
+		}
 		return $content;
 	} else {
 		$self->dic->logger->error($response->status_line);

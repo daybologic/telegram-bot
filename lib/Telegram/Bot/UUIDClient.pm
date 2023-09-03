@@ -36,7 +36,6 @@ extends 'Telegram::Bot::Base';
 
 use Readonly;
 use JSON qw(decode_json);
-use LWP::UserAgent;
 use MIME::Base64;
 use URI;
 
@@ -56,8 +55,6 @@ sub generate {
 	$uri->query_form(\%opts);
 
 	my @results;
-	$self->dic->logger->trace($uri);
-
 	my $response = $self->dic->ua->get($uri);
 	if ($response->is_success) {
 		my $decoded = decode_json(decode_base64($response->decoded_content));

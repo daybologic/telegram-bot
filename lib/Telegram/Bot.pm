@@ -67,9 +67,10 @@ use POSIX;
 use utf8;
 
 BEGIN {
-	our $VERSION = '2.2.0';
+	our $VERSION = '2.3.0';
 }
 
+my $stop = 0;
 my $dic = Telegram::Bot::DI::Container->new();
 my $api = $dic->api;
 my $me = $dic->api->getMe or die;
@@ -93,6 +94,10 @@ sub source {
 	return 'Source code for the bot can be obtained from '
 	    . "https://git.sr.ht/~m6kvm/telegram-bot/refs/v${Telegram::Bot::VERSION}\n"
 	    . 'Patches and memes may be sent to 2e0eol@gmail.com with subject "telegram-bot"';
+}
+
+sub bugger {
+	return $dic->bugger->run();
 }
 
 sub xkcd {
@@ -121,11 +126,14 @@ sub breakfast {
 	my (@input) = @_;
 	my $user = $input[0]->{from}{username} || 'jesscharlton';
 	my $text = $input[0]->{text};
+
 	my @words = split(m/\s+/, $text);
 	shift(@words); # Sack off 'breakfast'
 	my $name = $words[0] ? $words[0] : $user;
 	$name = '@' . $name if (index($name, '@') != 0);
-	return "Has old $name had their breakfast yet?";
+
+	my $their = $dic->genderClient->get($name)->their();
+	return "Has old $name had $their breakfast yet?";
 }
 
 sub version {
@@ -211,16 +219,46 @@ sub insult {
 }
 
 sub recordStartup {
-	my ($self) = @_;
-
+	$dic->logger->info(sprintf("Telegram-bot (@%s). Starting.  For full documentation, say /source to the bot.  To increase debug, send SIGUSR1 to %s", $me->{result}{username}, $$));
 	$dic->audit->acquireSession()->recordStartup();
+
+	return;
+}
+
+sub recordShutdown {
+	$dic->logger->info('Shutting down');
+	$stop = 1;
+
+	return;
+}
+
+sub logLevelChange {
+	my ($delta) = @_;
+	my $logger = $dic->logger;
+
+	if ($delta > 0) {
+		$logger->more_logging($delta);
+		$logger->info('Increased log level via SIGUSR1');
+	} else {
+		$delta = abs($delta);
+		$logger->info('Decreased log level via SIGUSR2');
+		$logger->less_logging($delta);
+	}
+
+	return;
+}
+
+sub installSignals {
+	$SIG{USR1} = sub { logLevelChange(1) };
+	$SIG{USR2} = sub { logLevelChange(-1) };
+	$SIG{TERM} = $SIG{INT} = \&recordShutdown;
 
 	return;
 }
 
 # FIXME: This method should not exist.  use DI Container!
 sub __startup {
-	$dic->logger->trace('TODO: Legacy __startup called');
+	$dic->logger->warn('TODO: Legacy __startup called');
 	$dic->admins->load();
 
 	$visualCrossing = Geo::Weather::VisualCrossing->new({
@@ -272,6 +310,7 @@ my $commands = {
 			return "I don't recognize the ID or URL";
 		}
 	},
+	'bugger' => \&bugger,
 	'version' => \&version,
 	'search' => sub {
 		my (@input) = @_;
@@ -543,10 +582,8 @@ my $message_types = {
 	},
 };
 
-my $startMsg = sprintf("Hello! I am %s. Starting...", $me->{result}{username});
-printf("%s\n", $startMsg);
-$dic->logger->info($startMsg);
 recordStartup();
+installSignals();
 
 my $breakfastDone = 0;
 my $backCounter = 0;
@@ -605,7 +642,7 @@ sub backgroundTasks {
 	return;
 }
 
-while (1) {
+while (0 == $stop) {
 	eval {
 		$updates = $api->getUpdates ({
 			timeout => 30, # Use long polling
@@ -627,8 +664,8 @@ while (1) {
         $dic->logger->trace('chat id ' . $u->{message}{chat}{id});
         $offset = $u->{update_id} + 1 if $u->{update_id} >= $offset;
         if (my $text = $u->{message}{text}) { # Text message
-            $dic->logger->debug(sprintf("Incoming text message from \@%s\n", ($u->{message}{from}{username} // '<undef>')));
-            $dic->logger->debug(sprintf("Text: %s\n", $text));
+            $dic->logger->debug(sprintf("Incoming text message from \@%s", ($u->{message}{from}{username} // '<undef>')));
+            $dic->logger->trace(sprintf("Text: %s\n", $text));
             next if (index($text, '/') != 0); # Not a command
             my ($cmd, @params) = split / /, $text;
             my $res = $commands->{substr($cmd, 1)} || $commands->{_unknown};
