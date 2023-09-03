@@ -70,6 +70,7 @@ BEGIN {
 	our $VERSION = '2.2.0';
 }
 
+my $stop = 0;
 my $dic = Telegram::Bot::DI::Container->new();
 my $api = $dic->api;
 my $me = $dic->api->getMe or die;
@@ -218,10 +219,15 @@ sub insult {
 }
 
 sub recordStartup {
-	my ($self) = @_;
-
 	$dic->logger->info(sprintf("Hello! I am %s. Starting...", $me->{result}{username}));
 	$dic->audit->acquireSession()->recordStartup();
+
+	return;
+}
+
+sub recordShutdown {
+	$dic->logger->info('Shutting down');
+	$stop = 1;
 
 	return;
 }
@@ -245,6 +251,7 @@ sub logLevelChange {
 sub installSignals {
 	$SIG{USR1} = sub { logLevelChange(1) };
 	$SIG{USR2} = sub { logLevelChange(-1) };
+	$SIG{TERM} = $SIG{INT} = \&recordShutdown;
 
 	return;
 }
@@ -635,7 +642,7 @@ sub backgroundTasks {
 	return;
 }
 
-while (1) {
+while (0 == $stop) {
 	eval {
 		$updates = $api->getUpdates ({
 			timeout => 30, # Use long polling
