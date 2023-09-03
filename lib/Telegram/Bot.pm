@@ -226,6 +226,26 @@ sub recordStartup {
 	return;
 }
 
+sub logLevelChange {
+	my $logger = $dic->logger;
+
+	my $delta = 1;
+	$logger->{_sigTrace} = !$logger->{_sigTrace}; # toggle
+
+	if ($logger->{_sigTrace}) {
+		$logger->more_logging($delta);
+	} else {
+		$logger->less_logging($delta);
+	}
+
+	return;
+}
+
+sub installSignals {
+	$SIG{USR1} = \&logLevelChange;
+	return;
+}
+
 # FIXME: This method should not exist.  use DI Container!
 sub __startup {
 	$dic->logger->warn('TODO: Legacy __startup called');
@@ -553,6 +573,7 @@ my $message_types = {
 };
 
 recordStartup();
+installSignals();
 
 my $breakfastDone = 0;
 my $backCounter = 0;
