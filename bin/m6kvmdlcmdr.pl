@@ -15,7 +15,7 @@ sub main {
 		return $exitCode;
 	}
 
-	return Telegram::Bot->new->run();
+	#return Telegram::Bot->new->run(); # FIXME: This is not an object; need to fix that
 }
 
 sub rootCheck {

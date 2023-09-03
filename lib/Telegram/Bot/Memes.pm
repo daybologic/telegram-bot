@@ -337,14 +337,14 @@ sub __pathFromCache {
 	if (my $extension = __memeExtensionCacheFetch($name)) {
 		foreach my $aspect ($self->getAspects()) {
 			my $path = __makeCachePattern($name, $extension, $aspect);
-			$self->dic->logger->trace("Checking if '$path' exists (used extension cache)");
+			$self->dic->logger->debug("Checking if '$path' exists (used extension cache)");
 			return $path if (-f $path);
 		}
 	} else {
 		foreach my $extension (qw(png gif jpg JPG jpeg)) {
 			foreach my $aspect ($self->getAspects()) {
 				my $path = __makeCachePattern($name, $extension, $aspect);
-				$self->dic->logger->trace("Checking if '$path' exists (not in extension cache)");
+				$self->dic->logger->debug("Checking if '$path' exists (not in extension cache)");
 				return $path if (-f $path);
 			}
 		}
@@ -417,7 +417,7 @@ sub __downloadMeme {
 
 sub __runCommand {
 	my ($self, $command) = @_;
-	$self->dic->logger->trace("Running $command");
+	$self->dic->logger->debug("Running $command");
 	return system($command);
 }
 
