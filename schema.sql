@@ -165,3 +165,12 @@ CREATE TABLE `karma` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `term` (`term`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+CREATE TABLE `gender` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user` int(11) NOT NULL,
+  `gender` enum('female','male','unspecified') NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `gender_user` (`user`),
+  CONSTRAINT `gender_user` FOREIGN KEY (`user`) REFERENCES `user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
