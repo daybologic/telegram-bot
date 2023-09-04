@@ -11,11 +11,13 @@ fi
 
 CACHEDIR='/var/cache/telegram-bot'
 LOGDIR='/var/log/telegram-bot'
-mkdir -p "$CACHEDIR" "$LOGDIR"
-chmod 0700 "$CACHEDIR" "$LOGDIR"
+DBDIR='/var/lib/telegram-bot'
+
+mkdir -p "$CACHEDIR" "$LOGDIR" "$DBDIR"
+chmod 0700 "$CACHEDIR" "$LOGDIR" "$DBDIR"
 
 # FIXME: Need a UID for the bot
-chown palmer "$CACHEDIR" "$LOGDIR"
+chown palmer "$CACHEDIR" "$LOGDIR" "$DBDIR"
 
 # TODO: The following will only work on Debian; need to bang out
 # on other operating systems.

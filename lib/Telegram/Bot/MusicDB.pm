@@ -43,7 +43,7 @@ has __db => (isa => 'ArrayRef[Str]', is => 'rw', default => sub {
 });
 
 has __location => (is => 'ro', lazy => 1, isa => 'Str', default => sub {
-	return "/var/lib/$ENV{USER}/telegram-bot/music-database.list";
+	return '/var/cache/telegram-bot/music-database.list';
 });
 
 has limit => (is => 'rw', isa => 'Int', default => $LIMIT);
@@ -65,7 +65,7 @@ sub __reload {
 			chomp($line);
 			push(@{ $self->__db }, $line);
 		}
-		$self->dic->logger->info(sprintf("%d tracks loaded\n", scalar(@{ $self->__db })));
+		$self->dic->logger->info(sprintf("%d tracks loaded", scalar(@{ $self->__db })));
 		$fh->close();
 	}
 
@@ -81,7 +81,7 @@ sub search {
 	$#results = $self->limit - 1 if (scalar(@results) > $self->limit);
 
 	$self->dic->logger->debug(sprintf(
-		"Query '%s' returned %d results (%d entries total)\n",
+		"Query '%s' returned %d results (%d entries total)",
 		$criteria,
 		scalar(@results),
 		scalar(@{ $self->__db }),
