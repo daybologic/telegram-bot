@@ -35,7 +35,7 @@ use Readonly;
 use utf8;
 
 BEGIN {
-	our $VERSION = '2.3.0';
+	our $VERSION = '2.3.1';
 }
 
 has owner => (is => 'ro', isa => 'Telegram::Bot::Config', required => 1);
