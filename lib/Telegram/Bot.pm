@@ -67,7 +67,7 @@ use POSIX;
 use utf8;
 
 BEGIN {
-	our $VERSION = '2.3.0';
+	our $VERSION = '2.3.1';
 }
 
 my $stop = 0;
