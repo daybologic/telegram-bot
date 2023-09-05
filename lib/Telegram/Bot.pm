@@ -279,7 +279,7 @@ my $commands = {
 		my @words = split(m/\s+/, $text);
 		$text = $words[1];
 		if ($text) {
-			my $results = $dic->musicDb->search($text);
+			my $results = $dic->musicDB->search($text);
 			if (scalar(@$results)) {
 				return join("\n", @$results);
 			} else {
