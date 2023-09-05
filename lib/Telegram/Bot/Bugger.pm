@@ -98,7 +98,7 @@ Readonly my @ARTICLES => (
 	"an electric kettle",
 	"a glass of wine",
 	"an eggplant",
-	"the aubergine",
+	"an aubergine",
 	"Mohammed Fayed",
 	"a walrus-face",
 	"The Nautilus",
