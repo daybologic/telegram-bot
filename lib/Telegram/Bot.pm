@@ -589,18 +589,13 @@ my $message_types = {
 recordStartup();
 installSignals();
 
-my $nextBackgroundTask = undef;
+my @backgroundTaskQueue = ();
 
 sub handle_fifo_record {
 	my ($record) = @_;
 	$dic->logger->trace('FROM FIFO: ' . $record); # FIXME: Ignored
 
-	if ($nextBackgroundTask) {
-		$dic->logger->warn('If you see this message, you need to make @nextBackgroundTask a list');
-		return;
-	}
-
-	$nextBackgroundTask = {
+	push(@backgroundTaskQueue, {
 		ok => 1,
 		result => [
 			{
@@ -628,13 +623,13 @@ sub handle_fifo_record {
 						username => 'M6KVM',
 						type => 'private'
 					},
-					date => 1694038865,
+					date => 1694113787,
 					message_id => 1081
 				},
 				update_id => 0,
 			},
 		],
-	};
+	});
 
 	return;
 }
@@ -668,22 +663,17 @@ sysopen(MESSAGES, $FIFO_PATH, O_NONBLOCK|O_RDONLY)
 
 while (0 == $stop) {
 	stashNextBackgroundTask();
+	$updates = pop(@backgroundTaskQueue); # Doesn't matter if empty or not
 
-	eval {
-		$updates = $api->getUpdates ({
-			timeout => 30, # Use long polling
-			$offset ? (offset => $offset) : ()
-		});
-	};
-	if (my $evalError = $EVAL_ERROR) {
-		sleep 300;
-	}
-
-	if (!$updates) {
-		# if there is background task, but no foreground task,
-		# substitute foreground task and clear the background task.
-		if ($updates = $nextBackgroundTask) {
-			$nextBackgroundTask = undef;
+	unless ($updates) {
+		eval {
+			$updates = $api->getUpdates ({
+				timeout => 30, # Use long polling
+				$offset ? (offset => $offset) : ()
+			});
+		};
+		if (my $evalError = $EVAL_ERROR) {
+			sleep 30;
 		}
 	}
 
@@ -693,7 +683,7 @@ while (0 == $stop) {
     }
 
     for my $u (@{$updates->{result}}) {
-#        $dic->logger->trace('chat id ' . $u->{message}{chat}{id});
+        $dic->logger->trace('chat id ' . $u->{message}{chat}{id});
 	$dic->logger->debug(Dumper $updates);
         $offset = $u->{update_id} + 1 if $u->{update_id} >= $offset;
         if (my $text = $u->{message}{text}) { # Text message
