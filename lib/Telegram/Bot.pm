@@ -634,26 +634,13 @@ sub handle_fifo_record {
 	return;
 }
 
-sub stashNextBackgroundTask {
-	my $rv;
-
-	my $buffer;
-	$rv = sysread(MESSAGES, $buffer, $FIFO_BUFSIZ);
-	if (!defined($rv) && $! == EAGAIN) {
-		return; # would have blocked
-	} elsif ($rv > 0) {
-		&handle_fifo_record($buffer);
-	}
-
-	# should never really come down here ...
-#	close(MESSAGES);
-
-#	$api->sendMessage({
-#		chat_id => 1, #$chatId,
-#		(
-#			text => $message,
-#		),
-#	});
+sub loadNextBackgroundTasks {
+	my ($rv, $buffer);
+	do {
+		if ($rv = sysread(MESSAGES, $buffer, $FIFO_BUFSIZ)) {
+			&handle_fifo_record($buffer) if ($rv > 0);
+		}
+	} while ($rv || $! == EAGAIN);
 
 	return;
 }
@@ -661,21 +648,33 @@ sub stashNextBackgroundTask {
 sysopen(MESSAGES, $FIFO_PATH, O_NONBLOCK|O_RDONLY)
     or die("The FIFO file \"$FIFO_PATH\" is missing, and this program can't run without it.");
 
-while (0 == $stop) {
-	stashNextBackgroundTask();
-	$updates = pop(@backgroundTaskQueue); # Doesn't matter if empty or not
+sub getNextUpdate {
+	loadNextBackgroundTasks();
 
-	unless ($updates) {
-		eval {
-			$updates = $api->getUpdates ({
-				timeout => 30, # Use long polling
-				$offset ? (offset => $offset) : ()
-			});
-		};
-		if (my $evalError = $EVAL_ERROR) {
-			sleep 30;
-		}
+	if (my $backgroundUpdates = pop(@backgroundTaskQueue)) { # Doesn't matter if empty or not
+		return $backgroundUpdates;
 	}
+
+	my $foregroundUpdates;
+	eval {
+		$foregroundUpdates = $api->getUpdates ({
+			timeout => 30, # Use long polling
+			$offset ? (offset => $offset) : ()
+		});
+	};
+	if (my $evalError = $EVAL_ERROR) {
+		sleep 30;
+	}
+
+	return $foregroundUpdates;
+}
+
+while (0 == $stop) {
+	my $updates = undef;
+	do {
+		$updates = getNextUpdate();
+		sleep(1);
+	} while (!$updates);
 
     unless ($updates and ref $updates eq "HASH" and $updates->{ok}) {
         $dic->logger->warn('getUpdates returned a false value - trying again...');
