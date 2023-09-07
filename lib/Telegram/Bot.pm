@@ -594,6 +594,30 @@ my @backgroundTaskQueue = ();
 sub handle_fifo_record {
 	my ($record) = @_;
 	$dic->logger->trace('FROM FIFO: ' . $record); # FIXME: Ignored
+	my (@attribs) = split(m/\|/, $record);
+
+	my %params = (
+		chat_id => 0,
+		target => 'M6KVM',
+		text => '(none)',
+	);
+
+	foreach my $attrib (@attribs) {
+		my ($key, $value) = split(m/:/, $attrib);
+		my $skip = (!defined($key) || !defined($value));
+
+		$key = '<undef>' unless (defined($key));
+		$value = '<undef>' unless (defined($value));
+		$dic->logger->warn("key: $key, value: $value");
+
+		next if ($skip);
+
+		if (exists($params{$key})) {
+			$params{$key} = $value;
+		}
+	}
+
+	$dic->logger->debug(Dumper \%params);
 
 	push(@backgroundTaskQueue, {
 		ok => 1,
@@ -601,30 +625,30 @@ sub handle_fifo_record {
 			{
 				message => {
 					from => {
-						first_name => 'Duncan',
+						#first_name => 'Duncan',
 						language_code => 'en',
 						username => 'M6KVM',
-						last_name => 'Palmer',
+						#last_name => 'Palmer',
 						is_bot => 1, # from script
 						id => 1135496320,
 					},
 					entities => [
 						{
-							length => 5, # text length? ('/uuid')
+							length => length($params{text}),
 							offset => 0,
 							type => 'bot_command'
 						},
 					],
-					text => '/breakfast @jesscharlton',
+					text => $params{text},
 					chat => {
 						last_name => 'Palmer',
 						first_name => 'Duncan',
-						id => 1135496320,
-						username => 'M6KVM',
+						id => $params{chat_id},
+						username => $params{target},
 						type => 'private'
 					},
-					date => 1694113787,
-					message_id => 1081
+					date => time(),
+					message_id => 1 + int(rand(999999999)),
 				},
 				update_id => 0,
 			},
@@ -634,11 +658,23 @@ sub handle_fifo_record {
 	return;
 }
 
+my $buffer = '';
 sub loadNextBackgroundTasks {
-	my ($rv, $buffer);
+	my $command = '';
+	my ($rv);
+
+	if (length($buffer) > 0) {
+		$dic->logger->warn("BUFFER CONTENT UNCLEARED: $buffer");
+	}
+
 	do {
 		if ($rv = sysread(MESSAGES, $buffer, $FIFO_BUFSIZ)) {
-			&handle_fifo_record($buffer) if ($rv > 0);
+			if ($rv > 0) {
+				my @commands = split(m/\n/, $buffer);
+				foreach my $command (@commands) {
+					&handle_fifo_record($command)
+				}
+			}
 		}
 	} while ($rv || $! == EAGAIN);
 
