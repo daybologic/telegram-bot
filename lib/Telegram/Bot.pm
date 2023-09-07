@@ -41,6 +41,7 @@ use Data::Dumper;
 use Data::Money::Amount 0.2.0;
 use Data::Money::Currency::Converter::Repository::APILayer 0.2.0;
 use English qw(-no_match_vars);
+use Fcntl;
 use Geo::Weather::VisualCrossing;
 use HTTP::Status qw(status_message);
 #use Log::Log4perl;
@@ -63,12 +64,15 @@ use Telegram::Bot::UUIDClient;
 use Telegram::Bot::Weather::Location;
 use Time::Duration;
 use URI::URL;
-use POSIX;
+use POSIX qw(:errno_h);
 use utf8;
 
 BEGIN {
 	our $VERSION = '2.3.1';
 }
+
+Readonly my $FIFO_PATH   => '/var/run/telegram-bot/timed-messages.fifo';
+Readonly my $FIFO_BUFSIZ => 1024;
 
 my $stop = 0;
 my $dic = Telegram::Bot::DI::Container->new();
@@ -585,64 +589,86 @@ my $message_types = {
 recordStartup();
 installSignals();
 
-my $breakfastDone = 0;
-my $backCounter = 0;
-sub backgroundTasks {
-	my $chatId = 0;
+my $nextBackgroundTask = undef;
 
-	my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time());
+sub handle_fifo_record {
+	my ($record) = @_;
+	$dic->logger->trace('FROM FIFO: ' . $record); # FIXME: Ignored
 
-	return if ($wday == 0 || $wday == 6); # No action at the weekend
-
-	$backCounter++;
-	return;
-	if ((time() % 125) == 0) {
-		my $message;
-		if (($backCounter % 3) == 0) {
-			$message = 'What year is it?';
-		} elsif (($backCounter % 9) == 0) {
-			$message = "Where am I?";
-		} else {
-			$message = "Who's the President?";
-		}
-
-		$api->sendMessage({
-			chat_id => $chatId,
-			(
-				text => $message,
-			),
-		});
-
+	if ($nextBackgroundTask) {
+		$dic->logger->warn('If you see this message, you need to make @nextBackgroundTask a list');
 		return;
-	} elsif ((time() % 194) == 0) {
-		$api->sendMessage({
-			chat_id => $chatId,
-			(
-				text => 'actio Benedict est actio dei',
-			),
-		});
 	}
 
-	return if ($hour != 17 || $min != 15); # only operate for 1 min a day
-	return if ($breakfastDone); # FIXME need to clear once a day... or store the date in a HASH
-
-	#eval {
-		$api->sendMessage({
-			chat_id => $chatId,
-			(
-				text => breakfast({
-					text => '/breakfast @m6kvm',
-				}),
-			),
-		});
-	#};
-
-	$breakfastDone++;
+	$nextBackgroundTask = {
+		ok => 1,
+		result => [
+			{
+				message => {
+					from => {
+						first_name => 'Duncan',
+						language_code => 'en',
+						username => 'M6KVM',
+						last_name => 'Palmer',
+						is_bot => 1, # from script
+						id => 1135496320,
+					},
+					entities => [
+						{
+							length => 5, # text length? ('/uuid')
+							offset => 0,
+							type => 'bot_command'
+						},
+					],
+					text => '/breakfast @jesscharlton',
+					chat => {
+						last_name => 'Palmer',
+						first_name => 'Duncan',
+						id => 1135496320,
+						username => 'M6KVM',
+						type => 'private'
+					},
+					date => 1694038865,
+					message_id => 1081
+				},
+				update_id => 0,
+			},
+		],
+	};
 
 	return;
 }
 
+sub stashNextBackgroundTask {
+	my $rv;
+
+	my $buffer;
+	$rv = sysread(MESSAGES, $buffer, $FIFO_BUFSIZ);
+	if (!defined($rv) && $! == EAGAIN) {
+		return; # would have blocked
+	} elsif ($rv > 0) {
+		&handle_fifo_record($buffer);
+	}
+
+	# should never really come down here ...
+#	close(MESSAGES);
+
+#	$api->sendMessage({
+#		chat_id => 1, #$chatId,
+#		(
+#			text => $message,
+#		),
+#	});
+
+	return;
+}
+
+sysopen(MESSAGES, $FIFO_PATH, O_NONBLOCK|O_RDONLY)
+    or die("The FIFO file \"$FIFO_PATH\" is missing, and this program can't run without it.");
+
 while (0 == $stop) {
+	stashNextBackgroundTask();
+
 	eval {
 		$updates = $api->getUpdates ({
 			timeout => 30, # Use long polling
@@ -653,7 +679,13 @@ while (0 == $stop) {
 		sleep 300;
 	}
 
-	backgroundTasks();
+	if (!$updates) {
+		# if there is background task, but no foreground task,
+		# substitute foreground task and clear the background task.
+		if ($updates = $nextBackgroundTask) {
+			$nextBackgroundTask = undef;
+		}
+	}
 
     unless ($updates and ref $updates eq "HASH" and $updates->{ok}) {
         $dic->logger->warn('getUpdates returned a false value - trying again...');
@@ -661,7 +693,8 @@ while (0 == $stop) {
     }
 
     for my $u (@{$updates->{result}}) {
-        $dic->logger->trace('chat id ' . $u->{message}{chat}{id});
+#        $dic->logger->trace('chat id ' . $u->{message}{chat}{id});
+	$dic->logger->debug(Dumper $updates);
         $offset = $u->{update_id} + 1 if $u->{update_id} >= $offset;
         if (my $text = $u->{message}{text}) { # Text message
             $dic->logger->debug(sprintf("Incoming text message from \@%s", ($u->{message}{from}{username} // '<undef>')));
