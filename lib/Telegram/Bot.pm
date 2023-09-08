@@ -610,7 +610,10 @@ sub handle_fifo_record {
 		$value = '<undef>' unless (defined($value));
 		$dic->logger->trace("handle_fifo_record: key: $key, value: $value");
 
-		next if ($skip);
+		if ($skip) {
+			$dic->logger->warn('Skipping incomplete background command attribute');
+			next;
+		}
 
 		if (exists($params{$key})) {
 			$params{$key} = $value;
@@ -673,7 +676,8 @@ sub loadNextBackgroundTasks {
 			if ($rv > 0) {
 				my @commands = split(m/\n/, $buffer);
 				foreach my $command (@commands) {
-					&handle_fifo_record($command)
+					$dic->logger->debug("Queueing background command: '$command'");
+					&handle_fifo_record($command);
 				}
 			}
 		}
@@ -685,10 +689,11 @@ sub loadNextBackgroundTasks {
 sysopen(MESSAGES, $FIFO_PATH, O_NONBLOCK|O_RDONLY)
     or die("The FIFO file \"$FIFO_PATH\" is missing, and this program can't run without it.");
 
-sub getNextUpdate {
+sub getNextUpdates {
 	loadNextBackgroundTasks();
 
 	if (my $backgroundUpdates = pop(@backgroundTaskQueue)) { # Doesn't matter if empty or not
+		$dic->logger->debug("Background task retrieved from queue");
 		return $backgroundUpdates;
 	}
 
@@ -709,8 +714,8 @@ sub getNextUpdate {
 while (0 == $stop) {
 	my $updates = undef;
 	do {
-		$updates = getNextUpdate();
-		sleep(1);
+		$updates = getNextUpdates();
+		sleep(1) unless ($updates);
 	} while (!$updates);
 
     unless ($updates and ref $updates eq "HASH" and $updates->{ok}) {
