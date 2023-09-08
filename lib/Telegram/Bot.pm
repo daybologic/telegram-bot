@@ -608,7 +608,7 @@ sub handle_fifo_record {
 
 		$key = '<undef>' unless (defined($key));
 		$value = '<undef>' unless (defined($value));
-		$dic->logger->warn("key: $key, value: $value");
+		$dic->logger->trace("handle_fifo_record: key: $key, value: $value");
 
 		next if ($skip);
 
@@ -617,7 +617,7 @@ sub handle_fifo_record {
 		}
 	}
 
-	$dic->logger->debug(Dumper \%params);
+	$dic->logger->trace(Dumper \%params);
 
 	push(@backgroundTaskQueue, {
 		ok => 1,
@@ -665,6 +665,7 @@ sub loadNextBackgroundTasks {
 
 	if (length($buffer) > 0) {
 		$dic->logger->warn("BUFFER CONTENT UNCLEARED: $buffer");
+		$buffer = '';
 	}
 
 	do {
@@ -718,8 +719,8 @@ while (0 == $stop) {
     }
 
     for my $u (@{$updates->{result}}) {
-        $dic->logger->trace('chat id ' . $u->{message}{chat}{id});
-	$dic->logger->debug(Dumper $updates);
+	$dic->logger->trace(Dumper $u);
+	$dic->logger->trace('chat id ' . $u->{message}{chat}{id});
         $offset = $u->{update_id} + 1 if $u->{update_id} >= $offset;
         if (my $text = $u->{message}{text}) { # Text message
             $dic->logger->debug(sprintf("Incoming text message from \@%s", ($u->{message}{from}{username} // '<undef>')));
