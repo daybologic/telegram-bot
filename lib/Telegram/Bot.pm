@@ -41,6 +41,7 @@ use Data::Dumper;
 use Data::Money::Amount 0.2.0;
 use Data::Money::Currency::Converter::Repository::APILayer 0.2.0;
 use English qw(-no_match_vars);
+use Fcntl;
 use Geo::Weather::VisualCrossing;
 use HTTP::Status qw(status_message);
 #use Log::Log4perl;
@@ -63,12 +64,15 @@ use Telegram::Bot::UUIDClient;
 use Telegram::Bot::Weather::Location;
 use Time::Duration;
 use URI::URL;
-use POSIX;
+use POSIX qw(:errno_h);
 use utf8;
 
 BEGIN {
-	our $VERSION = '2.3.1';
+	our $VERSION = '2.4.0';
 }
+
+Readonly my $FIFO_PATH   => '/var/run/telegram-bot/timed-messages.fifo';
+Readonly my $FIFO_BUFSIZ => 1024;
 
 my $stop = 0;
 my $dic = Telegram::Bot::DI::Container->new();
@@ -454,7 +458,7 @@ my $commands = {
 			} elsif ($word =~ m/^\d{1,2}$/) {
 				$count = $word;
 			} elsif ($word =~ m/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/io) {
-				$results = $dic->uuidClient->info($word);
+				$results = [$dic->uuidClient->info($word)];
 			} else {
 				return "Usage: /uuid v[version] [count] [uuid]\n"
 				    . "Default UUID version is 1, count up to 99 is allowed, the default is 1.\n"
@@ -585,75 +589,134 @@ my $message_types = {
 recordStartup();
 installSignals();
 
-my $breakfastDone = 0;
-my $backCounter = 0;
-sub backgroundTasks {
-	my $chatId = 0;
+my @backgroundTaskQueue = ();
 
-	my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time());
+sub handle_fifo_record {
+	my ($record) = @_;
+	$dic->logger->trace('FROM FIFO: ' . $record); # FIXME: Ignored
+	my (@attribs) = split(m/\|/, $record);
 
-	return if ($wday == 0 || $wday == 6); # No action at the weekend
+	my %params = (
+		chat_id => 0,
+		target => 'M6KVM',
+		text => '(none)',
+	);
 
-	$backCounter++;
-	return;
-	if ((time() % 125) == 0) {
-		my $message;
-		if (($backCounter % 3) == 0) {
-			$message = 'What year is it?';
-		} elsif (($backCounter % 9) == 0) {
-			$message = "Where am I?";
-		} else {
-			$message = "Who's the President?";
+	foreach my $attrib (@attribs) {
+		my ($key, $value) = split(m/:/, $attrib);
+		my $skip = (!defined($key) || !defined($value));
+
+		$key = '<undef>' unless (defined($key));
+		$value = '<undef>' unless (defined($value));
+		$dic->logger->trace("handle_fifo_record: key: $key, value: $value");
+
+		if ($skip) {
+			$dic->logger->warn('Skipping incomplete background command attribute');
+			next;
 		}
 
-		$api->sendMessage({
-			chat_id => $chatId,
-			(
-				text => $message,
-			),
-		});
-
-		return;
-	} elsif ((time() % 194) == 0) {
-		$api->sendMessage({
-			chat_id => $chatId,
-			(
-				text => 'actio Benedict est actio dei',
-			),
-		});
+		if (exists($params{$key})) {
+			$params{$key} = $value;
+		}
 	}
 
-	return if ($hour != 17 || $min != 15); # only operate for 1 min a day
-	return if ($breakfastDone); # FIXME need to clear once a day... or store the date in a HASH
+	$dic->logger->trace(Dumper \%params);
 
-	#eval {
-		$api->sendMessage({
-			chat_id => $chatId,
-			(
-				text => breakfast({
-					text => '/breakfast @m6kvm',
-				}),
-			),
-		});
-	#};
-
-	$breakfastDone++;
+	push(@backgroundTaskQueue, {
+		ok => 1,
+		result => [
+			{
+				message => {
+					from => {
+						#first_name => 'Duncan',
+						language_code => 'en',
+						username => 'M6KVM',
+						#last_name => 'Palmer',
+						is_bot => 1, # from script
+						id => 1135496320,
+					},
+					entities => [
+						{
+							length => length($params{text}),
+							offset => 0,
+							type => 'bot_command'
+						},
+					],
+					text => $params{text},
+					chat => {
+						last_name => 'Palmer',
+						first_name => 'Duncan',
+						id => $params{chat_id},
+						username => $params{target},
+						type => 'private'
+					},
+					date => time(),
+					message_id => 1 + int(rand(999999999)),
+				},
+				update_id => 0,
+			},
+		],
+	});
 
 	return;
 }
 
-while (0 == $stop) {
+my $buffer = '';
+sub loadNextBackgroundTasks {
+	my $command = '';
+	my ($rv);
+
+	if (length($buffer) > 0) {
+		$dic->logger->warn("BUFFER CONTENT UNCLEARED: $buffer");
+		$buffer = '';
+	}
+
+	do {
+		if ($rv = sysread(MESSAGES, $buffer, $FIFO_BUFSIZ)) {
+			if ($rv > 0) {
+				my @commands = split(m/\n/, $buffer);
+				foreach my $command (@commands) {
+					$dic->logger->debug("Queueing background command: '$command'");
+					&handle_fifo_record($command);
+				}
+			}
+		}
+	} while ($rv || $! == EAGAIN);
+
+	return;
+}
+
+sysopen(MESSAGES, $FIFO_PATH, O_NONBLOCK|O_RDONLY)
+    or die("The FIFO file \"$FIFO_PATH\" is missing, and this program can't run without it.");
+
+sub getNextUpdates {
+	loadNextBackgroundTasks();
+
+	if (my $backgroundUpdates = pop(@backgroundTaskQueue)) { # Doesn't matter if empty or not
+		$dic->logger->debug("Background task retrieved from queue");
+		return $backgroundUpdates;
+	}
+
+	my $foregroundUpdates;
 	eval {
-		$updates = $api->getUpdates ({
+		$foregroundUpdates = $api->getUpdates ({
 			timeout => 30, # Use long polling
 			$offset ? (offset => $offset) : ()
 		});
 	};
 	if (my $evalError = $EVAL_ERROR) {
-		sleep 300;
+		sleep 30;
 	}
 
-	backgroundTasks();
+	return $foregroundUpdates;
+}
+
+while (0 == $stop) {
+	my $updates = undef;
+	do {
+		$updates = getNextUpdates();
+		sleep(1) unless ($updates);
+	} while (!$updates);
 
     unless ($updates and ref $updates eq "HASH" and $updates->{ok}) {
         $dic->logger->warn('getUpdates returned a false value - trying again...');
@@ -661,7 +724,8 @@ while (0 == $stop) {
     }
 
     for my $u (@{$updates->{result}}) {
-        $dic->logger->trace('chat id ' . $u->{message}{chat}{id});
+	$dic->logger->trace(Dumper $u);
+	$dic->logger->trace('chat id ' . $u->{message}{chat}{id});
         $offset = $u->{update_id} + 1 if $u->{update_id} >= $offset;
         if (my $text = $u->{message}{text}) { # Text message
             $dic->logger->debug(sprintf("Incoming text message from \@%s", ($u->{message}{from}{username} // '<undef>')));

@@ -1,3 +1,10 @@
+telegram-bot (2.4.0) stable; urgency=high
+
+  * Named pipe introduced for background commands from Cron
+  * HOTFIX: /uuid <uuid> info fixed
+
+ -- Rev. Duncan Ross Palmer <2e0eol@gmail.com>  Wed, 13 Sep 2023 20:10:31 +0100
+
 telegram-bot (2.3.1) stable; urgency=high
 
   * HOTFIX: musicDb -> musicDB
@@ -21,6 +28,13 @@ telegram-bot (2.3.0) stable; urgency=medium
   * XKCD support for JPEG images fixed
 
  -- Rev. Duncan Ross Palmer <2e0eol@gmail.com>  Sun, 03 Sep 2023 22:01:33 +0100
+
+telegram-bot (2.2.1) stable; urgency=high
+
+  * HOTFIX: musicDb -> musicDB
+    (CRITICAL); causes crash
+
+ -- Rev. Duncan Ross Palmer <2e0eol@gmail.com>  Tue, 05 Sep 2023 08:17:51 +0100
 
 telegram-bot (2.2.0) stable; urgency=medium
 
