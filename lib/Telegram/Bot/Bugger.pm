@@ -127,6 +127,14 @@ Readonly my @ARTICLES => (
 	'stamp duty',
 	'an exhaust pipe',
 	'a trash compactor',
+	'a pitchfork',
+	'a remote control',
+	'a large microphone',
+	'a conveyer-belt',
+	'a leather belt',
+	'a tube of Smarties',
+	'a tube of Rolos',
+	"the Elephant's foot",
 );
 
 sub run {
