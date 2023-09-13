@@ -1,3 +1,10 @@
+telegram-bot (2.4.0) stable; urgency=high
+
+  * Named pipe introduced for background commands from Cron
+  * HOTFIX: /uuid <uuid> info fixed
+
+ -- Rev. Duncan Ross Palmer <2e0eol@gmail.com>  Wed, 13 Sep 2023 20:10:31 +0100
+
 telegram-bot (2.3.1) stable; urgency=high
 
   * HOTFIX: musicDb -> musicDB
