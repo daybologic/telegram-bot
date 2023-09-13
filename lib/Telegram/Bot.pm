@@ -454,7 +454,7 @@ my $commands = {
 			} elsif ($word =~ m/^\d{1,2}$/) {
 				$count = $word;
 			} elsif ($word =~ m/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/io) {
-				$results = $dic->uuidClient->info($word);
+				$results = [$dic->uuidClient->info($word)];
 			} else {
 				return "Usage: /uuid v[version] [count] [uuid]\n"
 				    . "Default UUID version is 1, count up to 99 is allowed, the default is 1.\n"
