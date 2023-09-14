@@ -357,7 +357,7 @@ sub __photoFromCache {
 			}
 
 			my $path = __makeCachePattern($name, $extension, $aspect);
-			$self->dic->logger->trace("Checking if '$path' exists (used extension cache)");
+			$self->dic->logger->debug("Checking if '$path' exists (used extension cache)");
 			return { file => $path } if (-f $path);
 		}
 	} else {
@@ -368,7 +368,7 @@ sub __photoFromCache {
 				}
 
 				my $path = __makeCachePattern($name, $extension, $aspect);
-				$self->dic->logger->trace("Checking if '$path' exists (not in extension cache)");
+				$self->dic->logger->debug("Checking if '$path' exists (not in extension cache)");
 				return { file => $path } if (-f $path);
 			}
 		}
@@ -446,7 +446,7 @@ sub __downloadMeme {
 
 sub __runCommand {
 	my ($self, $command) = @_;
-	$self->dic->logger->trace("Running $command");
+	$self->dic->logger->debug("Running $command");
 	return system($command);
 }
 

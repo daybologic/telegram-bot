@@ -81,7 +81,7 @@ sub isAdmin {
 
 	foreach my $admin (@{ $self->admins }) {
 		if ($admin->value eq lc($name)) {
-			$self->dic->logger->debug("name '$name' is an admin");
+			$self->dic->logger->info("name '$name' *IS* an admin");
 			return 1;
 		}
 	}

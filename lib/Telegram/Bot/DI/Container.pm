@@ -39,6 +39,7 @@ use Log::Log4perl;
 use Telegram::Bot::Admins;
 use Telegram::Bot::Audit;
 use Telegram::Bot::Ball8;
+use Telegram::Bot::Bugger;
 use Telegram::Bot::CatClient;
 use Telegram::Bot::Config;
 use Telegram::Bot::DB;
@@ -58,6 +59,7 @@ has admins => (is => 'rw', isa => 'Telegram::Bot::Admins', lazy => 1, builder =>
 has api => (is => 'rw', isa => 'WWW::Telegram::BotAPI', lazy => 1, builder => '_makeAPI');
 has audit => (is => 'rw', isa => 'Telegram::Bot::Audit', lazy => 1, builder => '_makeAudit');
 has ball8 => (is => 'rw', isa => 'Telegram::Bot::Ball8', lazy => 1, builder => '_makeBall8');
+has bugger => (is => 'rw', isa => 'Telegram::Bot::Bugger', lazy => 1, builder => '_makeBugger');
 has cache => (is => 'rw', isa => 'Cache::Memcached', lazy => 1, builder => '_makeCache');
 has catClient => (is => 'rw', isa => 'Telegram::Bot::CatClient', lazy => 1, builder => '_makeCatClient');
 has config => (is => 'rw', isa => 'Telegram::Bot::Config', lazy => 1, builder => '_makeConfig');
@@ -110,6 +112,11 @@ sub _makeAudit {
 sub _makeBall8 {
 	my ($self) = @_;
 	return Telegram::Bot::Ball8->new(dic => $self);
+}
+
+sub _makeBugger {
+	my ($self) = @_;
+	return Telegram::Bot::Bugger->new(dic => $self);
 }
 
 sub _makeCache {

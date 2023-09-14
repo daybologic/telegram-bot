@@ -34,12 +34,14 @@ use Moose;
 
 extends 'Telegram::Bot::Base';
 
+use Data::Dumper;
 use Readonly;
 use JSON qw(decode_json);
 use MIME::Base64;
 use URI;
 
-Readonly my $URL => 'http://perlapi.daybologic.co.uk/v2/uuid/generate';
+Readonly my $URL_GENERATE => 'http://perlapi.daybologic.co.uk/v2/uuid/generate';
+Readonly my $URL_INFO     => 'http://perlapi.daybologic.co.uk/v2/uuid/info/%s';
 
 has [qw(count version)] => (is => 'rw', isa => 'Int', default => 1);
 
@@ -51,12 +53,10 @@ sub generate {
 		v => $self->version,
 	);
 
-	my $uri = URI->new($URL);
+	my $uri = URI->new($URL_GENERATE);
 	$uri->query_form(\%opts);
 
 	my @results;
-	$self->dic->logger->trace($uri);
-
 	my $response = $self->dic->ua->get($uri);
 	if ($response->is_success) {
 		my $decoded = decode_json(decode_base64($response->decoded_content));
@@ -69,6 +69,18 @@ sub generate {
 
 	$self->dic->logger->debug(sprintf('%d results generated.', scalar(@results)));
 	return \@results;
+}
+
+sub info {
+	my ($self, $uuid) = @_;
+
+	my $response = $self->dic->ua->get(sprintf($URL_INFO, $uuid));
+	unless ($response->is_success) {
+		$self->dic->logger->error($response->status_line);
+		return $response->status_line;
+	}
+
+	return Dumper decode_json(decode_base64($response->decoded_content));
 }
 
 1;
