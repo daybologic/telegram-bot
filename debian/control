@@ -32,6 +32,7 @@ Depends:
  ${misc:Depends},
  ${perl:Depends},
  ${shlibs:Depends},
+ imagemagick,
  libconfig-ini-perl,
  libdata-money-perl,
  libdatetime-perl,

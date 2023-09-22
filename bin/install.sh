@@ -22,6 +22,7 @@ chown palmer "$CACHEDIR" "$LOGDIR" "$DBDIR"
 # TODO: The following will only work on Debian; need to bang out
 # on other operating systems.
 sudo apt install \
+	imagemagick \
 	libconfig-ini-perl \
 	libdatetime-perl \
 	libdbd-mysql-perl \
@@ -34,7 +35,6 @@ sudo apt install \
 	liburi-encode-perl \
 	libwww-perl \
 	perl \
-	perl-base \
-	perl-modules-5.32
+	perl-base
 
 exit 0
