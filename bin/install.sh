@@ -23,6 +23,7 @@ chown palmer "$CACHEDIR" "$LOGDIR" "$DBDIR"
 # on other operating systems.
 sudo apt install \
 	imagemagick \
+	jq \
 	libconfig-ini-perl \
 	libdatetime-perl \
 	libdbd-mysql-perl \
