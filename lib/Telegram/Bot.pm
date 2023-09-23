@@ -560,7 +560,7 @@ my $commands = {
 		my @words = split(m/\s+/, $text);
 
 		$dic->memes->chatId($id);
-		if (my $meme = $dic->memes->setUser($user)->run(@words)) {
+		if (my $meme = $dic->memes->setUser($user // '')->run(@words)) {
 			return $meme;
 		}
 
