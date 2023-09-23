@@ -16,8 +16,7 @@ DBDIR='/var/lib/telegram-bot'
 mkdir -p "$CACHEDIR" "$LOGDIR" "$DBDIR"
 chmod 0700 "$CACHEDIR" "$LOGDIR" "$DBDIR"
 
-# FIXME: Need a UID for the bot
-chown palmer "$CACHEDIR" "$LOGDIR" "$DBDIR"
+chown telegram-bot "$CACHEDIR" "$LOGDIR" "$DBDIR"
 
 # TODO: The following will only work on Debian; need to bang out
 # on other operating systems.
