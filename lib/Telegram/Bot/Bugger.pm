@@ -135,6 +135,7 @@ Readonly my @ARTICLES => (
 	'a tube of Smarties',
 	'a tube of Rolos',
 	"the Elephant's foot",
+	'a trident',
 );
 
 sub run {
