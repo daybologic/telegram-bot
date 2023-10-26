@@ -74,6 +74,15 @@ sub testUnits {
 	return EXIT_SUCCESS;
 }
 
+sub testCommand {
+	my ($self) = @_;
+	plan tests => 1;
+
+	is($self->sut->run('/units pint of Guinness'), 2.3288, 'Units in a pint of Guinness');
+
+	return EXIT_SUCCESS;
+}
+
 package main;
 use strict;
 use warnings;

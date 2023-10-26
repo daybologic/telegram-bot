@@ -42,12 +42,41 @@ Readonly my $PINT_US => 473;
 sub run {
 	my ($self, $command) = @_;
 
-	...
+	$command =~ s/ of//gi;
+	my (undef, $quantity, $drinkType) = split(m/\s+/, $command);
+	my $ml = __mlFromName($quantity);
+	my $abv = __strengthFromName($drinkType);
+	return __units($abv, 1, $ml);
 }
 
 sub __units {
 	my ($abv, $quantity, $size) = @_;
 	return ($abv*($quantity*$size))/1000;
+}
+
+sub __mlFromName {
+	my ($name) = @_;
+
+	if ($name =~ m/pint/i) {
+		return $PINT_UK;
+	}
+
+	return 1;
+}
+
+sub __strengthFromName {
+	my ($name) = @_;
+
+	my %map = (
+		caroline => 7.2,
+		fosters  => 4,
+		guinness => 4.1,
+		stella   => 4.6,
+		wine     => 12.5,
+	);
+
+	$name = lc($name);
+	return $map{$name} || 0;
 }
 
 1;
