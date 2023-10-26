@@ -35,11 +35,14 @@ package AlcoholUnitsTests;
 use lib 'lib';
 use Moose;
 use POSIX qw(EXIT_SUCCESS);
+use Readonly;
 use Telegram::Bot::AlcoholUnits;
 use Test::More 0.96;
 
 use lib 'externals/libtest-module-runnable-perl/lib';
 extends 'Test::Module::Runnable';
+
+Readonly my $GUINNESS => 2.3288;
 
 sub setUp {
 	my ($self, %params) = @_;
@@ -74,11 +77,12 @@ sub testUnits {
 	return EXIT_SUCCESS;
 }
 
-sub testCommand {
+sub testGuinness {
 	my ($self) = @_;
-	plan tests => 1;
+	plan tests => 2;
 
-	is($self->sut->run('/units pint of Guinness'), 2.3288, 'Units in a pint of Guinness');
+	is($self->sut->run('/units pint of Guinness'), $GUINNESS, 'Units in pint of Guinness');
+	is($self->sut->run('/units a pint of Guinness'), $GUINNESS, 'Units in a pint of Guinness');
 
 	return EXIT_SUCCESS;
 }

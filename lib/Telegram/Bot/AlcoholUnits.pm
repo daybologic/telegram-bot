@@ -42,6 +42,7 @@ Readonly my $PINT_US => 473;
 sub run {
 	my ($self, $command) = @_;
 
+	$command =~ s/a //gi;
 	$command =~ s/ of//gi;
 	my (undef, $quantity, $drinkType) = split(m/\s+/, $command);
 	my $ml = __mlFromName($quantity);
