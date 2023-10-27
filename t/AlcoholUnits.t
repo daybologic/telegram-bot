@@ -110,9 +110,13 @@ sub testBuckfast {
 
 sub testWine {
 	my ($self) = @_;
-	plan tests => 1;
+	plan tests => 5;
 
 	is($self->sut->run('/units in a bottle of wine'), $WINE, 'Units in a bottle of wine');
+	is($self->sut->run('/units in a large glass of wine'), $WINE / 3, 'Units in a large glass of wine');
+	is($self->sut->run('/units in a glass of wine'), $WINE / 3, 'Units in a glass of wine');
+	is($self->sut->run('/units in a medium glass of wine'), 2.1875, 'Units in a medium glass of wine');
+	is($self->sut->run('/units in a small glass of wine'), 1.5625, 'Units in a small glass of wine');
 
 	return EXIT_SUCCESS;
 }

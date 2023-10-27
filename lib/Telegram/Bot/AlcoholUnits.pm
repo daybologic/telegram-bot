@@ -38,6 +38,9 @@ use Readonly;
 use Scalar::Util qw(looks_like_number);
 
 Readonly my $BOTTLE  => 750;
+Readonly my $GLASS_L => 250;
+Readonly my $GLASS_M => 175;
+Readonly my $GLASS_S => 125;
 Readonly my $PINT_UK => 568;
 Readonly my $PINT_US => 473;
 
@@ -72,16 +75,25 @@ sub run {
 	}
 
 	my $jarType = $words[0];
-	if (__strengthFromName($jarType)) { # oops, it's a drink
+	return __syntax() unless ($jarType);
+	my $sizeType = 'large';
+	$jarType = lc($jarType);
+	if ($jarType eq 'large') {
+		shift(@words);
+	} elsif ($jarType eq 'small' || $jarType eq 'medium') {
+		$sizeType = shift(@words);
+	}
+	$jarType = $words[0];
+
+	if (__strengthFromName($jarType)) { # oops, it's a drinkType
 		$jarType = 'pint';
 	} else {
 		shift(@words);
 	}
 	shift(@words) if ($words[0] && lc($words[0]) eq 'of');
-	my $drinkType = $words[0];
-	shift(@words);
+	my $drinkType = shift(@words);
 
-	my $ml = __mlFromJarType($jarType);
+	my $ml = __mlFromJarType($jarType, $sizeType);
 	my $abv = __strengthFromName($drinkType);
 	my $result = __units($abv, $quantity * $divisor, $ml);
 
@@ -99,12 +111,20 @@ sub __units {
 }
 
 sub __mlFromJarType {
-	my ($jarType) = @_;
+	my ($jarType, $sizeType) = @_;
 
 	if ($jarType =~ m/pint/i) {
 		return $PINT_UK;
 	} elsif ($jarType =~ m/bottle/i) {
 		return $BOTTLE;
+	} elsif ($jarType =~ m/glass/i) {
+		if ($sizeType =~ m/small/i) {
+			return $GLASS_S;
+		} elsif ($sizeType =~ m/medium/i) {
+			return $GLASS_M;
+		}
+
+		return $GLASS_L;
 	}
 
 	return $PINT_UK;
