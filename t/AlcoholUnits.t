@@ -143,6 +143,17 @@ sub testWhiskey {
 	return EXIT_SUCCESS;
 }
 
+sub testVodka {
+	my ($self) = @_;
+	plan tests => 3;
+
+	is($self->sut->run('/units in a measure of vodka'), 1, 'Units in a measure of vodka');
+	is($self->sut->run('/units in a shot of vodka'), 1, 'Units in a shot of vodka');
+	is($self->sut->run('/units in a large measure of vodka'), 2, 'Units in a large measure of vodka');
+
+	return EXIT_SUCCESS;
+}
+
 package main;
 use strict;
 use warnings;

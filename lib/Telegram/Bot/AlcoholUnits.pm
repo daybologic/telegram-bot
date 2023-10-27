@@ -153,6 +153,7 @@ sub __strengthFromName {
 		guinness => 4.1,
 		stella   => 4.6,
 		timeline => 5.4,
+		vodka    => 40,
 		wine     => 12.5,
 		whiskey  => 40,
 	);
