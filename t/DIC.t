@@ -78,6 +78,7 @@ sub testAttributesSimple {
 
 	Readonly my %MAP => (
 		'Telegram::Bot::Admins'            => 'admins',
+		'Telegram::Bot::AlcoholUnits'      => 'alcoholUnits',
 		'Telegram::Bot::Audit'             => 'audit',
 		'Telegram::Bot::Ball8'             => 'ball8',
 		'Telegram::Bot::CatClient'         => 'catClient',

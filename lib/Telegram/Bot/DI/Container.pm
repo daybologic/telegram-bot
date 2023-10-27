@@ -36,6 +36,7 @@ use Moose;
 use LWP::UserAgent;
 use Log::Log4perl;
 use Telegram::Bot::Admins;
+use Telegram::Bot::AlcoholUnits;
 use Telegram::Bot::Audit;
 use Telegram::Bot::Ball8;
 use Telegram::Bot::Bugger;
@@ -55,6 +56,7 @@ use Telegram::Bot::XKCD;
 use WWW::Telegram::BotAPI;
 
 has admins => (is => 'rw', isa => 'Telegram::Bot::Admins', lazy => 1, builder => '_makeAdmins');
+has alcoholUnits => (is => 'rw', isa => 'Telegram::Bot::AlcoholUnits', lazy => 1, builder => '_makeAlcoholUnits');
 has api => (is => 'rw', isa => 'WWW::Telegram::BotAPI', lazy => 1, builder => '_makeAPI');
 has audit => (is => 'rw', isa => 'Telegram::Bot::Audit', lazy => 1, builder => '_makeAudit');
 has ball8 => (is => 'rw', isa => 'Telegram::Bot::Ball8', lazy => 1, builder => '_makeBall8');
@@ -100,6 +102,11 @@ sub _makeAPI {
 sub _makeAdmins {
 	my ($self) = @_;
 	return Telegram::Bot::Admins->new(dic => $self);
+}
+
+sub _makeAlcoholUnits {
+	my ($self) = @_;
+	return Telegram::Bot::AlcoholUnits->new(dic => $self);
 }
 
 sub _makeAudit {

@@ -100,6 +100,12 @@ sub source {
 	    . 'Patches and memes may be sent to 2e0eol@gmail.com with subject "telegram-bot"';
 }
 
+sub units {
+	my (@input) = @_;
+	my $text = $input[0]->{text};
+	return $dic->alcoholUnits->run($text);
+}
+
 sub bugger {
 	return $dic->bugger->run();
 }
@@ -314,6 +320,7 @@ my $commands = {
 			return "I don't recognize the ID or URL";
 		}
 	},
+	'units' => \&units,
 	'bugger' => \&bugger,
 	'version' => \&version,
 	'search' => sub {
