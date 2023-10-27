@@ -134,8 +134,9 @@ sub testCansOfBeer {
 
 sub testWhiskey {
 	my ($self) = @_;
-	plan tests => 3;
+	plan tests => 4;
 
+	is($self->sut->run('/units in two measures of whisky'), 2, 'Units in two measures of whisky');
 	is($self->sut->run('/units in a measure of whiskey'), 1, 'Units in a measure of whiskey');
 	is($self->sut->run('/units in a shot of whisky'), 1, 'Units in a shot of whisky');
 	is($self->sut->run('/units in a large measure of whisky'), 2, 'Units in a large measure of whisky');
@@ -145,8 +146,9 @@ sub testWhiskey {
 
 sub testVodka {
 	my ($self) = @_;
-	plan tests => 3;
+	plan tests => 4;
 
+	is($self->sut->run('/units in two measures of vodka'), 2, 'Units in two measures of vodka');
 	is($self->sut->run('/units in a measure of vodka'), 1, 'Units in a measure of vodka');
 	is($self->sut->run('/units in a shot of vodka'), 1, 'Units in a shot of vodka');
 	is($self->sut->run('/units in a large measure of vodka'), 2, 'Units in a large measure of vodka');
