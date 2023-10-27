@@ -37,14 +37,15 @@ extends 'Telegram::Bot::Base';
 use Readonly;
 use Scalar::Util qw(looks_like_number);
 
-Readonly my $BOTTLE  => 750;
-Readonly my $CAN_L   => 440;
-Readonly my $CAN_S   => 330;
-Readonly my $GLASS_L => 250;
-Readonly my $GLASS_M => 175;
-Readonly my $GLASS_S => 125;
-Readonly my $PINT_UK => 568;
-Readonly my $PINT_US => 473;
+Readonly my $BOTTLE         => 750;
+Readonly my $CAN_L          => 440;
+Readonly my $CAN_S          => 330;
+Readonly my $GLASS_L        => 250;
+Readonly my $GLASS_M        => 175;
+Readonly my $GLASS_S        => 125;
+Readonly my $PINT_UK        => 568;
+Readonly my $PINT_US        => 473;
+Readonly my $SPIRIT_ENGLAND => 25;
 
 sub run {
 	my ($self, $command) = @_;
@@ -78,11 +79,9 @@ sub run {
 
 	my $jarType = $words[0];
 	return __syntax() unless ($jarType);
-	my $sizeType = 'large';
+	my $sizeType = 'default';
 	$jarType = lc($jarType);
-	if ($jarType eq 'large') {
-		shift(@words);
-	} elsif ($jarType eq 'small' || $jarType eq 'medium') {
+	if ($jarType eq 'large' || $jarType eq 'medium' || $jarType eq 'small') {
 		$sizeType = shift(@words);
 	}
 	$jarType = $words[0];
@@ -133,6 +132,12 @@ sub __mlFromJarType {
 		}
 
 		return $CAN_L;
+	} elsif ($jarType =~ m/measure/i || $jarType =~ m/shot/i) {
+		if ($sizeType =~ m/large/i) {
+			return $SPIRIT_ENGLAND * 2;
+		}
+
+		return $SPIRIT_ENGLAND;
 	}
 
 	return $PINT_UK;
@@ -149,11 +154,13 @@ sub __strengthFromName {
 		stella   => 4.6,
 		timeline => 5.4,
 		wine     => 12.5,
+		whiskey  => 40,
 	);
 
 	my %aliases = (
 		buckie => 'buckfast',
 		bucky  => 'buckfast',
+		whisky => 'whiskey',
 	);
 
 	if ($name) {
