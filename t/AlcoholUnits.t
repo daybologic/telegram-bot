@@ -123,8 +123,10 @@ sub testWine {
 
 sub testCansOfBeer {
 	my ($self) = @_;
-	plan tests => 1;
+	plan tests => 3;
 
+	is($self->sut->run('/units in a large can of Timeline'), 2.376, 'Units in a large can of Timeline');
+	is($self->sut->run('/units in a small can of Timeline'), 1.782, 'Units in a small can of Timeline');
 	is($self->sut->run('/units in a can of Timeline'), 2.376, 'Units in a can of Timeline');
 
 	return EXIT_SUCCESS;

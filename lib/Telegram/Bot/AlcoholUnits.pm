@@ -39,6 +39,7 @@ use Scalar::Util qw(looks_like_number);
 
 Readonly my $BOTTLE  => 750;
 Readonly my $CAN_L   => 440;
+Readonly my $CAN_S   => 330;
 Readonly my $GLASS_L => 250;
 Readonly my $GLASS_M => 175;
 Readonly my $GLASS_S => 125;
@@ -127,6 +128,10 @@ sub __mlFromJarType {
 
 		return $GLASS_L;
 	} elsif ($jarType =~ m/can/i) {
+		if ($sizeType =~ m/small/i) {
+			return $CAN_S;
+		}
+
 		return $CAN_L;
 	}
 
