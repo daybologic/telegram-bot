@@ -35,19 +35,50 @@ use Moose;
 extends 'Telegram::Bot::Base';
 
 use Readonly;
+use Scalar::Util qw(looks_like_number);
 
+Readonly my $BOTTLE  => 750;
 Readonly my $PINT_UK => 568;
 Readonly my $PINT_US => 473;
 
 sub run {
 	my ($self, $command) = @_;
 
-	$command =~ s/a //gi;
-	$command =~ s/ of//gi;
-	my (undef, $quantity, $drinkType) = split(m/\s+/, $command);
-	my $ml = __mlFromName($quantity);
+	my (@words) = split(m/\s+/, $command);
+	shift(@words); # drop /units
+
+	my $divisor = 1;
+	if (lc($words[0]) eq 'third') {
+		$divisor = 0.33;
+		shift(@words);
+	} elsif (lc($words[0]) eq 'half') {
+		$divisor = 0.5;
+		shift(@words);
+	}
+
+	my $quantity;
+	if (lc($words[0]) eq 'a') {
+		$quantity = 1;
+		shift(@words);
+	} elsif ($quantity = __cardinalToNum($words[0])) {
+		shift(@words);
+	} else {
+		$quantity = 1;
+	}
+
+	my $jarType = $words[0];
+	if (__strengthFromName($jarType)) { # oops, it's a drink
+		$jarType = 'pint';
+	} else {
+		shift(@words);
+	}
+	shift(@words) if (lc($words[0]) eq 'of');
+	my $drinkType = $words[0];
+	shift(@words);
+
+	my $ml = __mlFromJarType($jarType);
 	my $abv = __strengthFromName($drinkType);
-	return __units($abv, 1, $ml);
+	return __units($abv, $quantity * $divisor, $ml);
 }
 
 sub __units {
@@ -55,20 +86,23 @@ sub __units {
 	return ($abv*($quantity*$size))/1000;
 }
 
-sub __mlFromName {
-	my ($name) = @_;
+sub __mlFromJarType {
+	my ($jarType) = @_;
 
-	if ($name =~ m/pint/i) {
+	if ($jarType =~ m/pint/i) {
 		return $PINT_UK;
+	} elsif ($jarType =~ m/bottle/i) {
+		return $BOTTLE;
 	}
 
-	return 1;
+	return $PINT_UK;
 }
 
 sub __strengthFromName {
 	my ($name) = @_;
 
 	my %map = (
+		buckfast => 15,
 		caroline => 7.2,
 		fosters  => 4,
 		guinness => 4.1,
@@ -76,8 +110,53 @@ sub __strengthFromName {
 		wine     => 12.5,
 	);
 
+	my %aliases = (
+		buckie => 'buckfast',
+		bucky  => 'buckfast',
+	);
+
 	$name = lc($name);
+	$name = $aliases{$name} if (exists($aliases{$name}));
 	return $map{$name} || 0;
+}
+
+sub __cardinalToNum {
+	my ($word) = @_;
+
+	return $word if (looks_like_number($word));
+
+	$word = lc($word);
+	Readonly my @CARDINAL => (qw(
+		zero
+		one
+		two
+		three
+		four
+		five
+		six
+		seven
+		eight
+		nine
+		ten
+		eleven
+		twelve
+		thirteen
+		fourteen
+		fifteen
+		sixteen
+		seventeen
+		eighteen
+		nineteen
+		twenty
+	));
+
+	for (my $ordinal = 0; $ordinal < scalar(@CARDINAL); $ordinal++) {
+		if ($CARDINAL[$ordinal] eq $word) {
+			return $ordinal;
+		}
+	}
+
+	return 0;
 }
 
 1;
