@@ -46,6 +46,7 @@ sub run {
 
 	my (@words) = split(m/\s+/, $command);
 	shift(@words); # drop /units
+	return __syntax() unless ($words[0]);
 
 	my $divisor = 1;
 	if (lc($words[0]) eq 'third') {
@@ -72,13 +73,20 @@ sub run {
 	} else {
 		shift(@words);
 	}
-	shift(@words) if (lc($words[0]) eq 'of');
+	shift(@words) if ($words[0] && lc($words[0]) eq 'of');
 	my $drinkType = $words[0];
 	shift(@words);
 
 	my $ml = __mlFromJarType($jarType);
 	my $abv = __strengthFromName($drinkType);
-	return __units($abv, $quantity * $divisor, $ml);
+	my $result = __units($abv, $quantity * $divisor, $ml);
+
+	return $result if ($result);
+	return __syntax();
+}
+
+sub __syntax {
+	return "I don't know about that, say something like: /units half a pint of Guinness";
 }
 
 sub __units {
@@ -115,7 +123,12 @@ sub __strengthFromName {
 		bucky  => 'buckfast',
 	);
 
-	$name = lc($name);
+	if ($name) {
+		$name = lc($name);
+	} else {
+		return 0;
+	}
+
 	$name = $aliases{$name} if (exists($aliases{$name}));
 	return $map{$name} || 0;
 }
