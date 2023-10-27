@@ -107,7 +107,6 @@ sub testBuckfast {
 	return EXIT_SUCCESS;
 }
 
-
 package main;
 use strict;
 use warnings;
