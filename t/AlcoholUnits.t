@@ -121,6 +121,15 @@ sub testWine {
 	return EXIT_SUCCESS;
 }
 
+sub testCansOfBeer {
+	my ($self) = @_;
+	plan tests => 1;
+
+	is($self->sut->run('/units in a can of Timeline'), 2.376, 'Units in a can of Timeline');
+
+	return EXIT_SUCCESS;
+}
+
 package main;
 use strict;
 use warnings;

@@ -38,6 +38,7 @@ use Readonly;
 use Scalar::Util qw(looks_like_number);
 
 Readonly my $BOTTLE  => 750;
+Readonly my $CAN_L   => 440;
 Readonly my $GLASS_L => 250;
 Readonly my $GLASS_M => 175;
 Readonly my $GLASS_S => 125;
@@ -125,6 +126,8 @@ sub __mlFromJarType {
 		}
 
 		return $GLASS_L;
+	} elsif ($jarType =~ m/can/i) {
+		return $CAN_L;
 	}
 
 	return $PINT_UK;
@@ -139,6 +142,7 @@ sub __strengthFromName {
 		fosters  => 4,
 		guinness => 4.1,
 		stella   => 4.6,
+		timeline => 5.4,
 		wine     => 12.5,
 	);
 
