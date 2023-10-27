@@ -48,6 +48,10 @@ sub run {
 	shift(@words); # drop /units
 	return __syntax() unless ($words[0]);
 
+	if (lc($words[0]) eq 'in' && $words[1] && lc($words[1]) eq 'a') {
+		shift(@words);
+	}
+
 	my $divisor = 1;
 	if (lc($words[0]) eq 'third') {
 		$divisor = 0.33;

@@ -44,6 +44,7 @@ extends 'Test::Module::Runnable';
 
 Readonly my $GUINNESS => 2.3288; # pint
 Readonly my $BUCKFAST => 11.25; # bottle
+Readonly my $WINE     => 9.375; # bottle
 
 sub setUp {
 	my ($self, %params) = @_;
@@ -103,6 +104,15 @@ sub testBuckfast {
 	is($self->sut->run('/units bottle of Buckie'), $BUCKFAST, 'Units in bottle of Buckie');
 	is($self->sut->run('/units one bottle of Bucky'), $BUCKFAST, 'Units one bottle of Bucky');
 	is($self->sut->run('/units half a bottle of Bucky'), $BUCKFAST / 2, 'Units in half a bottle of Bucky');
+
+	return EXIT_SUCCESS;
+}
+
+sub testWine {
+	my ($self) = @_;
+	plan tests => 1;
+
+	is($self->sut->run('/units in a bottle of wine'), $WINE, 'Units in a bottle of wine');
 
 	return EXIT_SUCCESS;
 }
