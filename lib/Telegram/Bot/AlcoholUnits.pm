@@ -86,8 +86,8 @@ sub run {
 	}
 	$jarType = $words[0];
 
-	if (__strengthFromName($jarType)) { # oops, it's a drinkType
-		$jarType = 'pint';
+	if (__strengthFromName($jarType)) {
+		$jarType = 'pint'; # oops, it's a drinkType
 	} else {
 		shift(@words);
 	}
@@ -95,8 +95,10 @@ sub run {
 	my $drinkType = shift(@words);
 
 	my $ml = __mlFromJarType($jarType, $sizeType);
-	my $abv = __strengthFromName($drinkType);
+	my $abv = __strengthFromName($drinkType, 1);
 	my $result = __units($abv, $quantity * $divisor, $ml);
+
+	$self->dic->logger->debug(sprintf('drinkType: %s, jarType: %s, sizeType: %s, ABV: %s, ml: %d', $drinkType, $jarType, $sizeType, $abv, $ml));
 
 	return $result if ($result);
 	return __syntax();
@@ -114,7 +116,11 @@ sub __units {
 sub __mlFromJarType {
 	my ($jarType, $sizeType) = @_;
 
-	if ($jarType =~ m/pint/i) {
+	if ($jarType =~ m/^(\d+)([cm]l)$/i) {
+		my ($ml, $si) = ($1, $2);
+		$ml *= 10 if (lc($si) eq 'cl');
+		return $ml;
+	} elsif ($jarType =~ m/pint/i) {
 		return $PINT_UK;
 	} elsif ($jarType =~ m/bottle/i) {
 		return $BOTTLE;
@@ -144,13 +150,14 @@ sub __mlFromJarType {
 }
 
 sub __strengthFromName {
-	my ($name) = @_;
+	my ($name, $checkForABV) = @_;
 
 	my %map = (
 		buckfast => 15,
 		caroline => 7.2,
 		fosters  => 4,
 		guinness => 4.1,
+		kestrel  => 9,
 		stella   => 4.6,
 		timeline => 5.4,
 		vodka    => 40,
@@ -165,6 +172,10 @@ sub __strengthFromName {
 	);
 
 	if ($name) {
+		if ($checkForABV && $name =~ m/^\d+/) {
+			$name =~ s/\%$//;
+			return $name if (looks_like_number($name));
+		}
 		$name = lc($name);
 	} else {
 		return 0;
