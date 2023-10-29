@@ -1,3 +1,5 @@
+#!/usr/bin/perl
+#
 # telegram-bot
 # Copyright (c) 2023, Rev. Duncan Ross Palmer (2E0EOL),
 # All rights reserved.
@@ -29,20 +31,42 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-package Telegram::Bot::RandomNumber;
+package FoodTests;
 use Moose;
 
-extends 'Telegram::Bot::Base';
+use lib 'externals/libtest-module-runnable-perl/lib';
+extends 'Test::Module::Runnable';
 
-use Readonly;
+use Telegram::Bot::DI::Container;
+use Telegram::Bot::Food;
+use POSIX qw(EXIT_SUCCESS);
+use Test::More;
 
-Readonly my $LIMIT => 65536;
+has config => (is => 'rw', isa => 'Telegram::Bot::Config');
 
-sub run {
+sub setUp {
 	my ($self) = @_;
-	my $number = 1 + int(rand($LIMIT));
-	$self->dic->logger->trace("Random number: $number");
-	return $number;
+
+	my $dic = Telegram::Bot::DI::Container->new();
+	$self->sut(Telegram::Bot::Food->new({ dic => $dic }));
+
+	return EXIT_SUCCESS;
 }
 
-1;
+sub testRun {
+	my ($self) = @_;
+	plan tests => 3;
+
+	my (@food) = map { $self->sut->run() } 0..1;
+	foreach my $comestible (@food) {
+		like($comestible, qr/^\w+/, 'Food stuff seen');
+	}
+	isnt($food[1], $food[0], 'Not same as previous');
+
+	return EXIT_SUCCESS;
+}
+
+package main;
+use strict;
+use warnings;
+exit(FoodTests->new->run);

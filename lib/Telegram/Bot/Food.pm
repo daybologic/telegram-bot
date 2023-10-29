@@ -29,20 +29,52 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-package Telegram::Bot::RandomNumber;
+package Telegram::Bot::Food;
 use Moose;
 
 extends 'Telegram::Bot::Base';
 
 use Readonly;
 
-Readonly my $LIMIT => 65536;
+Readonly my @FOOD => (qw(
+	fish and chips
+	curry
+	pie
+	burrito
+	thai
+	chinese
+	indian
+	salad
+	pasty
+	sandwich
+	pot noodle
+	roast dinner
+	panini
+	cake
+	chicken
+	wrap
+	pizza
+	huel
+	haggis
+	muesli
+	stew
+));
+
+has previouslyChosen => (is => 'rw', isa => 'Int', default => -1);
 
 sub run {
 	my ($self) = @_;
-	my $number = 1 + int(rand($LIMIT));
-	$self->dic->logger->trace("Random number: $number");
-	return $number;
+
+	my $index;
+	do {
+		$index = $self->dic->randomNumber->run() % scalar(@FOOD);
+	} while ($index == $self->previouslyChosen);
+
+	$self->previouslyChosen($index);
+	my $comestible = $FOOD[$index];
+
+	$self->dic->logger->debug("Chose comestible: '$comestible'");
+	return $comestible;
 }
 
 1;
