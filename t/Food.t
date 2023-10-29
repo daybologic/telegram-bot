@@ -37,14 +37,9 @@ use Moose;
 use lib 'externals/libtest-module-runnable-perl/lib';
 extends 'Test::Module::Runnable';
 
-use Telegram::Bot::Config::Section;
-use Telegram::Bot::Config;
 use Telegram::Bot::DI::Container;
 use Telegram::Bot::Food;
-use English qw(-no_match_vars);
 use POSIX qw(EXIT_SUCCESS);
-use Readonly;
-use Test::Deep qw(cmp_deeply all isa methods bool re);
 use Test::More;
 
 has config => (is => 'rw', isa => 'Telegram::Bot::Config');
@@ -53,24 +48,20 @@ sub setUp {
 	my ($self) = @_;
 
 	my $dic = Telegram::Bot::DI::Container->new();
-	$self->config(Telegram::Bot::Config->new({ dic => $dic }));
-
 	$self->sut(Telegram::Bot::Food->new({ dic => $dic }));
 
 	return EXIT_SUCCESS;
 }
 
-sub tearDown {
-	my ($self) = @_;
-	$self->clearMocks();
-	return EXIT_SUCCESS;
-}
-
 sub testRun {
 	my ($self) = @_;
-	plan tests => 1;
+	plan tests => 3;
 
-	$self->sut->run();
+	my (@food) = map { $self->sut->run() } 0..1;
+	foreach my $comestible (@food) {
+		like($comestible, qr/^\w+/, 'Food stuff seen');
+	}
+	isnt($food[1], $food[0], 'Not same as previous');
 
 	return EXIT_SUCCESS;
 }

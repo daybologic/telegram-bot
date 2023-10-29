@@ -84,6 +84,7 @@ sub testAttributesSimple {
 		'Telegram::Bot::Config'            => 'config',
 		'Telegram::Bot::DB'                => 'db',
 		'Telegram::Bot::DrinksClient'      => 'drinksClient',
+		'Telegram::Bot::Food'              => 'food',
 		'Telegram::Bot::GenderClient'      => 'genderClient',
 		'Telegram::Bot::Memes'             => 'memes',
 		'Telegram::Bot::MusicDB'           => 'musicDB',
