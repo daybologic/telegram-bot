@@ -36,6 +36,7 @@ extends 'Telegram::Bot::Base';
 
 use Readonly;
 use Scalar::Util qw(looks_like_number);
+use Telegram::Bot::DrinkInfo;
 
 Readonly my $BOTTLE         => 750;
 Readonly my $CAN_L          => 440;
@@ -47,12 +48,25 @@ Readonly my $PINT_UK        => 568;
 Readonly my $PINT_US        => 473;
 Readonly my $SPIRIT_ENGLAND => 25;
 
+has __previousDrinks => (is => 'rw', isa => 'HashRef[Telegram::Bot::DrinkInfo]', default => sub { { } });
+my $username = 'm6kvm'; # FIXME
+
 sub run {
 	my ($self, $command) = @_;
 
 	my (@words) = split(m/\s+/, $command);
 	shift(@words); # drop /units
 	return __syntax() unless ($words[0]);
+
+	if ($words[0] eq 'record') {
+		if (my $drinkInfo = $self->__previousDrinks->{$username}) {
+			my $result = $drinkInfo->record();
+			delete($self->__previousDrinks->{$username});
+			return $result;
+		} else {
+			return 'No drink info to record';
+		}
+	}
 
 	if (lc($words[0]) eq 'in') {
 		shift(@words);
@@ -100,8 +114,15 @@ sub run {
 
 	$self->dic->logger->debug(sprintf('drinkType: %s, jarType: %s, sizeType: %s, ABV: %s, ml: %d', $drinkType, $jarType, $sizeType, $abv, $ml));
 
-	return $result if ($result);
-	return __syntax();
+	return __syntax() unless ($result);
+	$self->__previousDrinks->{$username} = Telegram::Bot::DrinkInfo->new({ # FIXME
+		abv   => $abv,
+		dic   => $self->dic,
+		name  => $drinkType,
+		units => $result,
+	});
+
+	return $result;
 }
 
 sub __syntax {
