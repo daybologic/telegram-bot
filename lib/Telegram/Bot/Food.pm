@@ -56,6 +56,8 @@ Readonly my @FOOD => (qw(
 	pizza
 	huel
 	haggis
+	muesli
+	stew
 ));
 
 has previouslyChosen => (is => 'rw', isa => 'Int', default => -1);
