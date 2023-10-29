@@ -132,6 +132,11 @@ sub xkcd {
 	return 'oops, no comic';
 }
 
+sub food {
+	my (@input) = @_;
+	return 'You should all eat ' . $dic->food->run();
+}
+
 sub breakfast {
 	my (@input) = @_;
 	my $user = $input[0]->{from}{username} || 'jesscharlton';
@@ -432,6 +437,7 @@ my $commands = {
 		my $error = `aws --profile telegram dynamodb get-item --table-name excuses4 --key='{ "ident": { "S": "$key" } }' --cli-read-timeout 1800 | jq -a -r .Item.english.S`;
 		return $error;
 	},
+	'food' => \&food,
 	'tableflip' => sub {
 		return '(┛ಠ_ಠ)┛彡┻━┻';
 	},
