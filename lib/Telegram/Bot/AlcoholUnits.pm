@@ -157,6 +157,7 @@ sub __strengthFromName {
 		caroline => 7.2,
 		fosters  => 4,
 		guinness => 4.1,
+		kestrel  => 9,
 		stella   => 4.6,
 		timeline => 5.4,
 		vodka    => 40,
