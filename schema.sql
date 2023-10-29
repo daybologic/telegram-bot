@@ -165,3 +165,5 @@ CREATE TABLE `karma` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `term` (`term`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+CREATE TABLE `drinks` (`id` INT(11) NOT NULL auto_increment, `name` CHAR(32) NOT NULL, `when_utc` datetime NOT NULL DEFAULT current_timestamp(), `user` int(11) DEFAULT NULL, units FLOAT default 0, PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=latin1;
