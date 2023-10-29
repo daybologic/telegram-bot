@@ -39,7 +39,10 @@ use Readonly;
 Readonly my $LIMIT => 65536;
 
 sub run {
-	return 1 + int(rand($LIMIT));
+	my ($self) = @_;
+	my $number = 1 + int(rand($LIMIT));
+	$self->dic->logger->trace("Random number: $number");
+	return $number;
 }
 
 1;
