@@ -37,6 +37,7 @@ use Moose;
 use POSIX qw(EXIT_SUCCESS);
 use Readonly;
 use Telegram::Bot::AlcoholUnits;
+use Telegram::Bot::DI::Container;
 use Test::More 0.96;
 
 use lib 'externals/libtest-module-runnable-perl/lib';
@@ -48,7 +49,10 @@ Readonly my $WINE     => 9.375; # bottle
 
 sub setUp {
 	my ($self, %params) = @_;
-	$self->sut(Telegram::Bot::AlcoholUnits->new());
+
+	my $dic = Telegram::Bot::DI::Container->new();
+	$self->sut(Telegram::Bot::AlcoholUnits->new({ dic => $dic }));
+
 	return $self->SUPER::setUp(%params);
 }
 
@@ -152,6 +156,17 @@ sub testVodka {
 	is($self->sut->run('/units in a measure of vodka'), 1, 'Units in a measure of vodka');
 	is($self->sut->run('/units in a shot of vodka'), 1, 'Units in a shot of vodka');
 	is($self->sut->run('/units in a large measure of vodka'), 2, 'Units in a large measure of vodka');
+
+	return EXIT_SUCCESS;
+}
+
+sub testFreeForm {
+	my ($self) = @_;
+	plan tests => 3;
+
+	is($self->sut->run('/units in 440ml of 5.8'), 2.552, 'units in 440ml of 5.8');
+	is($self->sut->run('/units in 20cl of 11%'), 2.2, 'units in 20cl of 11%');
+	is($self->sut->run('/units in 33cl of 8.4'), 2.772, 'units in 33cl of 8.4');
 
 	return EXIT_SUCCESS;
 }
