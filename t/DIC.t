@@ -78,12 +78,14 @@ sub testAttributesSimple {
 
 	Readonly my %MAP => (
 		'Telegram::Bot::Admins'            => 'admins',
+		'Telegram::Bot::AlcoholUnits'      => 'alcoholUnits',
 		'Telegram::Bot::Audit'             => 'audit',
 		'Telegram::Bot::Ball8'             => 'ball8',
 		'Telegram::Bot::CatClient'         => 'catClient',
 		'Telegram::Bot::Config'            => 'config',
 		'Telegram::Bot::DB'                => 'db',
 		'Telegram::Bot::DrinksClient'      => 'drinksClient',
+		'Telegram::Bot::Food'              => 'food',
 		'Telegram::Bot::GenderClient'      => 'genderClient',
 		'Telegram::Bot::Memes'             => 'memes',
 		'Telegram::Bot::MusicDB'           => 'musicDB',
