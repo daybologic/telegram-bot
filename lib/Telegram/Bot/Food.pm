@@ -38,7 +38,11 @@ use Readonly;
 
 Readonly my @FOOD => (qw(
 	fish
+	chips
+	samosas
+	soup
 	curry
+	granola
 	pie
 	burrito
 	thai
