@@ -48,10 +48,10 @@ sub toString {
 }
 
 sub record {
-	my ($self) = @_;
-	my $sth = $self->dic->db->getHandle()->prepare('INSERT INTO drinks (name, units) VALUES(?, ?)');
-	$sth->execute($self->name, $self->units);
-	return sprintf('%s units recorded for %s', $self->units, 'nobody');
+	my ($self, $username) = @_;
+	my $sth = $self->dic->db->getHandle()->prepare('INSERT INTO drinks (name, units, user) VALUES(?, ?, ?)');
+	$sth->execute($self->name, $self->units, $self->dic->userRepo->username2Id($username));
+	return sprintf('%s units recorded for %s', $self->units, $username);
 }
 
 1;

@@ -49,18 +49,19 @@ Readonly my $PINT_US        => 473;
 Readonly my $SPIRIT_ENGLAND => 25;
 
 has __previousDrinks => (is => 'rw', isa => 'HashRef[Telegram::Bot::DrinkInfo]', default => sub { { } });
-my $username = 'm6kvm'; # FIXME
 
 sub run {
-	my ($self, $command) = @_;
+	my ($self, $command, $username) = @_;
 
 	my (@words) = split(m/\s+/, $command);
 	shift(@words); # drop /units
 	return __syntax() unless ($words[0]);
 
 	if ($words[0] eq 'record') {
-		if (my $drinkInfo = $self->__previousDrinks->{$username}) {
-			my $result = $drinkInfo->record();
+		if (!$username) {
+			return "Sorry, only users with an '\@username' may record units";
+		} elsif (my $drinkInfo = $self->__previousDrinks->{$username}) {
+			my $result = $drinkInfo->record($username);
 			delete($self->__previousDrinks->{$username});
 			return $result;
 		} else {
@@ -115,12 +116,14 @@ sub run {
 	$self->dic->logger->debug(sprintf('drinkType: %s, jarType: %s, sizeType: %s, ABV: %s, ml: %d', $drinkType, $jarType, $sizeType, $abv, $ml));
 
 	return __syntax() unless ($result);
-	$self->__previousDrinks->{$username} = Telegram::Bot::DrinkInfo->new({ # FIXME
-		abv   => $abv,
-		dic   => $self->dic,
-		name  => $drinkType,
-		units => $result,
-	});
+	if ($username) {
+		$self->__previousDrinks->{$username} = Telegram::Bot::DrinkInfo->new({
+			abv   => $abv,
+			dic   => $self->dic,
+			name  => $drinkType,
+			units => $result,
+		});
+	}
 
 	return $result;
 }
