@@ -37,11 +37,12 @@ extends 'Telegram::Bot::Base';
 use Readonly;
 
 Readonly my @FOOD => (qw(
-	fish and chips
+	fish
 	curry
 	pie
 	burrito
 	thai
+	cheese
 	chinese
 	indian
 	salad
