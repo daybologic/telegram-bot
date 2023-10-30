@@ -139,7 +139,7 @@ sub food {
 
 sub breakfast {
 	my (@input) = @_;
-	my $user = $input[0]->{from}{username} || 'jesscharlton';
+	my $user = $input[0]->{from}{username} || 'anonymous';
 	my $text = $input[0]->{text};
 
 	my @words = split(m/\s+/, $text);
