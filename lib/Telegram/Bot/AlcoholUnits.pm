@@ -187,6 +187,8 @@ sub __strengthFromName {
 		vodka    => 40,
 		wine     => 12.5,
 		whiskey  => 40,
+		gin      => 38,
+		modelo   => 4.5,
 	);
 
 	my %aliases = (
