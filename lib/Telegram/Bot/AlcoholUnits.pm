@@ -34,6 +34,7 @@ use Moose;
 
 extends 'Telegram::Bot::Base';
 
+use Data::Dumper;
 use Readonly;
 use Scalar::Util qw(looks_like_number);
 use Telegram::Bot::DrinkInfo;
@@ -66,6 +67,12 @@ sub run {
 			return $result;
 		} else {
 			return 'No drink info to record';
+		}
+	} elsif ($words[0] eq 'report') {
+		if ($username) {
+			return $self->__report($username);
+		} else {
+			return "Sorry, only users with an '\@username' may obtain a drinking report";
 		}
 	}
 
@@ -126,6 +133,33 @@ sub run {
 	}
 
 	return $result;
+}
+
+sub __report {
+	my ($self, $username) = @_;
+
+	my $report = '';
+	my $days = 7;
+	my $sth = $self->dic->db->getHandle()->prepare('SELECT d.name,d.units FROM drinks d, user u WHERE u.name = ? AND d.user=u.id AND d.when_utc >= DATE(NOW() - INTERVAL ? DAY)');
+	$sth->execute($username, $days);
+
+	my $weeklyUnits = 0;
+	my $totalDrinks = 0;
+	while (my $ref = $sth->fetchrow_hashref()) {
+		$self->dic->logger->trace(Dumper $ref);
+		$weeklyUnits += $ref->{units};
+		$totalDrinks++;
+	}
+
+	$report .= sprintf('%s drank %.1f units in the past %d days, over %d separate drinks...', $username,
+	    $weeklyUnits, $days, $totalDrinks);
+
+	my $their = $self->dic->genderClient->get($username)->their();
+	$report .= "\n" . sprintf('%s average drink contained %.2f units.', $their, $weeklyUnits / $totalDrinks);
+
+	$report .= sprintf("\nThat's %.2f units a day", $weeklyUnits / $days);
+
+	return $report;
 }
 
 sub __syntax {
