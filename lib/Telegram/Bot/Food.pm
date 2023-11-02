@@ -50,6 +50,7 @@ Readonly my @FOOD => (qw(
 	chinese
 	indian
 	salad
+	salami
 	pasty
 	sandwich
 	pot noodle
@@ -63,6 +64,12 @@ Readonly my @FOOD => (qw(
 	haggis
 	muesli
 	stew
+	yogurt
+	crisps
+	slice
+	icecream
+	tart
+	quiche
 ));
 
 has previouslyChosen => (is => 'rw', isa => 'Int', default => -1);
