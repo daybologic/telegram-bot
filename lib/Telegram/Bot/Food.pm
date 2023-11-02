@@ -38,6 +38,7 @@ use Readonly;
 
 Readonly my @FOOD => (qw(
 	fish
+	wellington
 	chips
 	samosas
 	soup
@@ -51,6 +52,7 @@ Readonly my @FOOD => (qw(
 	indian
 	salad
 	salami
+	pasta
 	pasty
 	sandwich
 	pot noodle
