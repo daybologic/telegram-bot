@@ -36,43 +36,43 @@ extends 'Telegram::Bot::Base';
 
 use Readonly;
 
-Readonly my @FOOD => (qw(
-	fish
-	wellington
-	chips
-	samosas
-	soup
-	curry
-	granola
-	pie
-	burrito
-	thai
-	cheese
-	chinese
-	indian
-	salad
-	salami
-	pasta
-	pasty
-	sandwich
-	pot noodle
-	roast dinner
-	panini
-	cake
-	chicken
-	wrap
-	pizza
-	huel
-	haggis
-	muesli
-	stew
-	yogurt
-	crisps
-	slice
-	icecream
-	tart
-	quiche
-));
+Readonly my @FOOD => (
+	'fish',
+	'wellington',
+	'chips',
+	'samosas',
+	'soup',
+	'curry',
+	'granola',
+	'pie',
+	'burrito',
+	'thai',
+	'cheese',
+	'chinese',
+	'indian',
+	'salad',
+	'salami',
+	'pasta',
+	'pasty',
+	'sandwich',
+	'pot noodle',
+	'roast dinner',
+	'panini',
+	'cake',
+	'chicken',
+	'wrap',
+	'pizza',
+	'huel',
+	'haggis',
+	'muesli',
+	'stew',
+	'yogurt',
+	'crisps',
+	'slice',
+	'ice cream',
+	'tart',
+	'quiche',
+);
 
 has previouslyChosen => (is => 'rw', isa => 'Int', default => -1);
 
