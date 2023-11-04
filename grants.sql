@@ -7,4 +7,4 @@ GRANT SELECT, INSERT, UPDATE ON `telegram_bot`.`user_settings` TO `telegram_bot`
 GRANT INSERT ON `telegram_bot`.`user_history` TO `telegram_bot`@`%`;
 GRANT SELECT, INSERT, DELETE ON `telegram_bot`.`meme` TO `telegram_bot`@`%`;
 GRANT SELECT, INSERT, UPDATE, DELETE ON `telegram_bot`.`karma` TO `telegram_bot`@`%`;
-GRANT SELECT, INSERT ON `telegram_bot`.`drinks` TO `telegram_bot`@`%`;
+GRANT SELECT, INSERT, DELETE ON `telegram_bot`.`drinks` TO `telegram_bot`@`%`;

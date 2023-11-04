@@ -74,6 +74,12 @@ sub run {
 		} else {
 			return "Sorry, only users with a '\@username' may obtain a drinking report";
 		}
+	} elsif ($words[0] eq 'undo') {
+		if ($username) {
+			return $self->__undo($username);
+		} else {
+			return "Sorry, only users with a '\@username' may undo the last item from the drinking report";
+		}
 	}
 
 	if (lc($words[0]) eq 'in') {
@@ -133,6 +139,26 @@ sub run {
 	}
 
 	return $result;
+}
+
+sub __undo {
+	my ($self, $username) = @_;
+
+	my $userId = $self->dic->userRepo->username2Id($username);
+	my $items = 1;
+	my $sth = $self->dic->db->getHandle()->prepare('DELETE FROM drinks WHERE user = ? ORDER BY id DESC LIMIT ?');
+	$sth->execute($username, $items);
+
+	$items = $sth->rows;
+	if ($items < 0) {
+		return "Can't delete drinks for $username, see log";
+	} elsif ($items == 0) {
+		return "No more drinks to delete for $username";
+	}
+
+	my $plural = '';
+	$plural = 's' if ($items != 1);
+	return sprintf('Deleted the previous %d drink%s for %s', $items, $plural, $username);
 }
 
 sub __report {
