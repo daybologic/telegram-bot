@@ -183,8 +183,18 @@ sub __report {
 	$report .= "\n" . sprintf('%s average drink contained %.2f units.', $their, $weeklyUnits / $totalDrinks);
 
 	$report .= sprintf("\nThat's %.2f units a day", $weeklyUnits / $days);
+	$report .= __govWarning($weeklyUnits);
 
 	return $report;
+}
+
+sub __govWarning {
+	my ($weeklyUnits) = @_;
+	return '' if ($weeklyUnits <= 14);
+
+	my $message = "\nWARNING: The UK CMO advises against regularly imbibing more than 14 units in a week.";
+	$message .= "\nThe CMO advises over 50 units a week is high risk drinking." if ($weeklyUnits > 50);
+	return $message;
 }
 
 sub __syntax {
