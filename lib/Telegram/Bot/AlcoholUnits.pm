@@ -60,7 +60,7 @@ sub run {
 
 	if ($words[0] eq 'record') {
 		if (!$username) {
-			return "Sorry, only users with an '\@username' may record units";
+			return "Sorry, only users with a '\@username' may record units";
 		} elsif (my $drinkInfo = $self->__previousDrinks->{$username}) {
 			my $result = $drinkInfo->record($username);
 			delete($self->__previousDrinks->{$username});
@@ -72,7 +72,7 @@ sub run {
 		if ($username) {
 			return $self->__report($username);
 		} else {
-			return "Sorry, only users with an '\@username' may obtain a drinking report";
+			return "Sorry, only users with a '\@username' may obtain a drinking report";
 		}
 	}
 
