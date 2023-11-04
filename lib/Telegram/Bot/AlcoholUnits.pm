@@ -144,10 +144,9 @@ sub run {
 sub __undo {
 	my ($self, $username) = @_;
 
-	my $userId = $self->dic->userRepo->username2Id($username);
 	my $items = 1;
 	my $sth = $self->dic->db->getHandle()->prepare('DELETE FROM drinks WHERE user = ? ORDER BY id DESC LIMIT ?');
-	$sth->execute($username, $items);
+	$sth->execute($self->dic->userRepo->username2Id($username), $items);
 
 	$items = $sth->rows;
 	if ($items < 0) {
