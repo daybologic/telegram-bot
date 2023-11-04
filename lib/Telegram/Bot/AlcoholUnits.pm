@@ -251,9 +251,10 @@ sub __strengthFromName {
 	);
 
 	my %aliases = (
-		buckie => 'buckfast',
-		bucky  => 'buckfast',
-		whisky => 'whiskey',
+		buckie  => 'buckfast',
+		bucky   => 'buckfast',
+		guiness => 'guinness',
+		whisky  => 'whiskey',
 	);
 
 	if ($name) {
