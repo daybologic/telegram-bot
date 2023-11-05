@@ -150,11 +150,11 @@ sub run {
 sub __last {
 	my ($self, $username) = @_;
 
-	my $sth = $self->dic->db->getHandle()->prepare('SELECT when_utc FROM drinks WHERE user = ? ORDER BY when_utc DESC LIMIT 1');
+	my $sth = $self->dic->db->getHandle()->prepare('SELECT when_utc, units FROM drinks WHERE user = ? ORDER BY when_utc DESC LIMIT 1');
 	$sth->execute($self->dic->userRepo->username2Id($username));
 
 	if (my $row = $sth->fetchrow_hashref) {
-		return sprintf("Your last drink was on %s", $row->{when_utc});
+		return sprintf("Your last drink was on %s and was %.2f units", $row->{when_utc}, $row->{units});
 	}
 
 	return "No drinks recorded for $username";
