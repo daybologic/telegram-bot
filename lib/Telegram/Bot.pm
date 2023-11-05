@@ -221,6 +221,11 @@ sub memeAddRemove {
 	return "Can't get here";
 }
 
+sub help {
+	my ($self) = @_;
+	return 'TODO';
+}
+
 sub ball8 {
 	return $dic->ball8->run();
 }
@@ -326,6 +331,7 @@ my $commands = {
 		}
 	},
 	'units' => \&units,
+	'help' => \&help,
 	'bugger' => \&bugger,
 	'version' => \&version,
 	'search' => sub {
