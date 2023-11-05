@@ -63,7 +63,7 @@ sub run {
 			return "Sorry, only users with a '\@username' may record units";
 		} elsif (my $drinkInfo = $self->__previousDrinks->{$username}) {
 			my $result = $drinkInfo->record($username);
-			delete($self->__previousDrinks->{$username});
+			#delete($self->__previousDrinks->{$username}); # Experimental; do people want to record duplicates?
 			return $result;
 		} else {
 			return 'No drink info to record';
