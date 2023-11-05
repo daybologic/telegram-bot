@@ -80,6 +80,12 @@ sub run {
 		} else {
 			return "Sorry, only users with a '\@username' may undo the last item from the drinking report";
 		}
+	} elsif ($words[0] eq 'last') {
+		if ($username) {
+			return $self->__last($username);
+		} else {
+			return "Sorry, only users with a '\@username' may look up their last drink";
+		}
 	}
 
 	if (lc($words[0]) eq 'in') {
@@ -139,6 +145,19 @@ sub run {
 	}
 
 	return $result;
+}
+
+sub __last {
+	my ($self, $username) = @_;
+
+	my $sth = $self->dic->db->getHandle()->prepare('SELECT when_utc FROM drinks WHERE user = ? ORDER BY when_utc DESC LIMIT 1');
+	$sth->execute($self->dic->userRepo->username2Id($username));
+
+	if (my $row = $sth->fetchrow_hashref) {
+		return sprintf("Your last drink was on %s", $row->{when_utc});
+	}
+
+	return "No drinks recorded for $username";
 }
 
 sub __undo {
