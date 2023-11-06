@@ -184,8 +184,8 @@ sub __report {
 
 	my $report = '';
 	my $days = 7;
-	my $sth = $self->dic->db->getHandle()->prepare('SELECT d.name,d.units FROM drinks d, user u WHERE u.name = ? AND d.user=u.id AND d.when_utc >= DATE(NOW() - INTERVAL ? DAY)');
-	$sth->execute($username, $days);
+	my $sth = $self->dic->db->getHandle()->prepare('SELECT d.name,d.units FROM drinks d, user u WHERE u.name = ? AND d.user=u.id AND d.when_utc >= DATE(NOW() - INTERVAL ? HOUR)');
+	$sth->execute($username, $days * 24);
 
 	my $weeklyUnits = 0;
 	my $totalDrinks = 0;
