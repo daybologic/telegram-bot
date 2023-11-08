@@ -58,7 +58,17 @@ sub run {
 	shift(@words); # drop /units
 	return __syntax() unless ($words[0]);
 
-	if ($words[0] eq 'record') {
+	if (scalar(@words) == 1 && looks_like_number($words[0])) {
+		if ($username) {
+			$self->__previousDrinks->{$username} = Telegram::Bot::DrinkInfo->new({
+				abv   => 0,
+				dic   => $self->dic,
+				name  => 'raw units',
+				units => $words[0],
+			});
+		}
+		return $words[0];
+	} elsif ($words[0] eq 'record') {
 		if (!$username) {
 			return "Sorry, only users with a '\@username' may record units";
 		} elsif (my $drinkInfo = $self->__previousDrinks->{$username}) {

@@ -171,6 +171,17 @@ sub testFreeForm {
 	return EXIT_SUCCESS;
 }
 
+sub testRawUnits {
+	my ($self) = @_;
+	plan tests => 3;
+
+	is($self->sut->run('/units 10'), 10, '10 raw units');
+	is($self->sut->run('/units 2.552'), 2.552, '2.552 raw units');
+	is($self->sut->run('/units 1.1'), 1.1, '1.1 raw units');;
+
+	return EXIT_SUCCESS;
+}
+
 package main;
 use strict;
 use warnings;
