@@ -34,8 +34,10 @@ use Moose;
 
 extends 'Telegram::Bot::Base';
 
+use Data::Dumper;
 use Readonly;
 use Scalar::Util qw(looks_like_number);
+use Telegram::Bot::DrinkInfo;
 
 Readonly my $BOTTLE         => 750;
 Readonly my $CAN_L          => 440;
@@ -47,12 +49,54 @@ Readonly my $PINT_UK        => 568;
 Readonly my $PINT_US        => 473;
 Readonly my $SPIRIT_ENGLAND => 25;
 
+has __previousDrinks => (is => 'rw', isa => 'HashRef[Telegram::Bot::DrinkInfo]', default => sub { { } });
+
 sub run {
-	my ($self, $command) = @_;
+	my ($self, $command, $username) = @_;
 
 	my (@words) = split(m/\s+/, $command);
 	shift(@words); # drop /units
 	return __syntax() unless ($words[0]);
+
+	if (scalar(@words) == 1 && looks_like_number($words[0])) {
+		if ($username) {
+			$self->__previousDrinks->{$username} = Telegram::Bot::DrinkInfo->new({
+				abv   => 0,
+				dic   => $self->dic,
+				name  => 'raw units',
+				units => $words[0],
+			});
+		}
+		return $words[0];
+	} elsif ($words[0] eq 'record') {
+		if (!$username) {
+			return "Sorry, only users with a '\@username' may record units";
+		} elsif (my $drinkInfo = $self->__previousDrinks->{$username}) {
+			my $result = $drinkInfo->record($username);
+			#delete($self->__previousDrinks->{$username}); # Experimental; do people want to record duplicates?
+			return $result;
+		} else {
+			return 'No drink info to record';
+		}
+	} elsif ($words[0] eq 'report') {
+		if ($username) {
+			return $self->__report($username);
+		} else {
+			return "Sorry, only users with a '\@username' may obtain a drinking report";
+		}
+	} elsif ($words[0] eq 'undo') {
+		if ($username) {
+			return $self->__undo($username);
+		} else {
+			return "Sorry, only users with a '\@username' may undo the last item from the drinking report";
+		}
+	} elsif ($words[0] eq 'last') {
+		if ($username) {
+			return $self->__last($username);
+		} else {
+			return "Sorry, only users with a '\@username' may look up their last drink";
+		}
+	}
 
 	if (lc($words[0]) eq 'in') {
 		shift(@words);
@@ -100,8 +144,86 @@ sub run {
 
 	$self->dic->logger->debug(sprintf('drinkType: %s, jarType: %s, sizeType: %s, ABV: %s, ml: %d', $drinkType, $jarType, $sizeType, $abv, $ml));
 
-	return $result if ($result);
-	return __syntax();
+	return __syntax() unless ($result);
+	if ($username) {
+		$self->__previousDrinks->{$username} = Telegram::Bot::DrinkInfo->new({
+			abv   => $abv,
+			dic   => $self->dic,
+			name  => $drinkType,
+			units => $result,
+		});
+	}
+
+	return $result;
+}
+
+sub __last {
+	my ($self, $username) = @_;
+
+	my $sth = $self->dic->db->getHandle()->prepare('SELECT when_utc, units FROM drinks WHERE user = ? ORDER BY when_utc DESC LIMIT 1');
+	$sth->execute($self->dic->userRepo->username2Id($username));
+
+	if (my $row = $sth->fetchrow_hashref) {
+		return sprintf("Your last drink was on %s and was %.2f units", $row->{when_utc}, $row->{units});
+	}
+
+	return "No drinks recorded for $username";
+}
+
+sub __undo {
+	my ($self, $username) = @_;
+
+	my $items = 1;
+	my $sth = $self->dic->db->getHandle()->prepare('DELETE FROM drinks WHERE user = ? ORDER BY id DESC LIMIT ?');
+	$sth->execute($self->dic->userRepo->username2Id($username), $items);
+
+	$items = $sth->rows;
+	if ($items < 0) {
+		return "Can't delete drinks for $username, see log";
+	} elsif ($items == 0) {
+		return "No more drinks to delete for $username";
+	}
+
+	my $plural = '';
+	$plural = 's' if ($items != 1);
+	return sprintf('Deleted the previous %d drink%s for %s', $items, $plural, $username);
+}
+
+sub __report {
+	my ($self, $username) = @_;
+
+	my $report = '';
+	my $days = 7;
+	my $sth = $self->dic->db->getHandle()->prepare('SELECT d.name,d.units FROM drinks d, user u WHERE u.name = ? AND d.user=u.id AND d.when_utc >= DATE(NOW() - INTERVAL ? HOUR)');
+	$sth->execute($username, $days * 24);
+
+	my $weeklyUnits = 0;
+	my $totalDrinks = 0;
+	while (my $ref = $sth->fetchrow_hashref()) {
+		$self->dic->logger->trace(Dumper $ref);
+		$weeklyUnits += $ref->{units};
+		$totalDrinks++;
+	}
+
+	$report .= sprintf('%s drank %.1f units in the past %d days, over %d separate drinks...', $username,
+	    $weeklyUnits, $days, $totalDrinks);
+
+	my $their = $self->dic->genderClient->get($username)->their();
+	$report .= "\n" . sprintf('%s average drink contained %.2f units.', $their, $weeklyUnits / $totalDrinks);
+
+	$report .= sprintf("\nThat's %.2f units a day", $weeklyUnits / $days);
+	$report .= __govWarning($weeklyUnits);
+
+	return $report;
+}
+
+sub __govWarning {
+	my ($weeklyUnits) = @_;
+	return '' if ($weeklyUnits <= 14);
+
+	my $message = "\nWARNING: The UK CMO advises against regularly imbibing more than 14 units in a week.";
+	$message .= "\nThe CMO advises over 50 units a week is high risk drinking." if ($weeklyUnits > 50);
+	return $message;
 }
 
 sub __syntax {
@@ -163,12 +285,16 @@ sub __strengthFromName {
 		vodka    => 40,
 		wine     => 12.5,
 		whiskey  => 40,
+		gin      => 38,
+		modelo   => 4.5,
+		tsingtao => 4.7,
 	);
 
 	my %aliases = (
-		buckie => 'buckfast',
-		bucky  => 'buckfast',
-		whisky => 'whiskey',
+		buckie  => 'buckfast',
+		bucky   => 'buckfast',
+		guiness => 'guinness',
+		whisky  => 'whiskey',
 	);
 
 	if ($name) {

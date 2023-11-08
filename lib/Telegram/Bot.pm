@@ -103,7 +103,8 @@ sub source {
 sub units {
 	my (@input) = @_;
 	my $text = $input[0]->{text};
-	return $dic->alcoholUnits->run($text);
+	my $user = $input[0]->{from}{username}; # optional, used only for /units record
+	return $dic->alcoholUnits->run($text, $user);
 }
 
 sub bugger {

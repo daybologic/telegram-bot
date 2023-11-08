@@ -417,6 +417,27 @@ Usage: /breakfast <@username>
 Debugging purposes only; returns the staged meme which would be stored with the next /meme add <name> command.
 This command is subject to removal, renaming, or potentially a debug-only mode.
 
+##### /units
+
+Works as a calculator, an English phrase, such as "a pint of Guinness" returns the number of units in that drink.
+If only a number is specified, this is considered the number of units, and the calculation is not performed.
+
+###### /units record
+
+If you use /units record, the last number of units looked up will be recorded in the database with your username, and the present time.
+
+###### /units report
+
+Generate a report for your drinking
+
+###### /units undo
+
+Remove the previous drink recorded against your name from the database
+
+###### /units last
+
+The time when you last had an alcoholic drink
+
 #### Undocumented
 
 The following commands are undocumented at the present time.  Please do not use them, until further notice.
