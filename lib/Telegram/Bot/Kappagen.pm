@@ -34,8 +34,10 @@ use Moose;
 
 extends 'Telegram::Bot::Base';
 
-use Data::Dumper;
+use Readonly;
 use Scalar::Util qw(looks_like_number);
+
+Readonly my $LIMIT => 2048;
 
 sub run {
 	my ($self, @args) = @_;
@@ -49,6 +51,7 @@ sub run {
 		}
 	}
 
+	$count = $LIMIT if ($count > $LIMIT);
 	return ($thing) x $count;
 }
 
