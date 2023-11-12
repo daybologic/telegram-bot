@@ -108,7 +108,7 @@ sub testUnspecifiedCount {
 	}
 
 	subtest 'min/max' => sub {
-		plan tests => 1;
+		plan tests => 2;
 
 		is($seenMinimum, 8, 'Minimum (8) was seen');
 		is($seenMaximum, 64, 'Maximum (64) was seen');
