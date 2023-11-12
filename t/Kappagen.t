@@ -41,6 +41,7 @@ use Telegram::Bot::DI::Container;
 use Telegram::Bot::Kappagen;
 use POSIX qw(EXIT_SUCCESS);
 use Test::More;
+use utf8;
 
 has config => (is => 'rw', isa => 'Telegram::Bot::Config');
 
@@ -71,7 +72,7 @@ sub testSimple {
 
 sub testMixedSet {
 	my ($self) = @_;
-	plan tests => 4;
+	plan tests => 5;
 
 	my $output = $self->sut->run('x', 'y', 'z', 7);
 	is($output, 'xyzxyzx', 'terms first, count last');
@@ -84,6 +85,9 @@ sub testMixedSet {
 
 	$output = $self->sut->run('x', 7, 'y', 'z', 6);
 	is($output, 'xyz6xyz', 'first count applies only');
+
+	$output = $self->sut->run('🍆', '🌈', 5);
+	is($output, '🍆🌈🍆🌈🍆', "emojis: $output");
 
 	return EXIT_SUCCESS;
 }
