@@ -84,7 +84,7 @@ sub __randomCount {
 	my ($self) = @_;
 
 	my $r = $self->dic->randomNumber->run();
-	$r = $r % ($MAX_RANDOM_COUNT - $MIN_RANDOM_COUNT);
+	$r = $r % (($MAX_RANDOM_COUNT+1) - $MIN_RANDOM_COUNT);
 	$r += $MIN_RANDOM_COUNT;
 
 	$self->dic->logger->debug(sprintf('Chose random count for you:%d (min:%d, max %d)',
