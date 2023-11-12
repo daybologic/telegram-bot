@@ -41,6 +41,7 @@ use utf8;
 Readonly my $MAX_USER_COUNT => 2048;
 Readonly my $MIN_RANDOM_COUNT => 8;
 Readonly my $MAX_RANDOM_COUNT => 64;
+Readonly my $MAX_RANDOM_THINGS => 5;
 
 sub run {
 	my ($self, @args) = @_;
@@ -68,7 +69,7 @@ sub run {
 	}
 
 	if (scalar(@things) == 0) {
-		for (my $i = 0; $i < $count; $i++) {
+		for (my $i = 0; $i < $MAX_RANDOM_THINGS; $i++) {
 			push(@things, $self->__randomEmoji());
 		}
 	}
