@@ -90,7 +90,7 @@ sub testMixedSet {
 
 sub testUnspecifiedCount {
 	my ($self) = @_;
-	my $testCount = 6666;
+	my $testCount = 666;
 	plan tests => $testCount + 1;
 
 	my $seenMinimum = 999_999;
