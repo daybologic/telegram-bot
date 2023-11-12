@@ -230,6 +230,7 @@ sub kappagen {
 	my (@input) = @_;
 	my $text = $input[0]->{text};
 	my @words = split(m/\s+/, $text);
+	shift(@words); # discard /kappagen
 
 	return $dic->kappagen->run(@words);
 }
