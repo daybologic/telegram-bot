@@ -36,6 +36,7 @@ extends 'Telegram::Bot::Base';
 
 use Readonly;
 use Scalar::Util qw(looks_like_number);
+use utf8;
 
 Readonly my $MAX_USER_COUNT => 2048;
 Readonly my $MIN_RANDOM_COUNT => 8;
@@ -66,6 +67,12 @@ sub run {
 		$count = $MAX_USER_COUNT;
 	}
 
+	if (scalar(@things) == 0) {
+		for (my $i = 0; $i < $count; $i++) {
+			push(@things, $self->__randomEmoji());
+		}
+	}
+
 	return __processThings(\@things, $count);
 }
 
@@ -91,6 +98,28 @@ sub __randomCount {
 	    $r, $MIN_RANDOM_COUNT, $MAX_RANDOM_COUNT));
 
 	return $r;
+}
+
+sub __randomEmoji {
+	my ($self) = @_;
+
+	my @ranges = (
+		[
+			ord('\U0001F300'), # 127744
+			ord("\U0001FAF6"), # 129782
+		],
+		[126980, 127569],
+		[169,       174],
+		[8205,    12953],
+	);
+
+	my $rangeIndex = $self->dic->randomNumber->run() % scalar(@ranges);
+	my $range = $ranges[$rangeIndex];
+
+	my $chr = int(rand($range->[1] + $range->[0]));
+	$chr += $range->[0];
+
+	return chr($chr);
 }
 
 1;

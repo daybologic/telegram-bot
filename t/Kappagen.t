@@ -117,6 +117,31 @@ sub testUnspecifiedCount {
 	return EXIT_SUCCESS;
 }
 
+sub testUnspecifiedTerm {
+	my ($self) = @_;
+	plan tests => 1;
+
+	my $output = $self->sut->run(6);
+	is(length($output), 6, 'length correct');
+
+	$self->debug($output);
+
+	return EXIT_SUCCESS;
+}
+
+sub testUnspecified {
+	my ($self) = @_;
+	plan tests => 2;
+
+	my $output = $self->sut->run();
+	cmp_ok(length($output), '>=', 8, 'minimum length');
+	cmp_ok(length($output), '<=', 64, 'maximum length');
+
+	$self->debug($output);
+
+	return EXIT_SUCCESS;
+}
+
 package main;
 use strict;
 use warnings;
