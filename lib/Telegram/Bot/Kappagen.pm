@@ -38,21 +38,59 @@ use Readonly;
 use Scalar::Util qw(looks_like_number);
 
 Readonly my $LIMIT => 2048;
+Readonly my $MIN_RANDOM_COUNT => 8;
+Readonly my $MAX_RANDOM_COUNT => 64;
 
 sub run {
 	my ($self, @args) = @_;
+
 	my $count = 1;
-	my $thing = 'x';
+	my @things = ();
+	my $wantRandomCount = 1;
+
 	foreach my $arg (@args) {
-		if (looks_like_number($arg)) {
-			$count = $arg;
+		if (looks_like_number($arg) && $count == 1) {
+			$count = int($arg);
+			$wantRandomCount = 0;
+			$self->dic->logger->debug(sprintf('Set %s Kappagen count %d', \@things, $count));
 		} else {
-			$thing = $arg;
+			push(@things, $arg);
+			$self->dic->logger->debug(sprintf("Added %s Kappagen thing: '%s', present set size %d",
+			    \@things, $arg, scalar(@things)));
 		}
 	}
 
-	$count = $LIMIT if ($count > $LIMIT);
-	return ($thing) x $count;
+	if ($wantRandomCount) {
+		$count = $self->__randomCount();
+	} else {
+		$count = $LIMIT if ($count > $LIMIT);
+	}
+
+	return __processThings(\@things, $count);
+}
+
+sub __processThings {
+	my ($things, $count) = @_;
+	my $output = '';
+
+	for (my $i = 0; $i < $count; $i++) {
+		$output .= $things->[$i % scalar(@$things)];
+	}
+
+	return $output;
+}
+
+sub __randomCount {
+	my ($self) = @_;
+
+	my $r = $self->dic->randomNumber->run();
+	$r = $r % ($MAX_RANDOM_COUNT - $MIN_RANDOM_COUNT);
+	$r += $MIN_RANDOM_COUNT;
+
+	$self->dic->logger->debug(sprintf('Chose random count for you:%d (min:%d, max %d)',
+	    $r, $MIN_RANDOM_COUNT, $MAX_RANDOM_COUNT));
+
+	return $r;
 }
 
 1;
