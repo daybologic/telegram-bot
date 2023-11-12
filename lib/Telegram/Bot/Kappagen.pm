@@ -37,7 +37,7 @@ extends 'Telegram::Bot::Base';
 use Readonly;
 use Scalar::Util qw(looks_like_number);
 
-Readonly my $LIMIT => 2048;
+Readonly my $MAX_USER_COUNT => 2048;
 Readonly my $MIN_RANDOM_COUNT => 8;
 Readonly my $MAX_RANDOM_COUNT => 64;
 
@@ -49,7 +49,7 @@ sub run {
 	my $wantRandomCount = 1;
 
 	foreach my $arg (@args) {
-		if (looks_like_number($arg) && $count == 1) {
+		if (looks_like_number($arg) && $wantRandomCount) {
 			$count = int($arg);
 			$wantRandomCount = 0;
 			$self->dic->logger->debug(sprintf('Set %s Kappagen count %d', \@things, $count));
@@ -62,8 +62,8 @@ sub run {
 
 	if ($wantRandomCount) {
 		$count = $self->__randomCount();
-	} else {
-		$count = $LIMIT if ($count > $LIMIT);
+	} elsif ($count > $MAX_USER_COUNT ) {
+		$count = $MAX_USER_COUNT;
 	}
 
 	return __processThings(\@things, $count);
