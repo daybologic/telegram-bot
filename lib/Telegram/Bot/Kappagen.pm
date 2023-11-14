@@ -106,19 +106,21 @@ sub __randomEmoji {
 
 	my @ranges = (
 		[
-			ord('\U0001F300'), # 127744
-			ord("\U0001FAF6"), # 129782
+			127744,
+			129782,
 		],
-		[126980, 127569],
-		[169,       174],
-		[8205,    12953],
+		#[126980, 127569],
+		#[169,       174],
+		#[8205,    12953],
 	);
 
 	my $rangeIndex = $self->dic->randomNumber->run() % scalar(@ranges);
 	my $range = $ranges[$rangeIndex];
 
-	my $chr = int(rand($range->[1] + $range->[0]));
-	$chr += $range->[0];
+	$self->dic->logger->debug(sprintf('range %s-%s', $range->[0], $range->[1]));
+	my $chr = int(rand((1+$range->[1]) - $range->[0])) + $range->[0];
+
+	$self->dic->logger->debug(sprintf('Chose %s', $chr));
 
 	return chr($chr);
 }
