@@ -209,6 +209,7 @@ sub __report {
 	    $weeklyUnits, $days, $totalDrinks);
 
 	my $their = $self->dic->genderClient->get($username)->their();
+	$totalDrinks++ if ($totalDrinks == 0); # Ensure no division by zero
 	$report .= "\n" . sprintf('%s average drink contained %.2f units.', $their, $weeklyUnits / $totalDrinks);
 
 	$report .= sprintf("\nThat's %.2f units a day", $weeklyUnits / $days);
