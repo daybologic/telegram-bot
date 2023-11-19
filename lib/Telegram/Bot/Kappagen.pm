@@ -106,9 +106,6 @@ sub __randomEmoji {
 
 	my @ranges = (
 		[127744,  129782],
-		#[126980, 127569],
-		#[169,       174],
-		#[8205,    12953],
 	);
 
 	my $rangeIndex = $self->dic->randomNumber->run() % scalar(@ranges);
