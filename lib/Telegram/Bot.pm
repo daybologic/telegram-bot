@@ -101,6 +101,13 @@ sub source {
 	    . 'Patches and memes may be sent to 2e0eol@gmail.com with subject "telegram-bot"';
 }
 
+sub units {
+	my (@input) = @_;
+	my $text = $input[0]->{text};
+	my $user = $input[0]->{from}{username}; # optional, used only for /units record
+	return $dic->alcoholUnits->run($text, $user);
+}
+
 sub bugger {
 	return $dic->bugger->run();
 }
@@ -132,9 +139,14 @@ sub xkcd {
 	return 'oops, no comic';
 }
 
+sub food {
+	my (@input) = @_;
+	return 'You should all eat ' . $dic->food->run();
+}
+
 sub breakfast {
 	my (@input) = @_;
-	my $user = $input[0]->{from}{username} || 'jesscharlton';
+	my $user = $input[0]->{from}{username} || 'anonymous';
 	my $text = $input[0]->{text};
 
 	my @words = split(m/\s+/, $text);
@@ -356,6 +368,7 @@ my $commands = {
 			return "I don't recognize the ID or URL";
 		}
 	},
+	'units' => \&units,
 	'bugger' => \&bugger,
 	'version' => \&version,
 	'search' => sub {
@@ -467,6 +480,7 @@ my $commands = {
 		my $error = `aws --profile telegram dynamodb get-item --table-name excuses4 --key='{ "ident": { "S": "$key" } }' --cli-read-timeout 1800 | jq -a -r .Item.english.S`;
 		return $error;
 	},
+	'food' => \&food,
 	'tableflip' => sub {
 		return '(┛ಠ_ಠ)┛彡┻━┻';
 	},
@@ -602,7 +616,7 @@ my $commands = {
 		my @words = split(m/\s+/, $text);
 
 		$dic->memes->chatId($id);
-		if (my $meme = $dic->memes->setUser($user)->run(@words)) {
+		if (my $meme = $dic->memes->setUser($user // '')->run(@words)) {
 			return $meme;
 		}
 

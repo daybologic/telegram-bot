@@ -16,13 +16,14 @@ DBDIR='/var/lib/telegram-bot'
 mkdir -p "$CACHEDIR" "$LOGDIR" "$DBDIR"
 chmod 0700 "$CACHEDIR" "$LOGDIR" "$DBDIR"
 
-# FIXME: Need a UID for the bot
-chown palmer "$CACHEDIR" "$LOGDIR" "$DBDIR"
+chown telegram-bot "$CACHEDIR" "$LOGDIR" "$DBDIR"
 
 # TODO: The following will only work on Debian; need to bang out
 # on other operating systems.
 sudo apt install \
 	libcache-memcached-perl \
+	imagemagick \
+	jq \
 	libconfig-ini-perl \
 	libdatetime-perl \
 	libdbd-mysql-perl \
@@ -35,7 +36,6 @@ sudo apt install \
 	liburi-encode-perl \
 	libwww-perl \
 	perl \
-	perl-base \
-	perl-modules-5.32
+	perl-base
 
 exit 0

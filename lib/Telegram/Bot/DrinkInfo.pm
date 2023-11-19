@@ -29,20 +29,29 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-package Telegram::Bot::RandomNumber;
+package Telegram::Bot::DrinkInfo;
+use strict;
+use warnings;
 use Moose;
 
 extends 'Telegram::Bot::Base';
 
+use English qw(-no_match_vars);
 use Readonly;
 
-Readonly my $LIMIT => 65536;
+has [qw(abv units)] => (is => 'ro', isa => 'Num');
+has name => (is => 'ro', isa => 'Str');
 
-sub run {
+sub toString {
 	my ($self) = @_;
-	my $number = 1 + int(rand($LIMIT));
-	$self->dic->logger->trace("Random number: $number");
-	return $number;
+	return sprintf('%s: %s ABV (%s units)', $self->name, $self->abv, $self->units);
+}
+
+sub record {
+	my ($self, $username) = @_;
+	my $sth = $self->dic->db->getHandle()->prepare('INSERT INTO drinks (name, units, user) VALUES(?, ?, ?)');
+	$sth->execute($self->name, $self->units, $self->dic->userRepo->username2Id($username));
+	return sprintf('%s units recorded for %s', $self->units, $username);
 }
 
 1;

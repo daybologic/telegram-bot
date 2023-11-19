@@ -33,6 +33,8 @@ Depends:
  ${perl:Depends},
  ${shlibs:Depends},
  libcache-memcached-perl,
+ jq,
+ imagemagick,
  libconfig-ini-perl,
  libdata-money-perl,
  libdatetime-perl,
