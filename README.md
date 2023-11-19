@@ -214,6 +214,16 @@ In order to see your current gender, type /gender
 
 It is not currently possible to remove your selected gender and revert to 'they'.
 
+#### Kappagen
+
+Type /kappagen for some random emojis
+This is based on the Twitch !kappagen feature.
+You may be specify the emojis to generate too, and the number of output characters, up to a limit.
+
+Example:
+
+/kappagen 🪯🚕📌😶🤤 500
+
 #### Karma
 
 Karma is a way of storing scores against arbitary terms.  It is does in increments (you like something) or decrements,
