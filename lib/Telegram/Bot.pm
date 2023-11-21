@@ -86,11 +86,6 @@ __startup(); ## FIXME
 
 sub karma {
 	my (@input) = @_;
-#	my $user = $input[0]->{from}{username};
-#	my $text = $input[0]->{text};
-
-#	my (@words) = split(m/\s+/, $text);
-#	return $karma->run($words[0], 1);
 	return $dic->karma->run($input[0]->{text});
 }
 
