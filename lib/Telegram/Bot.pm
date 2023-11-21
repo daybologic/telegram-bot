@@ -434,9 +434,6 @@ my $commands = {
 		return '[ERROR: CITY ' . join(' ', @place) . ' NOT FOUND]' unless ($report);
 		return $report->getScorpStuffFormat();
 	},
-	'lyfe' => sub {
-		return 'Such is the drinking lyfe 😩';
-	},
 	'error' => sub {
 		# TODO: You should use https://s5ock2i7gptq4b6h5rlvw6szva0wojrd.lambda-url.eu-west-2.on.aws/ now
 		my $key = 1 + int(rand(462));

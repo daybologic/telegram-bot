@@ -368,12 +368,6 @@ This allows you to run another bot in the channel which understands and does som
 Return a random number.  This is similar to $RANDOM in the shell.
 The number is limited to 16-bits in width.  Only one result per execution.
 
-##### /lyfe
-
-Insinuate that somebody is hung over from alcoholic beverages.
-
-TODO: It should be moved into custom commands, defined in a config file
-
 ##### /insult
 
 Produce a random insult
