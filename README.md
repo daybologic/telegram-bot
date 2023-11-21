@@ -392,18 +392,6 @@ The bot will repeat whatever you write here.  This is mostly so you can start ot
 This command is used to remotely download from YouTube but it doesn't work!
 In a future release, the bot will download something on your behalf and then produce a link.
 
-##### /horatio
-
-Esoteric: May be removed in a future release.
-
-TODO: It should be moved into custom commands, defined in a config file
-
-##### /ben
-
-Report Ben's live whereabouts
-This is a joke command, and it always reports the same thing.
-TODO: It should be moved into custom commands, defined in a config file
-
 ##### /breakfast
 
 Remind the given user to have their breakfast.
