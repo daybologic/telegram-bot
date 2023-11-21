@@ -731,44 +731,51 @@ while (0 == $stop) {
 		sleep(1) unless ($updates);
 	} while (!$updates);
 
-    unless ($updates and ref $updates eq "HASH" and $updates->{ok}) {
-        $dic->logger->warn('getUpdates returned a false value - trying again...');
-        next;
-    }
+	unless ($updates and ref $updates eq "HASH" and $updates->{ok}) {
+		$dic->logger->warn('getUpdates returned a false value - trying again...');
+		next;
+	}
 
-    for my $u (@{$updates->{result}}) {
-	$dic->logger->trace(Dumper $u);
-	$dic->logger->trace('chat id ' . $u->{message}{chat}{id});
-        $offset = $u->{update_id} + 1 if $u->{update_id} >= $offset;
-        if (my $text = $u->{message}{text}) { # Text message
-            $dic->logger->debug(sprintf("Incoming text message from \@%s", ($u->{message}{from}{username} // '<undef>')));
-            $dic->logger->trace(sprintf("Text: %s\n", $text));
-            next if (index($text, '/') != 0); # Not a command
-            my ($cmd, @params) = split / /, $text;
-            my $res = $commands->{substr($cmd, 1)} || $commands->{_unknown};
-            # Pass to the subroutine the message object, and the parameters passed to the cmd.
-            $res = $res->($u->{message}, @params) if ref $res eq "CODE";
-            next unless $res;
-            my $method = ref $res && $res->{method} ? delete $res->{method} : "sendMessage";
-            eval {
-		    $api->$method ({
-			chat_id => $u->{message}{chat}{id},
-			ref $res ? %$res : ( text => $res )
-		    });
-            };
-            $dic->logger->debug('Reply sent');
-        }
-        # Handle other message types.
-        for my $type (keys %{$u->{message} || {}}) {
-            next unless exists $message_types->{$type} and
-                        ref (my $res = $message_types->{$type}->($u->{message}));
-            my $method = delete($res->{method}) || "sendMessage";
-            $api->$method({
-                chat_id => $u->{message}{chat}{id},
-                %$res
-            });
-        }
-    }
+	for my $u (@{$updates->{result}}) {
+		$dic->logger->trace(Dumper $u);
+		$dic->logger->trace('chat id ' . $u->{message}{chat}{id});
+
+		$offset = $u->{update_id} + 1 if ($u->{update_id} >= $offset);
+		if (my $text = $u->{message}{text}) { # Text message
+			$dic->logger->debug(sprintf("Incoming text message from \@%s", ($u->{message}{from}{username} // '<undef>')));
+			$dic->logger->trace(sprintf("Text: %s\n", $text));
+
+			next if (index($text, '/') != 0); # Not a command
+			my ($cmd, @params) = split(m/ /, $text);
+			my $res = $commands->{ substr($cmd, 1) } || $commands->{_unknown};
+
+			# Pass to the subroutine the message object, and the parameters passed to the cmd.
+			$res = $res->($u->{message}, @params) if (ref($res) eq 'CODE');
+			next unless ($res);
+			my $method = ref($res) && $res->{method} ? delete($res->{method}) : 'sendMessage';
+
+			eval {
+				$api->$method({
+					chat_id => $u->{message}{chat}{id},
+					ref($res) ? %$res : ( text => $res ),
+				});
+			};
+
+			$dic->logger->debug('Reply sent');
+		}
+
+		# Handle other message types.
+		for my $type (keys %{$u->{message} || {}}) {
+			next unless exists($message_types->{$type}) and ref(my $res = $message_types->{$type}->($u->{message}));
+
+			my $method = delete($res->{method}) || 'sendMessage';
+
+			$api->$method({
+				chat_id => $u->{message}{chat}{id},
+				%$res,
+			});
+		}
+	}
 }
 
 1;
