@@ -442,17 +442,6 @@ Remove the previous drink recorded against your name from the database
 
 The time when you last had an alcoholic drink
 
-#### Undocumented
-
-The following commands are undocumented at the present time.  Please do not use them, until further notice.
-All of these are likely to be removed soon.
-
-##### /keyboard
-
-##### /knock
-
-##### /phone
-
 ## Community
 
 - [telegram-bot-discuss (mailing list)](https://lists.sr.ht/~m6kvm/telegram-bot-discuss)
