@@ -226,6 +226,15 @@ sub ball8 {
 	return $dic->ball8->run();
 }
 
+sub kappagen {
+	my (@input) = @_;
+	my $text = $input[0]->{text};
+	my @words = split(m/\s+/, $text);
+	shift(@words); # discard /kappagen
+
+	return $dic->kappagen->run(@words);
+}
+
 sub randomNumber {
 	return $dic->randomNumber->run();
 }
@@ -369,6 +378,7 @@ my $commands = {
 	'8ball' => \&ball8,
 	'xkcd' => \&xkcd,
 	'k' => \&karma,
+	'kappagen' => \&kappagen,
 	'random' => \&randomNumber,
 	'horatio' => sub { return 'licking Ben\'s roast potato' },
 	'insult' => \&insult,
