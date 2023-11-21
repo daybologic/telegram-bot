@@ -392,13 +392,6 @@ The bot will repeat whatever you write here.  This is mostly so you can start ot
 This command is used to remotely download from YouTube but it doesn't work!
 In a future release, the bot will download something on your behalf and then produce a link.
 
-##### /ynyr
-
-The old one!  Not as old as all that!
-Watch the film 'Krull' before using this comnand.
-
-TODO: It should be moved into custom commands, defined in a config file
-
 ##### /horatio
 
 Esoteric: May be removed in a future release.

@@ -547,7 +547,6 @@ my $commands = {
 
 		return $value;
 	},
-	'ynyr' => sub { return "Not as old as all that" },
 	# Example demonstrating the use of parameters in a command.
 	'say' => sub {
 		join " ", splice @_, 1 or "Usage: /say something"
