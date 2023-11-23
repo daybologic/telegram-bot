@@ -403,6 +403,13 @@ my $commands = {
 		my $usdAmount = Data::Money::Amount->fromPounds($amount, 'USD')->convert($currencyStandard); # FIXME: DIC
 		return $usdAmount ? $usdAmount->toString() : 'Something went wrong'; # TODO: should be able to get messages from library
 	},
+	'temp' => sub {
+		my (@input) = @_;
+		my $text = $input[0]->{text};
+		my @words = split(m/\s+/, $text);
+		my ($originalTemperature, $targetUnit) = @words;
+		return 'TODO';
+	},
 	'weather' => sub {
 		my (@input) = @_;
 		my $user = $input[0]->{from}{username};
