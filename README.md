@@ -52,6 +52,17 @@ Then run
 
 sudo chown $USER /var/cache/telegram-bot
 
+### FIFO
+
+The FIFO file '/var/run/telegram-bot/timed-messages.fifo' can be used to send messages to the bot as if they had been received via Telegram.
+Create the file using the MKFIFO(1) tool, and ensure it is owned by the UID of the bot.
+
+You can then do something akin to this in Cron:
+
+53	8	*	*	*	echo 'text:/units report|chat_id:-1001540092066|target:M6KVM' > /var/run/telegram-bot/timed-messages.fifo
+
+Which would send the owner of the account a report of how much booze they had recently.
+
 ### Database
 
 Set up a [MariaDB](https://mariadb.org) database, and pipe the following credentials and schema in using:
