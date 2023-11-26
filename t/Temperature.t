@@ -1,3 +1,5 @@
+#!/usr/bin/perl
+#
 # telegram-bot
 # Copyright (c) 2023, Rev. Duncan Ross Palmer (2E0EOL),
 # All rights reserved.
@@ -29,25 +31,47 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-package Telegram::Bot::Temperature;
+package TemperatureTests;
 use Moose;
 
-extends 'Telegram::Bot::Base';
+use lib 'externals/libtest-module-runnable-perl/lib';
+extends 'Test::Module::Runnable';
 
-sub run {
-	my ($self, @words) = @_;
+use Telegram::Bot::DI::Container;
+use Telegram::Bot::Food;
+use POSIX qw(EXIT_SUCCESS);
+use Test::More;
 
-	return 'TODO 2';
+has config => (is => 'rw', isa => 'Telegram::Bot::Config');
+
+sub setUp {
+	my ($self) = @_;
+
+	my $dic = Telegram::Bot::DI::Container->new();
+	$self->sut(Telegram::Bot::Temperature->new({ dic => $dic }));
+
+	return EXIT_SUCCESS;
 }
 
-sub c_to_f {
-	my ($c) = @_;
-	return ($c * 9/5) + 32;
+sub testC {
+	my ($self) = @_;
+	plan tests => 1;
+
+	is(Telegram::Bot::Temperature::c_to_f(10), 50, '10C is 50F');
+
+	return EXIT_SUCCESS;
 }
 
-sub f_to_c {
-	my ($f) = @_;
-	return ($f - 32) * 5/9;
+sub testF {
+	my ($self) = @_;
+	plan tests => 1;
+
+	is(Telegram::Bot::Temperature::f_to_c(50), 10, '50F is 10C');
+
+	return EXIT_SUCCESS;
 }
 
-1;
+package main;
+use strict;
+use warnings;
+exit(TemperatureTests->new->run);
