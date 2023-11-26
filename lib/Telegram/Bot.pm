@@ -407,7 +407,7 @@ my $commands = {
 		my (@input) = @_;
 		my $text = $input[0]->{text};
 		my @words = split(m/\s+/, $text);
-		#my ($originalTemperature, $targetUnit) = @words;
+		shift(@words); # Sack off '/temp'
 		return $dic->temperature->run(@words);
 	},
 	'weather' => sub {

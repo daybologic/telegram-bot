@@ -37,7 +37,17 @@ extends 'Telegram::Bot::Base';
 sub run {
 	my ($self, @words) = @_;
 
-	return 'TODO 2';
+	if (scalar(@words) == 2) {
+		my ($originalTemperature, $targetUnit) = @words;
+
+		if ($targetUnit =~ m/^c/i) {
+			return sprintf('%.2f F', c_to_f($originalTemperature));
+		} elsif ($targetUnit =~ m/^f/i) {
+			return sprintf('%.2f C', f_to_c($originalTemperature));
+		}
+	}
+
+	return 'unknown conversion';
 }
 
 sub c_to_f {
