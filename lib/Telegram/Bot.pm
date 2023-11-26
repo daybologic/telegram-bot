@@ -407,8 +407,8 @@ my $commands = {
 		my (@input) = @_;
 		my $text = $input[0]->{text};
 		my @words = split(m/\s+/, $text);
-		my ($originalTemperature, $targetUnit) = @words;
-		return 'TODO';
+		#my ($originalTemperature, $targetUnit) = @words;
+		return $dic->temperature->run(@words);
 	},
 	'weather' => sub {
 		my (@input) = @_;
