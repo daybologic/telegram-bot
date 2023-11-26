@@ -42,7 +42,7 @@ use Data::Money::Amount 0.2.0;
 use Data::Money::Currency::Converter::Repository::APILayer 0.2.0;
 use English qw(-no_match_vars);
 use Fcntl;
-use Geo::Weather::VisualCrossing;
+use Geo::Weather::VisualCrossing 0.1.3;
 use HTTP::Status qw(status_message);
 #use Log::Log4perl;
 use Readonly;
