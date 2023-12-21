@@ -125,7 +125,7 @@ sub run {
 	return __syntax() unless ($jarType);
 	my $sizeType = 'default';
 	$jarType = lc($jarType);
-	if ($jarType eq 'large' || $jarType eq 'medium' || $jarType eq 'small') {
+	if ($jarType eq 'large' || $jarType eq 'medium' || $jarType eq 'small' || $jarType eq 'smol') {
 		$sizeType = shift(@words);
 	}
 	$jarType = $words[0];
@@ -248,7 +248,7 @@ sub __mlFromJarType {
 	} elsif ($jarType =~ m/bottle/i) {
 		return $BOTTLE;
 	} elsif ($jarType =~ m/glass/i) {
-		if ($sizeType =~ m/small/i) {
+		if ($sizeType =~ m/small/i || $sizeType =~ m/smol/i) {
 			return $GLASS_S;
 		} elsif ($sizeType =~ m/medium/i) {
 			return $GLASS_M;
@@ -256,7 +256,7 @@ sub __mlFromJarType {
 
 		return $GLASS_L;
 	} elsif ($jarType =~ m/can/i) {
-		if ($sizeType =~ m/small/i) {
+		if ($sizeType =~ m/small/i || $sizeType =~ m/smol/i) {
 			return $CAN_S;
 		}
 
