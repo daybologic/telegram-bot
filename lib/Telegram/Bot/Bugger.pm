@@ -139,15 +139,23 @@ Readonly my @ARTICLES => (
 );
 
 sub run {
-	my ($self) = @_;
+	my ($self, $args) = @_;
+	my ($index) = @{$args}{qw(index)};
 
 	my $idx;
-	do {
-		$idx = int(rand(scalar(@ARTICLES)));
-	} while ($idx == $self->previous);
+	if (defined($index)) { # user-specified
+		$idx = $index;
+		if ($idx < 0 || $idx >= scalar(@ARTICLES)) {
+			return 'ERROR: No such bugger';
+		}
+	} else {
+		do {
+			$idx = int(rand(scalar(@ARTICLES)));
+		} while ($idx == $self->previous);
+	}
 
 	$self->previous($idx);
-	return 'Well bugger me with ' . $ARTICLES[$idx];
+	return sprintf('Well bugger me with %s [%d]', $ARTICLES[$idx], $idx);
 }
 
 1;

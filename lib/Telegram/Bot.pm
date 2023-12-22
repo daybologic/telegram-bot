@@ -103,6 +103,10 @@ sub units {
 }
 
 sub bugger {
+	my (@input) = @_;
+	my $text = $input[0]->{text};
+	my @words = split(m/\s+/, $text);
+	return $dic->bugger->run({ index => int($words[1]) }) if (scalar(@words) > 1);
 	return $dic->bugger->run();
 }
 
