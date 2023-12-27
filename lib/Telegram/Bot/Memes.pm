@@ -40,8 +40,7 @@ use Readonly;
 use Telegram::Bot::Memes::Add;
 
 Readonly my $CACHE_PATTERN => '/var/cache/telegram-bot/memes/%s/%s.%s';
-Readonly my $IMAGE_ASPECT_CONFIG => 'preferred_aspect';
-Readonly my $IMAGE_ASPECT_DEFAULT => '4x';
+Readonly my $IMAGE_ASPECT_DEFAULT => 'original';
 Readonly my $S3_BUCKET_DEFAULT => '58a75bba-1d73-11ee-afdd-5b1a31ab3736';
 Readonly my $S3_URI => 's3://%s/%s/%s.%s';
 Readonly my $RESULTS_LIMIT => 25;
@@ -124,32 +123,7 @@ sub getList {
 sub getAspects {
 	my ($self) = @_;
 
-	my ($section, $preference);
-	if ($self->dic) {
-		$section = $self->dic->config->getSectionByName(__PACKAGE__);
-		$preference = $section->getValueByKey($IMAGE_ASPECT_CONFIG) if ($section);
-	}
-	$preference = $IMAGE_ASPECT_DEFAULT unless ($preference);
-
-	my $preferenceSeen = 0;
-	my @aspects = ('original', '4x', '2x', '1x');
-	for (my $i = 0; $i < scalar(@aspects); $i++) {
-		if ($aspects[$i] eq $preference) {
-			$preferenceSeen = 1;
-
-			if ($i > 0) {
-				my $tmp = $aspects[0]; # save original preference
-				$aspects[0] = $preference; # override preference
-				$aspects[$i] = $tmp; # move original preference to this pos
-				last;
-			}
-		}
-	}
-
-	die('[' . __PACKAGE__ . "] $IMAGE_ASPECT_CONFIG invalid/unrecognized: '$preference'")
-	    unless ($preferenceSeen);
-
-	return @aspects;
+	return ($IMAGE_ASPECT_DEFAULT);
 }
 
 sub exists {

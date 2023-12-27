@@ -70,7 +70,7 @@ sub testDefaults {
 	my ($self) = @_;
 	plan tests => 1;
 
-	Readonly my @ASPECTS => (qw(original 4x 2x 1x));
+	Readonly my @ASPECTS => (qw(original));
 
 	my @results = $self->sut->getAspects();
 	cmp_deeply(\@results, \@ASPECTS, 'correct order');
@@ -83,7 +83,7 @@ sub testConfigOverride {
 	plan tests => 1;
 
 	Readonly my $OVERRIDE => '2x';
-	Readonly my @ASPECTS  => ($OVERRIDE, qw(4x original 1x));
+	Readonly my @ASPECTS  => ('original');
 
 	Readonly my %KEYS => (
 		preferred_aspect => $OVERRIDE,
@@ -98,7 +98,7 @@ sub testConfigOverride {
 	]);
 
 	my @results = $self->sut->getAspects();
-	cmp_deeply(\@results, \@ASPECTS, 'correct order');
+	cmp_deeply(\@results, \@ASPECTS, 'correct order (config had no effect)');
 
 	return EXIT_SUCCESS;
 
