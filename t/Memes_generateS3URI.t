@@ -39,17 +39,28 @@ use Moose;
 use lib 'externals/libtest-module-runnable-perl/lib';
 extends 'Test::Module::Runnable';
 
+use Telegram::Bot::DI::Container;
 use Telegram::Bot::Memes;
 use English qw(-no_match_vars);
 use POSIX qw(EXIT_SUCCESS);
 use Test::Deep qw(cmp_deeply all isa methods bool re);
 use Test::More;
 
+sub setUp {
+	my ($self) = @_;
+
+	$self->sut(Telegram::Bot::Memes->new(
+		dic => Telegram::Bot::DI::Container->new(),
+	));
+
+	return EXIT_SUCCESS;
+}
+
 sub test {
 	my ($self) = @_;
 	plan tests => 1;
 
-	my $result = Telegram::Bot::Memes::__generateS3URI('troll', 'png');
+	my $result = $self->sut->__generateS3URI('troll', 'png');
 	is($result, 's3://58a75bba-1d73-11ee-afdd-5b1a31ab3736/4x/troll.png', "URL: '$result'");
 
 	return EXIT_SUCCESS;
