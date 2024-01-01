@@ -48,11 +48,6 @@ sub add {
 
 	my $resizer = $self->resizer($filePath, $name);
 	$self->owner->addToBucket($resizer->original->path, $name, 'original');
-	for (my $size = 4; $size >= 1; $size /= 2) { # TODO: Do we need an all sizes iterator within the object?
-		my $aspect = sprintf('%dx', $size);
-		my $attribName = "size${aspect}";
-		$self->owner->addToBucket($resizer->$attribName->path, $name, $aspect);
-	}
 
 	$self->__recordOwner($name, $user);
 
