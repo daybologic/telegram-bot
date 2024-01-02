@@ -40,7 +40,7 @@ use Readonly;
 use Telegram::Bot::Memes::Add;
 
 Readonly my $CACHE_PATTERN => '/var/cache/telegram-bot/memes/%s/%s.%s';
-Readonly my $IMAGE_ASPECT_DEFAULT => 'original';
+Readonly my $IMAGE_ASPECT => 'original';
 Readonly my $S3_BUCKET_DEFAULT => '58a75bba-1d73-11ee-afdd-5b1a31ab3736';
 Readonly my $S3_URI => 's3://%s/%s/%s.%s';
 Readonly my $RESULTS_LIMIT => 25;
@@ -254,7 +254,7 @@ sub __buildListingCommand {
 	my ($self) = @_;
 
 	return sprintf("aws --output json s3api list-objects --bucket %s --prefix '%s/'",
-	    $self->bucket, $IMAGE_ASPECT_DEFAULT);
+	    $self->bucket, $IMAGE_ASPECT);
 }
 
 sub __executeListingCommand {
@@ -325,12 +325,12 @@ sub __detaint {
 
 sub __generateS3URI {
 	my ($self, $name, $ext) = @_;
-	return sprintf($S3_URI, $self->bucket, $IMAGE_ASPECT_DEFAULT, $name, $ext);
+	return sprintf($S3_URI, $self->bucket, $IMAGE_ASPECT, $name, $ext);
 }
 
 sub __makeCachePattern {
 	my ($name, $ext) = @_;
-	sprintf($CACHE_PATTERN, $IMAGE_ASPECT_DEFAULT, $name, $ext);
+	sprintf($CACHE_PATTERN, $IMAGE_ASPECT, $name, $ext);
 }
 
 sub __buildCommand {
