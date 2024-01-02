@@ -54,25 +54,19 @@ sub setUp {
 
 sub test {
 	my ($self) = @_;
+	plan tests => 1;
 
-	Readonly my @ASPECTS => (qw(original 4x 2x 1x));
-	plan tests => scalar(@ASPECTS);
-
-	foreach my $aspect (@ASPECTS) {
-		my $result = $self->sut->__executeListingCommand('/bin/true', __makeJson($aspect));
-		cmp_deeply($result, ['alreadydidsomething', 'bernie'], 'meme name list; two items');
-	}
+	my $result = $self->sut->__executeListingCommand('/bin/true', __makeJson());
+	cmp_deeply($result, ['alreadydidsomething', 'bernie'], 'meme name list; two items');
 
 	return EXIT_SUCCESS;
 }
 
 sub __makeJson {
-	my ($aspect) = @_;
-
-	return sprintf('{
+	return '{
 		"Contents": [
 			{
-				"Key": "%s/alreadydidsomething.jpg",
+				"Key": "original/alreadydidsomething.jpg",
 				"LastModified": "2023-08-10T14:41:21+00:00",
 				"ETag": "\"fffffffffffffffffffffffffffff499\"",
 				"Size": 35882,
@@ -82,7 +76,7 @@ sub __makeJson {
 				}
 			},
 			{
-				"Key": "%s/bernie.jpg",
+				"Key": "original/bernie.jpg",
 				"LastModified": "2023-08-23T15:40:42+00:00",
 				"ETag": "\"fffffffffffffffffffffffffffff264\"",
 				"Size": 314263,
@@ -92,7 +86,7 @@ sub __makeJson {
 				}
 			}
 		]
-	}', $aspect, $aspect);
+	}';
 }
 
 package main;

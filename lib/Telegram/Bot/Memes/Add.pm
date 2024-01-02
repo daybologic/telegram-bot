@@ -47,7 +47,7 @@ sub add {
 	$self->dic->logger->debug("fetched fileId $fileId via API to target path '$filePath'");
 
 	my $resizer = $self->resizer($filePath, $name);
-	$self->owner->addToBucket($resizer->original->path, $name, 'original');
+	$self->owner->addToBucket($resizer->original->path, $name);
 
 	$self->__recordOwner($name, $user);
 
