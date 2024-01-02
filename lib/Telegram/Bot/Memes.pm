@@ -110,20 +110,12 @@ sub getList {
 		return __memeExtensionCacheKeys();
 	} else {
 		my %fileList = (); # Merge all aspects into one list
-		foreach my $imageAspect ($self->getAspects()) {
-			my $fileListPerAspect = $self->__executeListingCommand($self->__buildListingCommand($imageAspect));
-			foreach my $file (@$fileListPerAspect) {
-				$fileList{$file}++;
-			}
+		my $fileListPerAspect = $self->__executeListingCommand($self->__buildListingCommand($IMAGE_ASPECT_DEFAULT));
+		foreach my $file (@$fileListPerAspect) {
+			$fileList{$file}++;
 		}
 		return [keys(%fileList)];
 	}
-}
-
-sub getAspects {
-	my ($self) = @_;
-
-	return ($IMAGE_ASPECT_DEFAULT);
 }
 
 sub exists {
@@ -188,11 +180,10 @@ sub remove {
 sub __removeAspects {
 	my ($self, $name, $extension) = @_;
 
-	foreach my $aspect ($self->getAspects()) {
-		$self->__runCommand($self->__buildDeleteCommand($name, $extension, $aspect));
-		if (my $path = __makeCachePattern($name, $extension, $aspect)) {
-			unlink($path);
-		}
+	my $aspect = $IMAGE_ASPECT_DEFAULT;
+	$self->__runCommand($self->__buildDeleteCommand($name, $extension, $aspect));
+	if (my $path = __makeCachePattern($name, $extension, $aspect)) {
+		unlink($path);
 	}
 
 	return;
@@ -308,19 +299,16 @@ sub __telegramCommand {
 sub __pathFromCache {
 	my ($self, $name) = @_;
 
+	my $aspect = $IMAGE_ASPECT_DEFAULT;
 	if (my $extension = __memeExtensionCacheFetch($name)) {
-		foreach my $aspect ($self->getAspects()) {
-			my $path = __makeCachePattern($name, $extension, $aspect);
-			$self->dic->logger->debug("Checking if '$path' exists (used extension cache)");
-			return $path if (-f $path);
-		}
+		my $path = __makeCachePattern($name, $extension, $aspect);
+		$self->dic->logger->debug("Checking if '$path' exists (used extension cache)");
+		return $path if (-f $path);
 	} else {
 		foreach my $extension (qw(png gif jpg JPG jpeg)) {
-			foreach my $aspect ($self->getAspects()) {
-				my $path = __makeCachePattern($name, $extension, $aspect);
-				$self->dic->logger->debug("Checking if '$path' exists (not in extension cache)");
-				return $path if (-f $path);
-			}
+			my $path = __makeCachePattern($name, $extension, $aspect);
+			$self->dic->logger->debug("Checking if '$path' exists (not in extension cache)");
+			return $path if (-f $path);
 		}
 	}
 
@@ -380,10 +368,8 @@ sub __downloadMeme {
 
 	$self->getList(); # causes extension cache to be refreshed periodically
 	if (my $extension = __memeExtensionCacheFetch($name)) {
-		foreach my $imageAspect ($self->getAspects()) {
-			my $command = $self->__buildCommand($name, $extension, $imageAspect);
-			$self->__runCommand($command);
-		}
+		my $command = $self->__buildCommand($name, $extension, $IMAGE_ASPECT_DEFAULT);
+		$self->__runCommand($command);
 	}
 
 	return;
