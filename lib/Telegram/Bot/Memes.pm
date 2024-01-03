@@ -40,8 +40,7 @@ use Readonly;
 use Telegram::Bot::Memes::Add;
 
 Readonly my $CACHE_PATTERN => '/var/cache/telegram-bot/memes/%s/%s.%s';
-Readonly my $IMAGE_ASPECT_CONFIG => 'preferred_aspect';
-Readonly my $IMAGE_ASPECT_DEFAULT => '4x';
+Readonly our $IMAGE_ASPECT => 'original'; # TODO: revert to 'my' not 'our' after Handle/Resizer classes have been removed. f01271d8-aa81-11ee-a387-43e5c3304127
 Readonly my $S3_BUCKET_DEFAULT => '58a75bba-1d73-11ee-afdd-5b1a31ab3736';
 Readonly my $S3_URI => 's3://%s/%s/%s.%s';
 Readonly my $RESULTS_LIMIT => 25;
@@ -111,45 +110,12 @@ sub getList {
 		return __memeExtensionCacheKeys();
 	} else {
 		my %fileList = (); # Merge all aspects into one list
-		foreach my $imageAspect ($self->getAspects()) {
-			my $fileListPerAspect = $self->__executeListingCommand($self->__buildListingCommand($imageAspect));
-			foreach my $file (@$fileListPerAspect) {
-				$fileList{$file}++;
-			}
+		my $fileListPerAspect = $self->__executeListingCommand($self->__buildListingCommand());
+		foreach my $file (@$fileListPerAspect) {
+			$fileList{$file}++;
 		}
 		return [keys(%fileList)];
 	}
-}
-
-sub getAspects {
-	my ($self) = @_;
-
-	my ($section, $preference);
-	if ($self->dic) {
-		$section = $self->dic->config->getSectionByName(__PACKAGE__);
-		$preference = $section->getValueByKey($IMAGE_ASPECT_CONFIG) if ($section);
-	}
-	$preference = $IMAGE_ASPECT_DEFAULT unless ($preference);
-
-	my $preferenceSeen = 0;
-	my @aspects = ('original', '4x', '2x', '1x');
-	for (my $i = 0; $i < scalar(@aspects); $i++) {
-		if ($aspects[$i] eq $preference) {
-			$preferenceSeen = 1;
-
-			if ($i > 0) {
-				my $tmp = $aspects[0]; # save original preference
-				$aspects[0] = $preference; # override preference
-				$aspects[$i] = $tmp; # move original preference to this pos
-				last;
-			}
-		}
-	}
-
-	die('[' . __PACKAGE__ . "] $IMAGE_ASPECT_CONFIG invalid/unrecognized: '$preference'")
-	    unless ($preferenceSeen);
-
-	return @aspects;
 }
 
 sub exists {
@@ -214,11 +180,9 @@ sub remove {
 sub __removeAspects {
 	my ($self, $name, $extension) = @_;
 
-	foreach my $aspect ($self->getAspects()) {
-		$self->__runCommand($self->__buildDeleteCommand($name, $extension, $aspect));
-		if (my $path = __makeCachePattern($name, $extension, $aspect)) {
-			unlink($path);
-		}
+	$self->__runCommand($self->__buildDeleteCommand($name, $extension));
+	if (my $path = __makeCachePattern($name, $extension)) {
+		unlink($path);
 	}
 
 	return;
@@ -257,8 +221,8 @@ sub add {
 }
 
 sub addToBucket {
-	my ($self, $path, $name, $aspect) = @_;
-	$self->__runCommand($self->__buildUploadCommand($name, $path, $aspect));
+	my ($self, $path, $name) = @_;
+	$self->__runCommand($self->__buildUploadCommand($name, $path));
 	return;
 }
 
@@ -287,10 +251,10 @@ sub __forgetOwner {
 }
 
 sub __buildListingCommand {
-	my ($self, $imageAspect) = @_;
+	my ($self) = @_;
 
 	return sprintf("aws --output json s3api list-objects --bucket %s --prefix '%s/'",
-	    $self->bucket, $imageAspect);
+	    $self->bucket, $IMAGE_ASPECT);
 }
 
 sub __executeListingCommand {
@@ -335,18 +299,14 @@ sub __pathFromCache {
 	my ($self, $name) = @_;
 
 	if (my $extension = __memeExtensionCacheFetch($name)) {
-		foreach my $aspect ($self->getAspects()) {
-			my $path = __makeCachePattern($name, $extension, $aspect);
-			$self->dic->logger->debug("Checking if '$path' exists (used extension cache)");
-			return $path if (-f $path);
-		}
+		my $path = __makeCachePattern($name, $extension);
+		$self->dic->logger->debug("Checking if '$path' exists (used extension cache)");
+		return $path if (-f $path);
 	} else {
 		foreach my $extension (qw(png gif jpg JPG jpeg)) {
-			foreach my $aspect ($self->getAspects()) {
-				my $path = __makeCachePattern($name, $extension, $aspect);
-				$self->dic->logger->debug("Checking if '$path' exists (not in extension cache)");
-				return $path if (-f $path);
-			}
+			my $path = __makeCachePattern($name, $extension);
+			$self->dic->logger->debug("Checking if '$path' exists (not in extension cache)");
+			return $path if (-f $path);
 		}
 	}
 
@@ -364,40 +324,38 @@ sub __detaint {
 }
 
 sub __generateS3URI {
-	my ($self, $name, $ext, $aspect) = @_;
-	$aspect = $IMAGE_ASPECT_DEFAULT unless ($aspect);
-	return sprintf($S3_URI, $self->bucket, $aspect, $name, $ext);
+	my ($self, $name, $ext) = @_;
+	return sprintf($S3_URI, $self->bucket, $IMAGE_ASPECT, $name, $ext);
 }
 
 sub __makeCachePattern {
-	my ($name, $ext, $aspect) = @_;
-	$aspect = $IMAGE_ASPECT_DEFAULT unless ($aspect);
-	sprintf($CACHE_PATTERN, $aspect, $name, $ext);
+	my ($name, $ext) = @_;
+	sprintf($CACHE_PATTERN, $IMAGE_ASPECT, $name, $ext);
 }
 
 sub __buildCommand {
-	my ($self, $name, $ext, $aspect) = @_;
+	my ($self, $name, $ext) = @_;
 	return sprintf(
 		'aws s3 cp %s %s',
-		$self->__generateS3URI($name, $ext, $aspect),
-		__makeCachePattern($name, $ext, $aspect),
+		$self->__generateS3URI($name, $ext),
+		__makeCachePattern($name, $ext),
 	);
 }
 
 sub __buildUploadCommand {
-	my ($self, $name, $path, $aspect) = @_;
+	my ($self, $name, $path) = @_;
 	return sprintf(
 		'aws s3 cp %s %s',
 		$path,
-		$self->__generateS3URI($name, 'jpg', $aspect),
+		$self->__generateS3URI($name, 'jpg'),
 	);
 }
 
 sub __buildDeleteCommand {
-	my ($self, $name, $ext, $aspect) = @_;
+	my ($self, $name, $ext) = @_;
 	return sprintf(
 		'aws s3 rm %s',
-		$self->__generateS3URI($name, $ext, $aspect),
+		$self->__generateS3URI($name, $ext),
 	);
 }
 
@@ -406,10 +364,8 @@ sub __downloadMeme {
 
 	$self->getList(); # causes extension cache to be refreshed periodically
 	if (my $extension = __memeExtensionCacheFetch($name)) {
-		foreach my $imageAspect ($self->getAspects()) {
-			my $command = $self->__buildCommand($name, $extension, $imageAspect);
-			$self->__runCommand($command);
-		}
+		my $command = $self->__buildCommand($name, $extension);
+		$self->__runCommand($command);
 	}
 
 	return;

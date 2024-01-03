@@ -596,9 +596,8 @@ my $message_types = {
 		my $user = $input[0]->{from}{username} || 'anonymous';
 		__setPicId($user, shift->{photo}[-1]{file_id});
 		+{
-			method     => 'sendMessage',
-			text       => "OK I've seen your meme, now say /meme add <name>.\n"
-			    . 'NOTE: This operation is slow, please be patient, the bot may not respond for up to a minute.',
+			method => 'sendMessage',
+			text   => "OK I've seen your meme, now say /meme add <name>."
 		},
 	},
 };

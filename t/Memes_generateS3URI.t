@@ -61,7 +61,7 @@ sub test {
 	plan tests => 1;
 
 	my $result = $self->sut->__generateS3URI('troll', 'png');
-	is($result, 's3://58a75bba-1d73-11ee-afdd-5b1a31ab3736/4x/troll.png', "URL: '$result'");
+	is($result, 's3://58a75bba-1d73-11ee-afdd-5b1a31ab3736/original/troll.png', "URL: '$result'");
 
 	return EXIT_SUCCESS;
 }
