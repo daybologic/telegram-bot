@@ -82,3 +82,5 @@ sub __validateAspect {
 }
 
 1;
+
+# FIXME: bucket {58a75bba-1d73-11ee-afdd-5b1a31ab3736} should be configurable by user.
