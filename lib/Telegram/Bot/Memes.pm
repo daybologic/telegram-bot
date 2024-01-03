@@ -40,7 +40,7 @@ use Readonly;
 use Telegram::Bot::Memes::Add;
 
 Readonly my $CACHE_PATTERN => '/var/cache/telegram-bot/memes/%s/%s.%s';
-Readonly my $IMAGE_ASPECT => 'original';
+Readonly our $IMAGE_ASPECT => 'original'; # TODO: revert to 'my' not 'our' after Handle/Resizer classes have been removed. f01271d8-aa81-11ee-a387-43e5c3304127
 Readonly my $S3_BUCKET_DEFAULT => '58a75bba-1d73-11ee-afdd-5b1a31ab3736';
 Readonly my $S3_URI => 's3://%s/%s/%s.%s';
 Readonly my $RESULTS_LIMIT => 25;

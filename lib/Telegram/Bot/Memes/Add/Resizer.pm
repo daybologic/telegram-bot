@@ -43,7 +43,6 @@ sub setOriginalFile {
 
 	$self->original(Telegram::Bot::Memes::Handle->new({
 		rootPath => $self->rootPath,
-		aspect   => 'original',
 		file     => $file,
 	}));
 
@@ -51,3 +50,7 @@ sub setOriginalFile {
 }
 
 1;
+
+# TODO: Resizer and Handler classes could be removed due to removal of meme aspects.
+# May be worth trying to work on other meme features first in case they become useful again.
+# f01271d8-aa81-11ee-a387-43e5c3304127
