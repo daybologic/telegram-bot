@@ -71,7 +71,7 @@ sub testYUNO { # a valid and important meme
 		caption => '',
 		method  => 'sendPhoto',
 		photo   => {
-			file => '/var/cache/telegram-bot/memes/4x/yuno.png',
+			file => '/var/cache/telegram-bot/memes/original/yuno.png',
 		},
 	}, 'run with yuno returned correct data');
 
@@ -86,7 +86,7 @@ sub testCaption {
 		caption => 'just to wind you up',
 		method  => 'sendPhoto',
 		photo   => {
-			file => '/var/cache/telegram-bot/memes/4x/troll.png',
+			file => '/var/cache/telegram-bot/memes/original/troll.png',
 		},
 	}, 'caption and image path correct');
 
@@ -101,7 +101,7 @@ sub testGIF {
 		caption   => '',
 		method    => 'sendAnimation',
 		animation => {
-			file => '/var/cache/telegram-bot/memes/4x/hotpotato.gif',
+			file => '/var/cache/telegram-bot/memes/original/hotpotato.gif',
 		},
 	}, 'caption and image path correct') or diag(explain($self->sut->run('/hotpotato')));
 
@@ -116,7 +116,7 @@ sub testNoSlash {
 		caption => '',
 		method  => 'sendPhoto',
 		photo   => {
-			file => '/var/cache/telegram-bot/memes/4x/rubberstamp.png',
+			file => '/var/cache/telegram-bot/memes/original/rubberstamp.png',
 		},
 	}, 'correct data');
 

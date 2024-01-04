@@ -42,7 +42,7 @@ use Data::Money::Amount 0.2.0;
 use Data::Money::Currency::Converter::Repository::APILayer 0.2.0;
 use English qw(-no_match_vars);
 use Fcntl;
-use Geo::Weather::VisualCrossing;
+use Geo::Weather::VisualCrossing 0.1.3;
 use HTTP::Status qw(status_message);
 #use Log::Log4perl;
 use Readonly;
@@ -87,11 +87,6 @@ __startup(); ## FIXME
 
 sub karma {
 	my (@input) = @_;
-#	my $user = $input[0]->{from}{username};
-#	my $text = $input[0]->{text};
-
-#	my (@words) = split(m/\s+/, $text);
-#	return $karma->run($words[0], 1);
 	return $dic->karma->run($input[0]->{text});
 }
 
@@ -109,6 +104,10 @@ sub units {
 }
 
 sub bugger {
+	my (@input) = @_;
+	my $text = $input[0]->{text};
+	my @words = split(m/\s+/, $text);
+	return $dic->bugger->run({ index => int($words[1]) }) if (scalar(@words) > 1);
 	return $dic->bugger->run();
 }
 
@@ -245,6 +244,15 @@ sub memeAddRemove {
 
 sub ball8 {
 	return $dic->ball8->run();
+}
+
+sub kappagen {
+	my (@input) = @_;
+	my $text = $input[0]->{text};
+	my @words = split(m/\s+/, $text);
+	shift(@words); # discard /kappagen
+
+	return $dic->kappagen->run(@words);
 }
 
 sub randomNumber {
@@ -411,10 +419,9 @@ my $commands = {
 	'8ball' => \&ball8,
 	'xkcd' => \&xkcd,
 	'k' => \&karma,
+	'kappagen' => \&kappagen,
 	'random' => \&randomNumber,
-	'horatio' => sub { return 'licking Ben\'s roast potato' },
 	'insult' => \&insult,
-	'ben' => sub { return 'He\'s at the garage having his tires rotated' },
 	'breakfast' => \&breakfast,
 	'source' => \&source,
 	'miles' => sub {
@@ -470,9 +477,6 @@ my $commands = {
 		my $report = $visualCrossing->lookup(join(' ', @place));
 		return '[ERROR: CITY ' . join(' ', @place) . ' NOT FOUND]' unless ($report);
 		return $report->getScorpStuffFormat();
-	},
-	'lyfe' => sub {
-		return 'Such is the drinking lyfe 😩';
 	},
 	'error' => sub {
 		# TODO: You should use https://s5ock2i7gptq4b6h5rlvw6szva0wojrd.lambda-url.eu-west-2.on.aws/ now
@@ -587,7 +591,6 @@ my $commands = {
 
 		return $value;
 	},
-	'ynyr' => sub { return "Not as old as all that" },
 	# Example demonstrating the use of parameters in a command.
 	'say' => sub {
 		join " ", splice @_, 1 or "Usage: /say something"
@@ -635,9 +638,8 @@ my $message_types = {
 		my $user = $input[0]->{from}{username} || 'anonymous';
 		__setPicId($user, shift->{photo}[-1]{file_id});
 		+{
-			method     => 'sendMessage',
-			text       => "OK I've seen your meme, now say /meme add <name>.\n"
-			    . 'NOTE: This operation is slow, please be patient, the bot may not respond for up to a minute.',
+			method => 'sendMessage',
+			text   => "OK I've seen your meme, now say /meme add <name>."
 		},
 	},
 };
@@ -774,54 +776,61 @@ while (0 == $stop) {
 		sleep(1) unless ($updates);
 	} while (!$updates);
 
-    unless ($updates and ref $updates eq "HASH" and $updates->{ok}) {
-        $dic->logger->warn('getUpdates returned a false value - trying again...');
-        next;
-    }
+	unless ($updates and ref $updates eq "HASH" and $updates->{ok}) {
+		$dic->logger->warn('getUpdates returned a false value - trying again...');
+		next;
+	}
 
-    for my $u (@{$updates->{result}}) {
-	$dic->logger->trace(Dumper $u);
-	$dic->logger->trace('chat id ' . $u->{message}{chat}{id});
-        $offset = $u->{update_id} + 1 if $u->{update_id} >= $offset;
-        if (my $text = $u->{message}{text}) { # Text message
-            $dic->logger->debug(sprintf("Incoming text message from \@%s", ($u->{message}{from}{username} // '<undef>')));
-            $dic->logger->trace(sprintf("Text: %s\n", $text));
-            next if (index($text, '/') != 0); # Not a command
-            my ($cmd, @params) = split / /, $text;
-            my $res = $commands->{substr($cmd, 1)} || $commands->{_unknown};
-            # Pass to the subroutine the message object, and the parameters passed to the cmd.
-            $res = $res->($u->{message}, @params) if ref $res eq "CODE";
-            next unless $res;
-            my $method = ref $res && $res->{method} ? delete $res->{method} : "sendMessage";
-		my $apiResponse;
-		eval {
-			$apiResponse = $api->$method({
-				chat_id => $u->{message}{chat}{id},
-				ref $res ? %$res : ( text => $res )
-			});
-		};
-		$dic->logger->trace("From API on calling $method: " . Dumper $apiResponse->{result});
-		if ($apiResponse && $apiResponse->{result}->{photo}) {
-			if ($photoIdCallback) {
-				$photoIdCallback->($apiResponse->{result}->{photo}->[-1]->{file_id});
+	for my $u (@{$updates->{result}}) {
+		$dic->logger->trace(Dumper $u);
+		$dic->logger->trace('chat id ' . $u->{message}{chat}{id});
+
+		$offset = $u->{update_id} + 1 if ($u->{update_id} >= $offset);
+		if (my $text = $u->{message}{text}) { # Text message
+			$dic->logger->debug(sprintf("Incoming text message from \@%s", ($u->{message}{from}{username} // '<undef>')));
+			$dic->logger->trace(sprintf("Text: %s\n", $text));
+
+			next if (index($text, '/') != 0); # Not a command
+			my ($cmd, @params) = split(m/ /, $text);
+			my $res = $commands->{ substr($cmd, 1) } || $commands->{_unknown};
+
+			# Pass to the subroutine the message object, and the parameters passed to the cmd.
+			$res = $res->($u->{message}, @params) if (ref($res) eq 'CODE');
+			next unless ($res);
+			my $method = ref($res) && $res->{method} ? delete($res->{method}) : 'sendMessage';
+
+			my $apiResponse;
+			eval {
+				$apiResponse = $api->$method({
+					chat_id => $u->{message}{chat}{id},
+					ref($res) ? %$res : ( text => $res ),
+				});
+			};
+
+			$dic->logger->trace("From API on calling $method: " . Dumper $apiResponse->{result});
+			if ($apiResponse && $apiResponse->{result}->{photo}) {
+				if ($photoIdCallback) {
+					$photoIdCallback->($apiResponse->{result}->{photo}->[-1]->{file_id});
+					$photoIdCallback = undef;
+				}
+			} elsif ($photoIdCallback) {
 				$photoIdCallback = undef;
 			}
-		} elsif ($photoIdCallback) {
-			$photoIdCallback = undef;
+			$dic->logger->debug('Reply sent');
 		}
-		$dic->logger->debug('Reply sent');
-        }
-        # Handle other message types.
-        for my $type (keys %{$u->{message} || {}}) {
-            next unless exists $message_types->{$type} and
-                        ref (my $res = $message_types->{$type}->($u->{message}));
-            my $method = delete($res->{method}) || "sendMessage";
-            $api->$method({
-                chat_id => $u->{message}{chat}{id},
-                %$res
-            });
-        }
-    }
+
+		# Handle other message types.
+		for my $type (keys %{$u->{message} || {}}) {
+			next unless exists($message_types->{$type}) and ref (my $res = $message_types->{$type}->($u->{message}));
+
+			my $method = delete($res->{method}) || 'sendMessage';
+
+			$api->$method({
+				chat_id => $u->{message}{chat}{id},
+				%$res,
+			});
+		}
+	}
 }
 
 1;

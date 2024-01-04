@@ -47,6 +47,7 @@ use Telegram::Bot::DB;
 use Telegram::Bot::DrinksClient;
 use Telegram::Bot::Food;
 use Telegram::Bot::GenderClient;
+use Telegram::Bot::Kappagen;
 use Telegram::Bot::Karma;
 use Telegram::Bot::Memes;
 use Telegram::Bot::MusicDB;
@@ -70,6 +71,7 @@ has db => (is => 'rw', isa => 'Telegram::Bot::DB', lazy => 1, builder => '_makeD
 has drinksClient => (is => 'rw', isa => 'Telegram::Bot::DrinksClient', lazy => 1, builder => '_makeDrinksClient');
 has food => (is => 'rw', isa => 'Telegram::Bot::Food', lazy => 1, builder => '_makeFood');
 has genderClient => (is => 'rw', isa => 'Telegram::Bot::GenderClient', lazy => 1, builder => '_makeGenderClient');
+has kappagen => (is => 'rw', isa => 'Telegram::Bot::Kappagen', lazy => 1, builder => '_makeKappagen');
 has karma => (is => 'rw', isa => 'Telegram::Bot::Karma', lazy => 1, builder => '_makeKarma');
 has logger => (is => 'rw', isa => 'Log::Log4perl::Logger', lazy => 1, builder => '_makeLogger');
 has memes => (is => 'rw', isa => 'Telegram::Bot::Memes', lazy => 1, builder => '_makeMemes');
@@ -182,6 +184,11 @@ sub _makeFood {
 sub _makeGenderClient {
 	my ($self) = @_;
 	return Telegram::Bot::GenderClient->new(dic => $self);
+}
+
+sub _makeKappagen {
+	my ($self) = @_;
+	return Telegram::Bot::Kappagen->new(dic => $self);
 }
 
 sub _makeKarma {
