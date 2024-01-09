@@ -277,18 +277,34 @@ sub __removeSizePrefix {
 	return (split(m/\//, $key))[1];
 }
 
+#TODO: Move to utils
+sub __extensionFromPath {
+	my ($path) = @_;
+	return (split(m/\./, $path))[-1];
+}
+
 sub __telegramCommand {
 	my ($self, $photo, @words) = @_;
 
-	# FIXME: How do you know if an image was a gif?
+	my $extension = 'jpg';
+	if ($photo && ref($photo) && ref($photo) eq 'HASH') {
+		$extension = __extensionFromPath($photo->{file});
+		$self->dic->logger->debug("Extracted extension '$extension' from path '$photo->{file}'");
+	}
+
+	my %private = (
+		extension => $extension,
+	);
+
 	if (
 		$self->chatId != -407509267
 		&& $photo
 		&& ref($photo)
 		&& ref($photo) eq 'HASH'
-		&& $photo->{file} =~ m/gif$/
+		&& $extension eq 'gif'
 	) {
 		return +{
+			__private => \%private,
 			animation => $photo,
 			caption   => join(' ', @words),
 			method    => 'sendAnimation',
@@ -296,16 +312,17 @@ sub __telegramCommand {
 	}
 
 	return +{
-		caption => join(' ', @words),
-		method  => 'sendPhoto',
-		photo   => $photo,
+		__private => \%private,
+		caption   => join(' ', @words),
+		method    => 'sendPhoto',
+		photo     => $photo,
 	};
 }
 
 sub storePhotoIdInCache {
-	my ($self, $name, $extension, $aspect, $photoId) = @_;
+	my ($self, $name, $extension, $photoId) = @_;
 
-	my $key = __makeCacheKey($name, $extension, $aspect); # FIXME: What key?
+	my $key = __makeCacheKey($name, $extension);
 	$self->dic->cache->set($key, $photoId, 180);
 
 	return;
@@ -338,8 +355,8 @@ sub __photoFromCache {
 }
 
 sub __makeCacheKey {
-	my ($name, $extension, $aspect) = @_;
-	return sprintf('%s/%s.%s', $aspect, $name, $extension);
+	my ($name, $extension) = @_;
+	return sprintf('%s/%s.%s', $IMAGE_ASPECT, $name, $extension);
 }
 
 sub __detaint {

@@ -188,12 +188,14 @@ sub memeSearch {
 			} elsif ($meme->{method} eq 'sendPhoto' && ref($meme->{photo}) eq 'HASH') {
 				$fromCache = 0;
 			}
-			warn 'fromCache is ' . $fromCache;
+			$dic->logger->debug('fromCache is ' . $fromCache);
 
 			if (!$fromCache) {
 				$photoIdCallback = sub {
 					my $photoId = shift;
-					$dic->memes->storePhotoIdInCache($name, $extension, $aspect, $photoId);
+					my $extension = $meme->{__private}->{extension};
+					$dic->logger->debug("name:$name, photoId:$photoId, extension:$extension ... " . Dumper $meme);
+					$dic->memes->storePhotoIdInCache($name, $extension, $photoId);
 				};
 			}
 
