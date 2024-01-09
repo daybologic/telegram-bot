@@ -114,23 +114,25 @@ sub testBuckfast {
 
 sub testWine {
 	my ($self) = @_;
-	plan tests => 5;
+	plan tests => 6;
 
 	is($self->sut->run('/units in a bottle of wine'), $WINE, 'Units in a bottle of wine');
 	is($self->sut->run('/units in a large glass of wine'), $WINE / 3, 'Units in a large glass of wine');
 	is($self->sut->run('/units in a glass of wine'), $WINE / 3, 'Units in a glass of wine');
 	is($self->sut->run('/units in a medium glass of wine'), 2.1875, 'Units in a medium glass of wine');
 	is($self->sut->run('/units in a small glass of wine'), 1.5625, 'Units in a small glass of wine');
+	is($self->sut->run('/units in a smol glass of wine'), 1.5625, 'Units in a smol glass of wine');
 
 	return EXIT_SUCCESS;
 }
 
 sub testCansOfBeer {
 	my ($self) = @_;
-	plan tests => 3;
+	plan tests => 4;
 
 	is($self->sut->run('/units in a large can of Timeline'), 2.376, 'Units in a large can of Timeline');
 	is($self->sut->run('/units in a small can of Timeline'), 1.782, 'Units in a small can of Timeline');
+	is($self->sut->run('/units in a smol can of Timeline'), 1.782, 'Units in a smol can of Timeline');
 	is($self->sut->run('/units in a can of Timeline'), 2.376, 'Units in a can of Timeline');
 
 	return EXIT_SUCCESS;

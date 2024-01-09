@@ -96,6 +96,11 @@ Disclaimer: Don't ask for serious advice, we don't condone self-harm.  The bot i
 
 Usage: /8ball question
 
+#### Bugger
+
+Type /bugger for a whimsical message.
+The message will include a number, in case you wish to retrieve the same message again using /bugger [nnn]
+
 #### HTTP.cat
 
 The HTTP /cat command, returns an image representing an [HTTP error code](https://http.dev/status).

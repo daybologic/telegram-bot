@@ -42,7 +42,7 @@ use Data::Money::Amount 0.2.0;
 use Data::Money::Currency::Converter::Repository::APILayer 0.2.0;
 use English qw(-no_match_vars);
 use Fcntl;
-use Geo::Weather::VisualCrossing;
+use Geo::Weather::VisualCrossing 0.1.3;
 use HTTP::Status qw(status_message);
 #use Log::Log4perl;
 use Readonly;
@@ -103,6 +103,10 @@ sub units {
 }
 
 sub bugger {
+	my (@input) = @_;
+	my $text = $input[0]->{text};
+	my @words = split(m/\s+/, $text);
+	return $dic->bugger->run({ index => int($words[1]) }) if (scalar(@words) > 1);
 	return $dic->bugger->run();
 }
 
@@ -599,9 +603,8 @@ my $message_types = {
 		my $user = $input[0]->{from}{username} || 'anonymous';
 		__setPicId($user, shift->{photo}[-1]{file_id});
 		+{
-			method     => 'sendMessage',
-			text       => "OK I've seen your meme, now say /meme add <name>.\n"
-			    . 'NOTE: This operation is slow, please be patient, the bot may not respond for up to a minute.',
+			method => 'sendMessage',
+			text   => "OK I've seen your meme, now say /meme add <name>."
 		},
 	},
 };

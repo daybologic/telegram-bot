@@ -32,8 +32,10 @@
 package Telegram::Bot::Memes::Handle;
 use Moose;
 
+use Telegram::Bot::Memes;
+
 has rootPath => (is => 'ro', isa => 'Str', default => '/var/cache/telegram-bot/memes');
-has ['aspect', 'file'] => (isa => 'Str', is => 'ro', required => 1);
+has file => (isa => 'Str', is => 'ro', required => 1);
 has path => (isa => 'Str', is => 'ro', lazy => 1, default => \&__makePath);
 has __aspectPath => (isa => 'Str', is => 'ro', lazy => 1, default => \&__makeAspectPath);
 
@@ -44,9 +46,13 @@ sub __makePath {
 
 sub __makeAspectPath {
 	my ($self) = @_;
-	my $aspectPath = join('/', $self->rootPath, $self->aspect);
+	my $aspectPath = join('/', $self->rootPath, $Telegram::Bot::Memes::IMAGE_ASPECT);
 	mkdir($aspectPath);
 	return $aspectPath;
 }
 
 1;
+
+# TODO: Resizer and Handler classes could be removed due to removal of meme aspects.
+# May be worth trying to work on other meme features first in case they become useful again.
+# f01271d8-aa81-11ee-a387-43e5c3304127

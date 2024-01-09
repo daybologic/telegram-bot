@@ -76,7 +76,7 @@ sub testDefaults {
 
 sub testConvertOriginal {
 	my ($self) = @_;
-	plan tests => 4;
+	plan tests => 3;
 
 	$self->sut->setOriginalFile($ORIGINAL_FILE);
 
@@ -84,26 +84,6 @@ sub testConvertOriginal {
 	is($self->sut->original->file, $ORIGINAL_FILE, "original set - '$ORIGINAL_FILE'");
 	is($self->sut->original->path, $originalPath, "original path - '$originalPath'");
 	ok(-f $originalPath, "original path exists - '$originalPath'");
-
-	subtest aspects => sub {
-		plan tests => 3;
-
-		for (my $size = 4; $size >= 1; $size /= 2) {
-			my $aspect = sprintf('%dx', $size);
-
-			subtest $aspect => sub {
-				plan tests => 4;
-				my $attribName = "size${aspect}";
-
-				is($self->sut->$attribName->file, $self->sut->original->file, "$aspect file is the same as original file");
-				isnt($self->sut->$attribName->path, $self->sut->original->path, "$aspect path is *NOT* the same as original path");
-
-				my $aspectPath = "t/data/$aspect/timpalmer.jpg";
-				is($self->sut->$attribName->path, $aspectPath, "$aspect path path - '$aspectPath'");
-				ok(-f $self->sut->$attribName->path, "$aspect size file exists - '$aspectPath'");
-			};
-		}
-	};
 
 	return EXIT_SUCCESS;
 }
