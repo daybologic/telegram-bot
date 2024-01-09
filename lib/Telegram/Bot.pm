@@ -325,7 +325,7 @@ sub __setPicId {
 
 	my $key = __getPicIdKey($user);
 	if ($picId) {
-		$dic->cache->set($key, $picId, 3600-3);
+		$dic->cache->set($key, $picId, 604800);
 	} else {
 		$dic->cache->delete($key);
 	}
