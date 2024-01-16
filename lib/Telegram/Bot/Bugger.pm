@@ -39,6 +39,7 @@ use Readonly;
 has previous => (isa => 'Int', is => 'rw', default => -1);
 
 Readonly my @ARTICLES => (
+	'a hair brush',
 	"a fish fork",
 	"a sheep shearer",
 	"an Olympic-sized swimming pool",
