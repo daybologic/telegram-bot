@@ -37,8 +37,17 @@ extends 'Telegram::Bot::Base';
 sub run {
 	my ($self, @words) = @_;
 
-	if (scalar(@words) == 2) {
+	if (scalar(@words) >= 1) {
 		my ($originalTemperature, $targetUnit) = @words;
+		if (scalar(@words) == 1) {
+			if ($words[0] =~ m/(\d+)(F|C)$/i) {
+				($originalTemperature, $targetUnit) = ($1, $2);
+			} else {
+				($originalTemperature, $targetUnit) = (0, 'F');
+			}
+		} else {
+			($originalTemperature, $targetUnit) = @words;
+		}
 
 		if ($targetUnit =~ m/^c/i) {
 			return __format(c_to_f($originalTemperature)) . ' F';
