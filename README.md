@@ -157,6 +157,17 @@ If you are an administrator, type /stop and the bot will exit.
 In order to restart the bot, an adminstrator will need to run the script again.
 This may be a useful feature if the bot is being abused and the relevant parties can't be specifically identified at the present time.
 
+##### /temp
+
+Convert temperature quickly:
+For example:
+
+/temp 50 f
+produces 10 C
+
+/temp 100 c
+produces 212 F
+
 ##### /uptime
 
 For how long the machine the bot is running on has been up, and how long the script has been running, without a fatal error occurring or a restart by an administrator, type:
