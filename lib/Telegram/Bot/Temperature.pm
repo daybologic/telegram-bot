@@ -41,13 +41,25 @@ sub run {
 		my ($originalTemperature, $targetUnit) = @words;
 
 		if ($targetUnit =~ m/^c/i) {
-			return sprintf('%.2f F', c_to_f($originalTemperature));
+			return __format(c_to_f($originalTemperature)) . ' F';
 		} elsif ($targetUnit =~ m/^f/i) {
-			return sprintf('%.2f C', f_to_c($originalTemperature));
+			return __format(f_to_c($originalTemperature)) . ' C';
 		}
 	}
 
 	return "unknown conversion, eg. '/temp 10 c' produces 50 F";
+}
+
+sub __format {
+	my ($input) = @_;
+	my $output = sprintf('%.2f', $input);
+
+	if ($output =~ s/\.00$//) {
+	} else {
+		$output =~ s/0$//;
+	}
+
+	return $output;
 }
 
 sub c_to_f {
