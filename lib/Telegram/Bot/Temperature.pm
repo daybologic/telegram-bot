@@ -47,7 +47,7 @@ sub run {
 		}
 	}
 
-	return 'unknown conversion';
+	return "unknown conversion, eg. '/temp 10 c' produces 50 F";
 }
 
 sub c_to_f {
