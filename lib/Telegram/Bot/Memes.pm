@@ -42,11 +42,13 @@ use Telegram::Bot::Memes::Add;
 Readonly my $CACHE_PATTERN => '/var/cache/telegram-bot/memes/%s/%s.%s';
 Readonly our $IMAGE_ASPECT => 'original'; # TODO: revert to 'my' not 'our' after Handle/Resizer classes have been removed. f01271d8-aa81-11ee-a387-43e5c3304127
 Readonly my $S3_BUCKET_DEFAULT => '58a75bba-1d73-11ee-afdd-5b1a31ab3736';
+Readonly my $STORAGE_CLASS_DEFAULT => 'STANDARD';
 Readonly my $S3_URI => 's3://%s/%s/%s.%s';
 Readonly my $RESULTS_LIMIT => 25;
 
 has adder => (isa => 'Telegram::Bot::Memes::Add', is => 'ro', init_arg => undef, lazy => 1, default => \&__makeAdder);
 has bucket => (isa => 'Str', is => 'rw', lazy => 1, default => \&__makeBucket);
+has storageClass => (isa => 'Str', is => 'rw', lazy => 1, default => \&__makeStorageClass);
 has chatId => (isa => 'Int', is => 'rw', default => 0);
 has user => (isa => 'Str', is => 'rw', default => '');
 
@@ -345,7 +347,8 @@ sub __buildCommand {
 sub __buildUploadCommand {
 	my ($self, $name, $path) = @_;
 	return sprintf(
-		'aws s3 cp --storage-class=STANDARD_IA %s %s', # TODO: Storage class should be configurable; WARNING: Don't use GLACIER_IR because of minimum storage size 128 KiB
+		'aws s3 cp --storage-class=%s %s %s',
+		$self->storageClass,
 		$path,
 		$self->__generateS3URI($name, 'jpg'),
 	);
@@ -390,6 +393,13 @@ sub __makeBucket {
 	my $value = $self->__getConfigSection()->getValueByKey('bucket');
 	return $value if ($value);
 	return $S3_BUCKET_DEFAULT;
+}
+
+sub __makeStorageClass {
+	my ($self) = @_;
+	my $value = $self->__getConfigSection()->getValueByKey('storage_class');
+	return $value if ($value);
+	return $STORAGE_CLASS_DEFAULT;
 }
 
 sub __getConfigSection() {
