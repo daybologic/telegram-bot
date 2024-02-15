@@ -345,7 +345,7 @@ sub __buildCommand {
 sub __buildUploadCommand {
 	my ($self, $name, $path) = @_;
 	return sprintf(
-		'aws s3 cp %s %s',
+		'aws s3 cp --storage-class=STANDARD_IA %s %s', # TODO: Storage class should be configurable; WARNING: Don't use GLACIER_IR because of minimum storage size 128 KiB
 		$path,
 		$self->__generateS3URI($name, 'jpg'),
 	);
