@@ -1,3 +1,11 @@
+telegram-bot (3.0.0) stable; urgency=medium
+
+  * New faster meme logic; you must migrate using bin/remove-meme-aspects.pl
+  * Temperature conversion command
+  * Configurable meme Amazon storage class
+
+ -- Rev. Duncan Ross Palmer <2e0eol@gmail.com>  Thu, 22 Feb 2024 22:12:11 +0000
+
 telegram-bot (2.4.0) stable; urgency=high
 
   * Named pipe introduced for background commands from Cron

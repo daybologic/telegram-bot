@@ -2,4 +2,4 @@ v3.0.0
 ------
 You must run the script ./bin/remove-meme-aspects.sh
 This will migrate your old scheme memes under 4x/, 2x/, 1x/, original all under original/ within your S3 bucket.
-If you do not use the meme feature(s) then no migratiom is necessary.
+If you do not use the meme feature(s) then no migration is necessary.

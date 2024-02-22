@@ -68,7 +68,7 @@ use POSIX qw(:errno_h);
 use utf8;
 
 BEGIN {
-	our $VERSION = '2.4.0';
+	our $VERSION = '3.0.0';
 }
 
 Readonly my $FIFO_PATH   => '/var/run/telegram-bot/timed-messages.fifo';
