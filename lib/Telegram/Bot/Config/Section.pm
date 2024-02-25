@@ -1,5 +1,5 @@
 # telegram-bot
-# Copyright (c) 2023, Rev. Duncan Ross Palmer (2E0EOL),
+# Copyright (c) 2023-2024, Rev. Duncan Ross Palmer (2E0EOL),
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,7 @@ use Readonly;
 use utf8;
 
 BEGIN {
-	our $VERSION = '2.4.0';
+	our $VERSION = '3.0.0';
 }
 
 has owner => (is => 'ro', isa => 'Telegram::Bot::Config', required => 1);
