@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 #
 # telegram-bot
-# Copyright (c) 2023, Rev. Duncan Ross Palmer (2E0EOL),
+# Copyright (c) 2023-2024, Rev. Duncan Ross Palmer (2E0EOL),
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,20 +31,15 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-package MemesGetAspectsTests;
+package FoodTests;
 use Moose;
 
 use lib 'externals/libtest-module-runnable-perl/lib';
 extends 'Test::Module::Runnable';
 
-use Telegram::Bot::Config::Section;
-use Telegram::Bot::Config;
 use Telegram::Bot::DI::Container;
-use Telegram::Bot::Memes;
-use English qw(-no_match_vars);
+use Telegram::Bot::Food;
 use POSIX qw(EXIT_SUCCESS);
-use Readonly;
-use Test::Deep qw(cmp_deeply all isa methods bool re);
 use Test::More;
 
 has config => (is => 'rw', isa => 'Telegram::Bot::Config');
@@ -53,58 +48,25 @@ sub setUp {
 	my ($self) = @_;
 
 	my $dic = Telegram::Bot::DI::Container->new();
-	$self->config(Telegram::Bot::Config->new({ dic => $dic }));
-
-	$self->sut(Telegram::Bot::Memes->new({ dic => $dic }));
+	$self->sut(Telegram::Bot::Food->new({ dic => $dic }));
 
 	return EXIT_SUCCESS;
 }
 
-sub tearDown {
+sub testRun {
 	my ($self) = @_;
-	$self->clearMocks();
-	return EXIT_SUCCESS;
-}
+	plan tests => 3;
 
-sub testDefaults {
-	my ($self) = @_;
-	plan tests => 1;
-
-	Readonly my @ASPECTS => (qw(original 4x 2x 1x));
-
-	my @results = $self->sut->getAspects();
-	cmp_deeply(\@results, \@ASPECTS, 'correct order');
+	my (@food) = map { $self->sut->run() } 0..1;
+	foreach my $comestible (@food) {
+		like($comestible, qr/^\w+/, 'Food stuff seen');
+	}
+	isnt($food[1], $food[0], 'Not same as previous');
 
 	return EXIT_SUCCESS;
-}
-
-sub testConfigOverride {
-	my ($self) = @_;
-	plan tests => 1;
-
-	Readonly my $OVERRIDE => '2x';
-	Readonly my @ASPECTS  => ($OVERRIDE, qw(4x original 1x));
-
-	Readonly my %KEYS => (
-		preferred_aspect => $OVERRIDE,
-	);
-
-	$self->mock('Telegram::Bot::Config', 'getSectionByName', [
-		Telegram::Bot::Config::Section->new({
-			'keys' => \%KEYS,
-			name   => 'Telegram::Bot::Memes',
-			owner  => $self->config,
-		}),
-	]);
-
-	my @results = $self->sut->getAspects();
-	cmp_deeply(\@results, \@ASPECTS, 'correct order');
-
-	return EXIT_SUCCESS;
-
 }
 
 package main;
 use strict;
 use warnings;
-exit(MemesGetAspectsTests->new->run);
+exit(FoodTests->new->run);

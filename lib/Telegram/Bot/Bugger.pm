@@ -1,5 +1,5 @@
 # telegram-bot
-# Copyright (c) 2023, Rev. Duncan Ross Palmer (2E0EOL),
+# Copyright (c) 2023-2024, Rev. Duncan Ross Palmer (2E0EOL),
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,7 @@ use Readonly;
 has previous => (isa => 'Int', is => 'rw', default => -1);
 
 Readonly my @ARTICLES => (
+	'a hair brush',
 	"a fish fork",
 	"a sheep shearer",
 	"an Olympic-sized swimming pool",
@@ -127,18 +128,45 @@ Readonly my @ARTICLES => (
 	'stamp duty',
 	'an exhaust pipe',
 	'a trash compactor',
+	'a pitchfork',
+	'a remote control',
+	'a conveyer-belt',
+	'a leather belt',
+	'a tube of Smarties',
+	'a tube of Rolos',
+	"the Elephant's foot",
+	'a trident',
+	'a Viagra pill',
+	'a telephone handset',
+	'a pair of headphones',
+	'Jurgen Vries',
+	'Darren Tate',
+	'Darren Porter',
+	'DJ Paulo',
+	'Miss Monique',
+	'ISO 27001',
+	'Lemongrab',
+	'a glass of orange juice',
 );
 
 sub run {
-	my ($self) = @_;
+	my ($self, $args) = @_;
+	my ($index) = @{$args}{qw(index)};
 
 	my $idx;
-	do {
-		$idx = int(rand(scalar(@ARTICLES)));
-	} while ($idx == $self->previous);
+	if (defined($index)) { # user-specified
+		$idx = $index;
+		if ($idx < 0 || $idx >= scalar(@ARTICLES)) {
+			return 'ERROR: No such bugger';
+		}
+	} else {
+		do {
+			$idx = int(rand(scalar(@ARTICLES)));
+		} while ($idx == $self->previous);
+	}
 
 	$self->previous($idx);
-	return 'Well bugger me with ' . $ARTICLES[$idx];
+	return sprintf('Well bugger me with %s [%d]', $ARTICLES[$idx], $idx);
 }
 
 1;

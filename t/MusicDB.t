@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 #
 # telegram-bot
-# Copyright (c) 2023, Rev. Duncan Ross Palmer (2E0EOL),
+# Copyright (c) 2023-2024, Rev. Duncan Ross Palmer (2E0EOL),
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -64,10 +64,7 @@ sub testDefaultLocation {
 
 	$self->sut(Telegram::Bot::MusicDB->new({ dic => $self->__dic }));
 
-	my $username = qx(whoami);
-	chomp($username);
-
-	my $path = "/var/lib/$username/telegram-bot/music-database.list";
+	my $path = '/var/cache/telegram-bot/music-database.list';
 	is($self->sut->__location, $path, $path);
 
 	return EXIT_SUCCESS;

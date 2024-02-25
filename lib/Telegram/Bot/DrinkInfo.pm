@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-#
 # telegram-bot
 # Copyright (c) 2023-2024, Rev. Duncan Ross Palmer (2E0EOL),
 # All rights reserved.
@@ -31,65 +29,29 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-package MemesExecuteListingCommandTests;
-use Moose;
-
-use lib 'externals/libtest-module-runnable-perl/lib';
-extends 'Test::Module::Runnable';
-
-use Telegram::Bot::Memes;
-use English qw(-no_match_vars);
-use POSIX qw(EXIT_SUCCESS);
-use Readonly;
-use Test::Deep qw(cmp_deeply all isa methods bool re);
-use Test::More;
-
-sub setUp {
-	my ($self) = @_;
-
-	$self->sut(Telegram::Bot::Memes->new());
-
-	return EXIT_SUCCESS;
-}
-
-sub test {
-	my ($self) = @_;
-	plan tests => 1;
-
-	my $result = $self->sut->__executeListingCommand('/bin/true', __makeJson());
-	cmp_deeply($result, ['alreadydidsomething', 'bernie'], 'meme name list; two items');
-
-	return EXIT_SUCCESS;
-}
-
-sub __makeJson {
-	return '{
-		"Contents": [
-			{
-				"Key": "original/alreadydidsomething.jpg",
-				"LastModified": "2023-08-10T14:41:21+00:00",
-				"ETag": "\"fffffffffffffffffffffffffffff499\"",
-				"Size": 35882,
-				"StorageClass": "STANDARD",
-				"Owner": {
-					"ID": "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff51a"
-				}
-			},
-			{
-				"Key": "original/bernie.jpg",
-				"LastModified": "2023-08-23T15:40:42+00:00",
-				"ETag": "\"fffffffffffffffffffffffffffff264\"",
-				"Size": 314263,
-				"StorageClass": "STANDARD",
-				"Owner": {
-					"ID": "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff51a"
-				}
-			}
-		]
-	}';
-}
-
-package main;
+package Telegram::Bot::DrinkInfo;
 use strict;
 use warnings;
-exit(MemesExecuteListingCommandTests->new->run);
+use Moose;
+
+extends 'Telegram::Bot::Base';
+
+use English qw(-no_match_vars);
+use Readonly;
+
+has [qw(abv units)] => (is => 'ro', isa => 'Num');
+has name => (is => 'ro', isa => 'Str');
+
+sub toString {
+	my ($self) = @_;
+	return sprintf('%s: %s ABV (%s units)', $self->name, $self->abv, $self->units);
+}
+
+sub record {
+	my ($self, $username) = @_;
+	my $sth = $self->dic->db->getHandle()->prepare('INSERT INTO drinks (name, units, user) VALUES(?, ?, ?)');
+	$sth->execute($self->name, $self->units, $self->dic->userRepo->username2Id($username));
+	return sprintf('%s units recorded for %s', $self->units, $username);
+}
+
+1;

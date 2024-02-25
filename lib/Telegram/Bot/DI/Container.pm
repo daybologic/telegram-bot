@@ -1,5 +1,5 @@
 # telegram-bot
-# Copyright (c) 2023, Rev. Duncan Ross Palmer (2E0EOL),
+# Copyright (c) 2023-2024, Rev. Duncan Ross Palmer (2E0EOL),
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -36,6 +36,7 @@ use Moose;
 use LWP::UserAgent;
 use Log::Log4perl;
 use Telegram::Bot::Admins;
+use Telegram::Bot::AlcoholUnits;
 use Telegram::Bot::Audit;
 use Telegram::Bot::Ball8;
 use Telegram::Bot::Bugger;
@@ -43,11 +44,14 @@ use Telegram::Bot::CatClient;
 use Telegram::Bot::Config;
 use Telegram::Bot::DB;
 use Telegram::Bot::DrinksClient;
+use Telegram::Bot::Food;
 use Telegram::Bot::GenderClient;
+use Telegram::Bot::Kappagen;
 use Telegram::Bot::Karma;
 use Telegram::Bot::Memes;
 use Telegram::Bot::MusicDB;
 use Telegram::Bot::RandomNumber;
+use Telegram::Bot::Temperature;
 use Telegram::Bot::User::Repository;
 use Telegram::Bot::UUIDClient;
 use Telegram::Bot::Weather::Location;
@@ -55,6 +59,7 @@ use Telegram::Bot::XKCD;
 use WWW::Telegram::BotAPI;
 
 has admins => (is => 'rw', isa => 'Telegram::Bot::Admins', lazy => 1, builder => '_makeAdmins');
+has alcoholUnits => (is => 'rw', isa => 'Telegram::Bot::AlcoholUnits', lazy => 1, builder => '_makeAlcoholUnits');
 has api => (is => 'rw', isa => 'WWW::Telegram::BotAPI', lazy => 1, builder => '_makeAPI');
 has audit => (is => 'rw', isa => 'Telegram::Bot::Audit', lazy => 1, builder => '_makeAudit');
 has ball8 => (is => 'rw', isa => 'Telegram::Bot::Ball8', lazy => 1, builder => '_makeBall8');
@@ -63,12 +68,15 @@ has catClient => (is => 'rw', isa => 'Telegram::Bot::CatClient', lazy => 1, buil
 has config => (is => 'rw', isa => 'Telegram::Bot::Config', lazy => 1, builder => '_makeConfig');
 has db => (is => 'rw', isa => 'Telegram::Bot::DB', lazy => 1, builder => '_makeDB');
 has drinksClient => (is => 'rw', isa => 'Telegram::Bot::DrinksClient', lazy => 1, builder => '_makeDrinksClient');
+has food => (is => 'rw', isa => 'Telegram::Bot::Food', lazy => 1, builder => '_makeFood');
 has genderClient => (is => 'rw', isa => 'Telegram::Bot::GenderClient', lazy => 1, builder => '_makeGenderClient');
+has kappagen => (is => 'rw', isa => 'Telegram::Bot::Kappagen', lazy => 1, builder => '_makeKappagen');
 has karma => (is => 'rw', isa => 'Telegram::Bot::Karma', lazy => 1, builder => '_makeKarma');
 has logger => (is => 'rw', isa => 'Log::Log4perl::Logger', lazy => 1, builder => '_makeLogger');
 has memes => (is => 'rw', isa => 'Telegram::Bot::Memes', lazy => 1, builder => '_makeMemes');
 has musicDB => (is => 'rw', isa => 'Telegram::Bot::MusicDB', lazy => 1, builder => '_makeMusicDB');
 has randomNumber => (is => 'rw', isa => 'Telegram::Bot::RandomNumber', lazy => 1, builder => '_makeRandomNumber');
+has temperature => (is => 'rw', isa => 'Telegram::Bot::Temperature', lazy => 1, builder => '_makeTemperature');
 has ua => (is => 'rw', isa => 'LWP::UserAgent', lazy => 1, builder => '_makeUserAgent');
 has userRepo => (is => 'rw', isa => 'Telegram::Bot::User::Repository', lazy => 1, builder => '_makeUserRepo');
 has uuidClient => (is => 'rw', isa => 'Telegram::Bot::UUIDClient', lazy => 1, builder => '_makeUuidClient');
@@ -100,6 +108,11 @@ sub _makeAPI {
 sub _makeAdmins {
 	my ($self) = @_;
 	return Telegram::Bot::Admins->new(dic => $self);
+}
+
+sub _makeAlcoholUnits {
+	my ($self) = @_;
+	return Telegram::Bot::AlcoholUnits->new(dic => $self);
 }
 
 sub _makeAudit {
@@ -137,9 +150,19 @@ sub _makeDrinksClient {
 	return Telegram::Bot::DrinksClient->new(dic => $self);
 }
 
+sub _makeFood {
+	my ($self) = @_;
+	return Telegram::Bot::Food->new(dic => $self);
+}
+
 sub _makeGenderClient {
 	my ($self) = @_;
 	return Telegram::Bot::GenderClient->new(dic => $self);
+}
+
+sub _makeKappagen {
+	my ($self) = @_;
+	return Telegram::Bot::Kappagen->new(dic => $self);
 }
 
 sub _makeKarma {
@@ -165,6 +188,11 @@ sub _makeMusicDB {
 sub _makeRandomNumber {
 	my ($self) = @_;
 	return Telegram::Bot::RandomNumber->new(dic => $self);
+}
+
+sub _makeTemperature {
+	my ($self) = @_;
+	return Telegram::Bot::Temperature->new(dic => $self);
 }
 
 sub _makeUuidClient {

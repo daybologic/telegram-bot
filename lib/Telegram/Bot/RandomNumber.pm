@@ -1,5 +1,5 @@
 # telegram-bot
-# Copyright (c) 2023, Rev. Duncan Ross Palmer (2E0EOL),
+# Copyright (c) 2023-2024, Rev. Duncan Ross Palmer (2E0EOL),
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,10 @@ use Readonly;
 Readonly my $LIMIT => 65536;
 
 sub run {
-	return 1 + int(rand($LIMIT));
+	my ($self) = @_;
+	my $number = 1 + int(rand($LIMIT));
+	$self->dic->logger->trace("Random number: $number");
+	return $number;
 }
 
 1;

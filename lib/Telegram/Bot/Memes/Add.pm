@@ -1,5 +1,5 @@
 # telegram-bot
-# Copyright (c) 2023, Rev. Duncan Ross Palmer (2E0EOL),
+# Copyright (c) 2023-2024, Rev. Duncan Ross Palmer (2E0EOL),
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -47,12 +47,7 @@ sub add {
 	$self->dic->logger->debug("fetched fileId $fileId via API to target path '$filePath'");
 
 	my $resizer = $self->resizer($filePath, $name);
-	$self->owner->addToBucket($resizer->original->path, $name, 'original');
-	for (my $size = 4; $size >= 1; $size /= 2) { # TODO: Do we need an all sizes iterator within the object?
-		my $aspect = sprintf('%dx', $size);
-		my $attribName = "size${aspect}";
-		$self->owner->addToBucket($resizer->$attribName->path, $name, $aspect);
-	}
+	$self->owner->addToBucket($resizer->original->path, $name);
 
 	$self->__recordOwner($name, $user);
 

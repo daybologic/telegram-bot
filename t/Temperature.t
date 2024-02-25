@@ -31,65 +31,47 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-package MemesExecuteListingCommandTests;
+package TemperatureTests;
 use Moose;
 
 use lib 'externals/libtest-module-runnable-perl/lib';
 extends 'Test::Module::Runnable';
 
-use Telegram::Bot::Memes;
-use English qw(-no_match_vars);
+use Telegram::Bot::DI::Container;
+use Telegram::Bot::Food;
 use POSIX qw(EXIT_SUCCESS);
-use Readonly;
-use Test::Deep qw(cmp_deeply all isa methods bool re);
 use Test::More;
+
+has config => (is => 'rw', isa => 'Telegram::Bot::Config');
 
 sub setUp {
 	my ($self) = @_;
 
-	$self->sut(Telegram::Bot::Memes->new());
+	my $dic = Telegram::Bot::DI::Container->new();
+	$self->sut(Telegram::Bot::Temperature->new({ dic => $dic }));
 
 	return EXIT_SUCCESS;
 }
 
-sub test {
+sub testC {
 	my ($self) = @_;
 	plan tests => 1;
 
-	my $result = $self->sut->__executeListingCommand('/bin/true', __makeJson());
-	cmp_deeply($result, ['alreadydidsomething', 'bernie'], 'meme name list; two items');
+	is(Telegram::Bot::Temperature::c_to_f(10), 50, '10C is 50F');
 
 	return EXIT_SUCCESS;
 }
 
-sub __makeJson {
-	return '{
-		"Contents": [
-			{
-				"Key": "original/alreadydidsomething.jpg",
-				"LastModified": "2023-08-10T14:41:21+00:00",
-				"ETag": "\"fffffffffffffffffffffffffffff499\"",
-				"Size": 35882,
-				"StorageClass": "STANDARD",
-				"Owner": {
-					"ID": "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff51a"
-				}
-			},
-			{
-				"Key": "original/bernie.jpg",
-				"LastModified": "2023-08-23T15:40:42+00:00",
-				"ETag": "\"fffffffffffffffffffffffffffff264\"",
-				"Size": 314263,
-				"StorageClass": "STANDARD",
-				"Owner": {
-					"ID": "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff51a"
-				}
-			}
-		]
-	}';
+sub testF {
+	my ($self) = @_;
+	plan tests => 1;
+
+	is(Telegram::Bot::Temperature::f_to_c(50), 10, '50F is 10C');
+
+	return EXIT_SUCCESS;
 }
 
 package main;
 use strict;
 use warnings;
-exit(MemesExecuteListingCommandTests->new->run);
+exit(TemperatureTests->new->run);

@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-#
 # telegram-bot
 # Copyright (c) 2023-2024, Rev. Duncan Ross Palmer (2E0EOL),
 # All rights reserved.
@@ -31,65 +29,66 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-package MemesExecuteListingCommandTests;
+package Telegram::Bot::Food;
 use Moose;
 
-use lib 'externals/libtest-module-runnable-perl/lib';
-extends 'Test::Module::Runnable';
+extends 'Telegram::Bot::Base';
 
-use Telegram::Bot::Memes;
-use English qw(-no_match_vars);
-use POSIX qw(EXIT_SUCCESS);
 use Readonly;
-use Test::Deep qw(cmp_deeply all isa methods bool re);
-use Test::More;
 
-sub setUp {
+Readonly my @FOOD => (
+	'fish',
+	'wellington',
+	'chips',
+	'samosas',
+	'soup',
+	'curry',
+	'granola',
+	'pie',
+	'burrito',
+	'thai',
+	'cheese',
+	'chinese',
+	'indian',
+	'salad',
+	'salami',
+	'pasta',
+	'pasty',
+	'sandwich',
+	'pot noodle',
+	'roast dinner',
+	'panini',
+	'cake',
+	'chicken',
+	'wrap',
+	'pizza',
+	'huel',
+	'haggis',
+	'muesli',
+	'stew',
+	'yogurt',
+	'crisps',
+	'slice',
+	'ice cream',
+	'tart',
+	'quiche',
+);
+
+has previouslyChosen => (is => 'rw', isa => 'Int', default => -1);
+
+sub run {
 	my ($self) = @_;
 
-	$self->sut(Telegram::Bot::Memes->new());
+	my $index;
+	do {
+		$index = $self->dic->randomNumber->run() % scalar(@FOOD);
+	} while ($index == $self->previouslyChosen);
 
-	return EXIT_SUCCESS;
+	$self->previouslyChosen($index);
+	my $comestible = $FOOD[$index];
+
+	$self->dic->logger->debug("Chose comestible: '$comestible'");
+	return $comestible;
 }
 
-sub test {
-	my ($self) = @_;
-	plan tests => 1;
-
-	my $result = $self->sut->__executeListingCommand('/bin/true', __makeJson());
-	cmp_deeply($result, ['alreadydidsomething', 'bernie'], 'meme name list; two items');
-
-	return EXIT_SUCCESS;
-}
-
-sub __makeJson {
-	return '{
-		"Contents": [
-			{
-				"Key": "original/alreadydidsomething.jpg",
-				"LastModified": "2023-08-10T14:41:21+00:00",
-				"ETag": "\"fffffffffffffffffffffffffffff499\"",
-				"Size": 35882,
-				"StorageClass": "STANDARD",
-				"Owner": {
-					"ID": "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff51a"
-				}
-			},
-			{
-				"Key": "original/bernie.jpg",
-				"LastModified": "2023-08-23T15:40:42+00:00",
-				"ETag": "\"fffffffffffffffffffffffffffff264\"",
-				"Size": 314263,
-				"StorageClass": "STANDARD",
-				"Owner": {
-					"ID": "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff51a"
-				}
-			}
-		]
-	}';
-}
-
-package main;
-use strict;
-use warnings;
-exit(MemesExecuteListingCommandTests->new->run);
+1;

@@ -52,6 +52,17 @@ Then run
 
 sudo chown $USER /var/cache/telegram-bot
 
+### FIFO
+
+The FIFO file '/var/run/telegram-bot/timed-messages.fifo' can be used to send messages to the bot as if they had been received via Telegram.
+Create the file using the MKFIFO(1) tool, and ensure it is owned by the UID of the bot.
+
+You can then do something akin to this in Cron:
+
+53	8	*	*	*	echo 'text:/units report|chat_id:-1001540092066|target:M6KVM' > /var/run/telegram-bot/timed-messages.fifo
+
+Which would send the owner of the account a report of how much booze they had recently.
+
 ### Database
 
 Set up a [MariaDB](https://mariadb.org) database, and pipe the following credentials and schema in using:
@@ -84,6 +95,11 @@ It is always right!
 Disclaimer: Don't ask for serious advice, we don't condone self-harm.  The bot is not a financial advisor, nor a lawyer, nor a doctor.  In fact, it doesn't really have any qualifications at all.
 
 Usage: /8ball question
+
+#### Bugger
+
+Type /bugger for a whimsical message.
+The message will include a number, in case you wish to retrieve the same message again using /bugger [nnn]
 
 #### HTTP.cat
 
@@ -140,6 +156,17 @@ This is standard Telegram parlance.
 If you are an administrator, type /stop and the bot will exit.
 In order to restart the bot, an adminstrator will need to run the script again.
 This may be a useful feature if the bot is being abused and the relevant parties can't be specifically identified at the present time.
+
+##### /temp
+
+Convert temperature quickly:
+For example:
+
+/temp 50 f
+produces 10 C
+
+/temp 100 c
+produces 212 F
 
 ##### /uptime
 
@@ -213,6 +240,16 @@ You cannot use this command if you have not configured a username within Telegra
 In order to see your current gender, type /gender
 
 It is not currently possible to remove your selected gender and revert to 'they'.
+
+#### Kappagen
+
+Type /kappagen for some random emojis
+This is based on the Twitch !kappagen feature.
+You may be specify the emojis to generate too, and the number of output characters, up to a limit.
+
+Example:
+
+/kappagen 🪯🚕📌😶🤤 500
 
 #### Karma
 
@@ -358,12 +395,6 @@ This allows you to run another bot in the channel which understands and does som
 Return a random number.  This is similar to $RANDOM in the shell.
 The number is limited to 16-bits in width.  Only one result per execution.
 
-##### /lyfe
-
-Insinuate that somebody is hung over from alcoholic beverages.
-
-TODO: It should be moved into custom commands, defined in a config file
-
 ##### /insult
 
 Produce a random insult
@@ -388,25 +419,6 @@ The bot will repeat whatever you write here.  This is mostly so you can start ot
 This command is used to remotely download from YouTube but it doesn't work!
 In a future release, the bot will download something on your behalf and then produce a link.
 
-##### /ynyr
-
-The old one!  Not as old as all that!
-Watch the film 'Krull' before using this comnand.
-
-TODO: It should be moved into custom commands, defined in a config file
-
-##### /horatio
-
-Esoteric: May be removed in a future release.
-
-TODO: It should be moved into custom commands, defined in a config file
-
-##### /ben
-
-Report Ben's live whereabouts
-This is a joke command, and it always reports the same thing.
-TODO: It should be moved into custom commands, defined in a config file
-
 ##### /breakfast
 
 Remind the given user to have their breakfast.
@@ -417,16 +429,26 @@ Usage: /breakfast <@username>
 Debugging purposes only; returns the staged meme which would be stored with the next /meme add <name> command.
 This command is subject to removal, renaming, or potentially a debug-only mode.
 
-#### Undocumented
+##### /units
 
-The following commands are undocumented at the present time.  Please do not use them, until further notice.
-All of these are likely to be removed soon.
+Works as a calculator, an English phrase, such as "a pint of Guinness" returns the number of units in that drink.
+If only a number is specified, this is considered the number of units, and the calculation is not performed.
 
-##### /keyboard
+###### /units record
 
-##### /knock
+If you use /units record, the last number of units looked up will be recorded in the database with your username, and the present time.
 
-##### /phone
+###### /units report
+
+Generate a report for your drinking
+
+###### /units undo
+
+Remove the previous drink recorded against your name from the database
+
+###### /units last
+
+The time when you last had an alcoholic drink
 
 ## Community
 
