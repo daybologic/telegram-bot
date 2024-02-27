@@ -110,6 +110,10 @@ sub bugger {
 	return $dic->bugger->run();
 }
 
+sub trump {
+	return $dic->trump->run();
+}
+
 sub xkcd {
 	my (@input) = @_;
 	my $text = $input[0]->{text};
@@ -336,6 +340,7 @@ my $commands = {
 	},
 	'units' => \&units,
 	'bugger' => \&bugger,
+	'djt' => \&trump,
 	'version' => \&version,
 	'search' => sub {
 		my (@input) = @_;

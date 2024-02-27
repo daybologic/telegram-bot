@@ -52,6 +52,7 @@ use Telegram::Bot::Memes;
 use Telegram::Bot::MusicDB;
 use Telegram::Bot::RandomNumber;
 use Telegram::Bot::Temperature;
+use Telegram::Bot::Trump;
 use Telegram::Bot::User::Repository;
 use Telegram::Bot::UUIDClient;
 use Telegram::Bot::Weather::Location;
@@ -77,6 +78,7 @@ has memes => (is => 'rw', isa => 'Telegram::Bot::Memes', lazy => 1, builder => '
 has musicDB => (is => 'rw', isa => 'Telegram::Bot::MusicDB', lazy => 1, builder => '_makeMusicDB');
 has randomNumber => (is => 'rw', isa => 'Telegram::Bot::RandomNumber', lazy => 1, builder => '_makeRandomNumber');
 has temperature => (is => 'rw', isa => 'Telegram::Bot::Temperature', lazy => 1, builder => '_makeTemperature');
+has trump => (is => 'rw', isa => 'Telegram::Bot::Trump', lazy => 1, builder => '_makeTrump');
 has ua => (is => 'rw', isa => 'LWP::UserAgent', lazy => 1, builder => '_makeUserAgent');
 has userRepo => (is => 'rw', isa => 'Telegram::Bot::User::Repository', lazy => 1, builder => '_makeUserRepo');
 has uuidClient => (is => 'rw', isa => 'Telegram::Bot::UUIDClient', lazy => 1, builder => '_makeUuidClient');
@@ -193,6 +195,11 @@ sub _makeRandomNumber {
 sub _makeTemperature {
 	my ($self) = @_;
 	return Telegram::Bot::Temperature->new(dic => $self);
+}
+
+sub _makeTrump {
+	my ($self) = @_;
+	return Telegram::Bot::Trump->new(dic => $self);
 }
 
 sub _makeUuidClient {
