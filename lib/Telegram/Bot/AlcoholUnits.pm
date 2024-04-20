@@ -279,16 +279,16 @@ sub __strengthFromName {
 		buckfast => 15,
 		caroline => 7.2,
 		fosters  => 4,
+		gin      => 38,
 		guinness => 4.1,
 		kestrel  => 9,
+		modelo   => 4.5,
 		stella   => 4.6,
 		timeline => 5.4,
-		vodka    => 40,
-		wine     => 12.5,
-		whiskey  => 40,
-		gin      => 38,
-		modelo   => 4.5,
 		tsingtao => 4.7,
+		vodka    => 40,
+		whiskey  => 40,
+		wine     => 12.5,
 	);
 
 	my %aliases = (
