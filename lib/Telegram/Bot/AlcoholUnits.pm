@@ -295,6 +295,7 @@ sub __strengthFromName {
 		buckie  => 'buckfast',
 		bucky   => 'buckfast',
 		guiness => 'guinness',
+		scotch  => 'whiskey',
 		whisky  => 'whiskey',
 	);
 
