@@ -119,6 +119,10 @@ Convert a currency amount in GBP to USD.  Usage: /usd <123.45>
 
 Convert a currency amount in USD to GBP.  Usage: /gbp <123.45>
 
+#### DJT
+
+Use /djt to get some random praise of The President
+
 #### Drinks/snacks counters
 
 In order to keep a count of how many drinks you are having in a day, you may use the following counters, none of which take an argument:
@@ -156,6 +160,17 @@ This is standard Telegram parlance.
 If you are an administrator, type /stop and the bot will exit.
 In order to restart the bot, an adminstrator will need to run the script again.
 This may be a useful feature if the bot is being abused and the relevant parties can't be specifically identified at the present time.
+
+##### /temp
+
+Convert temperature quickly:
+For example:
+
+/temp 50 f
+produces 10 C
+
+/temp 100 c
+produces 212 F
 
 ##### /uptime
 

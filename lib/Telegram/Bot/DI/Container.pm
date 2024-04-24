@@ -1,5 +1,5 @@
 # telegram-bot
-# Copyright (c) 2023, Rev. Duncan Ross Palmer (2E0EOL),
+# Copyright (c) 2023-2024, Rev. Duncan Ross Palmer (2E0EOL),
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -52,6 +52,8 @@ use Telegram::Bot::Karma;
 use Telegram::Bot::Memes;
 use Telegram::Bot::MusicDB;
 use Telegram::Bot::RandomNumber;
+use Telegram::Bot::Temperature;
+use Telegram::Bot::Trump;
 use Telegram::Bot::User::Repository;
 use Telegram::Bot::UUIDClient;
 use Telegram::Bot::Weather::Location;
@@ -77,6 +79,8 @@ has logger => (is => 'rw', isa => 'Log::Log4perl::Logger', lazy => 1, builder =>
 has memes => (is => 'rw', isa => 'Telegram::Bot::Memes', lazy => 1, builder => '_makeMemes');
 has musicDB => (is => 'rw', isa => 'Telegram::Bot::MusicDB', lazy => 1, builder => '_makeMusicDB');
 has randomNumber => (is => 'rw', isa => 'Telegram::Bot::RandomNumber', lazy => 1, builder => '_makeRandomNumber');
+has temperature => (is => 'rw', isa => 'Telegram::Bot::Temperature', lazy => 1, builder => '_makeTemperature');
+has trump => (is => 'rw', isa => 'Telegram::Bot::Trump', lazy => 1, builder => '_makeTrump');
 has ua => (is => 'rw', isa => 'LWP::UserAgent', lazy => 1, builder => '_makeUserAgent');
 has userRepo => (is => 'rw', isa => 'Telegram::Bot::User::Repository', lazy => 1, builder => '_makeUserRepo');
 has uuidClient => (is => 'rw', isa => 'Telegram::Bot::UUIDClient', lazy => 1, builder => '_makeUuidClient');
@@ -214,6 +218,16 @@ sub _makeMusicDB {
 sub _makeRandomNumber {
 	my ($self) = @_;
 	return Telegram::Bot::RandomNumber->new(dic => $self);
+}
+
+sub _makeTemperature {
+	my ($self) = @_;
+	return Telegram::Bot::Temperature->new(dic => $self);
+}
+
+sub _makeTrump {
+	my ($self) = @_;
+	return Telegram::Bot::Trump->new(dic => $self);
 }
 
 sub _makeUuidClient {

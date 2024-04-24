@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-#
 # telegram-bot
 # Copyright (c) 2023-2024, Rev. Duncan Ross Palmer (2E0EOL),
 # All rights reserved.
@@ -31,65 +29,56 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-package MemesExecuteListingCommandTests;
+package Telegram::Bot::Temperature;
 use Moose;
 
-use lib 'externals/libtest-module-runnable-perl/lib';
-extends 'Test::Module::Runnable';
+extends 'Telegram::Bot::Base';
 
-use Telegram::Bot::Memes;
-use English qw(-no_match_vars);
-use POSIX qw(EXIT_SUCCESS);
-use Readonly;
-use Test::Deep qw(cmp_deeply all isa methods bool re);
-use Test::More;
+sub run {
+	my ($self, @words) = @_;
 
-sub setUp {
-	my ($self) = @_;
-
-	$self->sut(Telegram::Bot::Memes->new());
-
-	return EXIT_SUCCESS;
-}
-
-sub test {
-	my ($self) = @_;
-	plan tests => 1;
-
-	my $result = $self->sut->__executeListingCommand('/bin/true', __makeJson());
-	cmp_deeply($result, ['alreadydidsomething', 'bernie'], 'meme name list; two items');
-
-	return EXIT_SUCCESS;
-}
-
-sub __makeJson {
-	return '{
-		"Contents": [
-			{
-				"Key": "original/alreadydidsomething.jpg",
-				"LastModified": "2023-08-10T14:41:21+00:00",
-				"ETag": "\"fffffffffffffffffffffffffffff499\"",
-				"Size": 35882,
-				"StorageClass": "STANDARD",
-				"Owner": {
-					"ID": "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff51a"
-				}
-			},
-			{
-				"Key": "original/bernie.jpg",
-				"LastModified": "2023-08-23T15:40:42+00:00",
-				"ETag": "\"fffffffffffffffffffffffffffff264\"",
-				"Size": 314263,
-				"StorageClass": "STANDARD",
-				"Owner": {
-					"ID": "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff51a"
-				}
+	if (scalar(@words) >= 1) {
+		my ($originalTemperature, $targetUnit) = @words;
+		if (scalar(@words) == 1) {
+			if ($words[0] =~ m/(\d+)(F|C)$/i) {
+				($originalTemperature, $targetUnit) = ($1, $2);
+			} else {
+				($originalTemperature, $targetUnit) = (0, 'F');
 			}
-		]
-	}';
+		} else {
+			($originalTemperature, $targetUnit) = @words;
+		}
+
+		if ($targetUnit =~ m/^c/i) {
+			return __format(c_to_f($originalTemperature)) . ' F';
+		} elsif ($targetUnit =~ m/^f/i) {
+			return __format(f_to_c($originalTemperature)) . ' C';
+		}
+	}
+
+	return "unknown conversion, eg. '/temp 10 c' produces 50 F";
 }
 
-package main;
-use strict;
-use warnings;
-exit(MemesExecuteListingCommandTests->new->run);
+sub __format {
+	my ($input) = @_;
+	my $output = sprintf('%.2f', $input);
+
+	if ($output =~ s/\.00$//) {
+	} else {
+		$output =~ s/0$//;
+	}
+
+	return $output;
+}
+
+sub c_to_f {
+	my ($c) = @_;
+	return ($c * 9/5) + 32;
+}
+
+sub f_to_c {
+	my ($f) = @_;
+	return ($f - 32) * 5/9;
+}
+
+1;

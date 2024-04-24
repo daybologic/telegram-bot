@@ -1,5 +1,5 @@
 # telegram-bot
-# Copyright (c) 2023, Rev. Duncan Ross Palmer (2E0EOL),
+# Copyright (c) 2023-2024, Rev. Duncan Ross Palmer (2E0EOL),
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -68,7 +68,7 @@ use POSIX qw(:errno_h);
 use utf8;
 
 BEGIN {
-	our $VERSION = '2.4.0';
+	our $VERSION = '3.0.0';
 }
 
 Readonly my $FIFO_PATH   => '/var/run/telegram-bot/timed-messages.fifo';
@@ -109,6 +109,10 @@ sub bugger {
 	my @words = split(m/\s+/, $text);
 	return $dic->bugger->run({ index => int($words[1]) }) if (scalar(@words) > 1);
 	return $dic->bugger->run();
+}
+
+sub trump {
+	return $dic->trump->run();
 }
 
 sub xkcd {
@@ -380,6 +384,7 @@ my $commands = {
 	},
 	'units' => \&units,
 	'bugger' => \&bugger,
+	'djt' => \&trump,
 	'version' => \&version,
 	'search' => sub {
 		my (@input) = @_;
@@ -450,6 +455,13 @@ my $commands = {
 		$currencyStandard = uc(substr($currencyStandard, 1, 3));
 		my $usdAmount = Data::Money::Amount->fromPounds($amount, 'USD')->convert($currencyStandard); # FIXME: DIC
 		return $usdAmount ? $usdAmount->toString() : 'Something went wrong'; # TODO: should be able to get messages from library
+	},
+	'temp' => sub {
+		my (@input) = @_;
+		my $text = $input[0]->{text};
+		my @words = split(m/\s+/, $text);
+		shift(@words); # Sack off '/temp'
+		return $dic->temperature->run(@words);
 	},
 	'weather' => sub {
 		my (@input) = @_;
