@@ -762,6 +762,10 @@ while (0 == $stop) {
 
 			next if (index($text, '/') != 0); # Not a command
 			my ($cmd, @params) = split(m/ /, $text);
+			my $handleIndex = index($cmd, '@');
+			if ($handleIndex > -1) {
+				$cmd = substr($cmd, 0, $handleIndex);
+			}
 			my $res = $commands->{ substr($cmd, 1) } || $commands->{_unknown};
 
 			# Pass to the subroutine the message object, and the parameters passed to the cmd.
