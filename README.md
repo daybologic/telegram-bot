@@ -119,6 +119,10 @@ Convert a currency amount in GBP to USD.  Usage: /usd <123.45>
 
 Convert a currency amount in USD to GBP.  Usage: /gbp <123.45>
 
+#### DJT
+
+Use /djt to get some random praise of The President
+
 #### Drinks/snacks counters
 
 In order to keep a count of how many drinks you are having in a day, you may use the following counters, none of which take an argument:

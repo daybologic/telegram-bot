@@ -68,7 +68,7 @@ use POSIX qw(:errno_h);
 use utf8;
 
 BEGIN {
-	our $VERSION = '3.0.0';
+	our $VERSION = '3.1.0';
 }
 
 Readonly my $FIFO_PATH   => '/var/run/telegram-bot/timed-messages.fifo';
@@ -108,6 +108,10 @@ sub bugger {
 	my @words = split(m/\s+/, $text);
 	return $dic->bugger->run({ index => int($words[1]) }) if (scalar(@words) > 1);
 	return $dic->bugger->run();
+}
+
+sub trump {
+	return $dic->trump->run();
 }
 
 sub xkcd {
@@ -336,6 +340,7 @@ my $commands = {
 	},
 	'units' => \&units,
 	'bugger' => \&bugger,
+	'djt' => \&trump,
 	'version' => \&version,
 	'search' => sub {
 		my (@input) = @_;
@@ -757,6 +762,10 @@ while (0 == $stop) {
 
 			next if (index($text, '/') != 0); # Not a command
 			my ($cmd, @params) = split(m/ /, $text);
+			my $handleIndex = index($cmd, '@');
+			if ($handleIndex > -1) {
+				$cmd = substr($cmd, 0, $handleIndex);
+			}
 			my $res = $commands->{ substr($cmd, 1) } || $commands->{_unknown};
 
 			# Pass to the subroutine the message object, and the parameters passed to the cmd.
