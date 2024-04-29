@@ -40,7 +40,7 @@ use Telegram::Bot::Config::Section;
 use utf8;
 
 BEGIN {
-	our $VERSION = '3.0.0';
+	our $VERSION = '3.1.0';
 }
 
 Readonly my $FILE_NAME => 'etc/telegram-bot.conf';
