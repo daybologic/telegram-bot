@@ -1,3 +1,11 @@
+telegram-bot (3.1.0) stable; urgency=high
+
+  * Trump (/djt) command
+  * define gin ABV
+  * fix bug with usernames in the Telegram Android app (#63)
+
+ -- Rev. Duncan Ross Palmer <2e0eol@gmail.com>  Mon, 29 Apr 2024 07:27:06 +0100
+
 telegram-bot (3.0.0) stable; urgency=medium
 
   * New faster meme logic; you must migrate using bin/remove-meme-aspects.pl
