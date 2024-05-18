@@ -115,7 +115,7 @@ sub testGIF {
 			caption   => '',
 			method    => 'sendAnimation',
 			animation => {
-				file => '/var/cache/telegram-bot/memes/original/hotpotato.gif',
+				file => '/var/cache/telegram-bot/memes/original/hotpotato.webm',
 			},
 		}, 'caption and image path correct') or diag(explain($self->sut->run('/hotpotato')));
 	};
