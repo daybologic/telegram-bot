@@ -58,6 +58,8 @@ tasks:
       cd telegram-bot/
   - build: |
       cd telegram-bot/
+      ln -sf debian/etc/log4perl.conf etc/log4perl.conf
+      ln -sf debian/etc/telegram-bot.conf etc/telegram-bot.conf
       perl Makefile.PL
       make
   - test: |
