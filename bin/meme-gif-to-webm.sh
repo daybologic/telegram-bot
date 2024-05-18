@@ -53,6 +53,11 @@ for gif in $gifs; do
 	aws s3 cp "s3://${bucket}/${gif}" "${originalFilePath}"
 	convert "${originalFilePath}" "${webmFilePath}"
 	aws s3 cp "--storage-class=$storageClass" "$webmFilePath" "s3://${bucket}/${remoteParent}/${webmFileName}"
+	aws s3 rm "s3://${bucket}/${gif}"
+	rm -f "${originalFilePath}" "${webmFilePath}"
 done
+
+rm -f "$json"
+rmdir "$tempFileDir"
 
 exit 0
