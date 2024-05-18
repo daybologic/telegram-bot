@@ -23,8 +23,12 @@ jobs:
     - name: ExtUtils::MakeMaker
       run: perl Makefile.PL
 
-    - name: make
-      run: make
+    - name: local setup
+      run: |
+        ln -sf `pwd`/srht/etc/log4perl.conf etc/log4perl.conf
+        ln -sf `pwd`/debian/etc/telegram-bot.conf etc/telegram-bot.conf
+        mkdir -p build/var/log
+        touch build/var/log/default.log
 
     - name: make test
-      run: make test
+      run: make && make test
