@@ -39,8 +39,6 @@ environment:
 tasks:
   - setup: |
       cd telegram-bot/
-      git clone -q -b dlscripts-0.4.0 https://git.sr.ht/~m6kvm/dlscripts
-      sudo apt-get install -q -y `dlscripts/build-deps.sh debian/control`
   - build: |
       cd telegram-bot/
       perl Makefile.PL
