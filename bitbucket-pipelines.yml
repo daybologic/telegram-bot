@@ -33,5 +33,6 @@ pipelines:
   default:
     - step:
         script:
+          - apt-get install -y libmoose-perl libjson-perl libjson-maybexs-perl libwww-perl libreadonly-perl liblog-log4perl-perl liburi-encode-perl libconfig-ini-perl libdatetime-perl libdbd-mysql-perl libdbi-perl libtime-duration-perl libuniversal-require-perl libtest-deep-perl libtest-mockmodule-perl libcache-cache-perl
           - perl Makefile.PL
           - make test
