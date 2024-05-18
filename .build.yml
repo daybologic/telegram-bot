@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-#
 # telegram-bot
 # Copyright (c) 2023-2024, Rev. Duncan Ross Palmer (2E0EOL),
 # All rights reserved.
@@ -31,42 +29,41 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-package MemesTests_generateS3URI;
-use strict;
-use warnings;
-use Moose;
+image: debian/stable
+packages:
+  - perl
+  - libmoose-perl
+  - libjson-perl
+  - libjson-maybexs-perl
+  - libwww-perl
+  - libreadonly-perl
+  - liblog-log4perl-perl
+  - liburi-encode-perl
+  - libconfig-ini-perl
+  - libdatetime-perl
+  - libdbd-mysql-perl
+  - libdbi-perl
+  - libtime-duration-perl
+  - libuniversal-require-perl
+  - libtest-deep-perl
+  - libtest-mockmodule-perl
+  - libcache-cache-perl
 
-use lib 'externals/libtest-module-runnable-perl/lib';
-extends 'Test::Module::Runnable';
-
-use Telegram::Bot::DI::Container;
-use Telegram::Bot::Memes;
-use English qw(-no_match_vars);
-use POSIX qw(EXIT_SUCCESS);
-use Test::Deep qw(cmp_deeply all isa methods bool re);
-use Test::More;
-
-sub setUp {
-	my ($self) = @_;
-
-	$self->sut(Telegram::Bot::Memes->new(
-		dic => Telegram::Bot::DI::Container->new(),
-	));
-
-	return EXIT_SUCCESS;
-}
-
-sub test {
-	my ($self) = @_;
-	plan tests => 1;
-
-	my $result = $self->sut->__generateS3URI('troll', 'png');
-	is($result, 's3://d947d0bc-457b-11ee-96b5-8fe750da9949/original/troll.png', "URL: '$result'");
-
-	return EXIT_SUCCESS;
-}
-
-package main;
-use strict;
-use warnings;
-exit(MemesTests_generateS3URI->new->run);
+sources:
+  - https://git.sr.ht/~m6kvm/telegram-bot
+environment:
+  deploy: palmer@overchat.org
+tasks:
+  - setup: |
+      cd telegram-bot/
+  - build: |
+      cd telegram-bot/
+      perl Makefile.PL
+      make
+  - test: |
+      cd telegram-bot/
+      ln -sf `pwd`/srht/etc/log4perl.conf etc/log4perl.conf
+      ln -sf `pwd`/debian/etc/telegram-bot.conf etc/telegram-bot.conf
+      mkdir -p build/var/log
+      touch build/var/log/default.log
+      make test

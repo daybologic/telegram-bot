@@ -32,7 +32,7 @@ sub run {
 			next if ($nameMap{original}->{$nonOriginalAspectFilename}); # original exists, don't look at aspects, they have been deleted (or will be)
 			my $remotePathSource = join('/', $aspect, $nonOriginalAspectFilename);
 			my $remotePathTarget = join('/', 'original', $nonOriginalAspectFilename);
-			my $data = `aws s3 cp s3://58a75bba-1d73-11ee-afdd-5b1a31ab3736/$remotePathSource s3://58a75bba-1d73-11ee-afdd-5b1a31ab3736/$remotePathTarget`;
+			my $data = `aws s3 cp s3://d947d0bc-457b-11ee-96b5-8fe750da9949/$remotePathSource s3://d947d0bc-457b-11ee-96b5-8fe750da9949/$remotePathTarget`;
 			warn("$data\n");
 			push(@deleteList, $remotePathSource); # we can remove the ?x aspect later on
 		}
@@ -50,14 +50,14 @@ sub __deletes {
 	warn(sprintf("%d files to delete\n", scalar(@$deleteList)));
 	sleep(10);
 	foreach my $filePath (@$deleteList) {
-		my $output = `aws s3 rm s3://58a75bba-1d73-11ee-afdd-5b1a31ab3736/$filePath`;
+		my $output = `aws s3 rm s3://d947d0bc-457b-11ee-96b5-8fe750da9949/$filePath`;
 		warn("$output\n");
 	}
 }
 
 sub __getBucketContent {
 	my %files = ( );
-	my $data = `aws --output json s3api list-objects --bucket 58a75bba-1d73-11ee-afdd-5b1a31ab3736`;
+	my $data = `aws --output json s3api list-objects --bucket d947d0bc-457b-11ee-96b5-8fe750da9949`;
 	my $json = JSON->new->allow_nonref;
 	$json = $json->decode($data);
 	$json = $json->{Contents};
