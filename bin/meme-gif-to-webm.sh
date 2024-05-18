@@ -33,4 +33,26 @@
 
 set -xeuo pipefail
 
+umask 077
+
+bucket=$(awk -F "=" '/bucket/ {print $2}' etc/telegram-bot.conf | tr -d ' ' | tr -d "'")
+
+tempFileDir=$(mktemp meme-gif-to-webm.XXXXXX --tmpdir -d)
+json="${tempFileDir}/list.json"
+aws --output json s3api list-objects --bucket "$bucket" > "$json"
+
+gifs=$(jq -r '.Contents[] | select (.Key | endswith("gif")) | .Key' "$json")
+for gif in $gifs; do
+	storageClass=$(jq -r ".Contents[] | select (.Key == \"${gif}\") | .StorageClass" "$json")
+	originalFileName=$(basename ${gif})
+	remoteParent=$(dirname "${gif}")
+	memeName=$(basename ${gif} .gif)
+	webmFileName="${memeName}.webm"
+	originalFilePath="${tempFileDir}/${originalFileName}"
+	webmFilePath="${tempFileDir}/${webmFileName}"
+	aws s3 cp "s3://${bucket}/${gif}" "${originalFilePath}"
+	convert "${originalFilePath}" "${webmFilePath}"
+	aws s3 cp "--storage-class=$storageClass" "$webmFilePath" "s3://${bucket}/${remoteParent}/${webmFileName}"
+done
+
 exit 0
