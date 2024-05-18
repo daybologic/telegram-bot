@@ -32,6 +32,7 @@
 image: debian/stable
 packages:
   - perl
+  - libmoose-perl
 sources:
   - https://git.sr.ht/~m6kvm/telegram-bot
 environment:
