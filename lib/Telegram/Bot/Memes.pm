@@ -282,11 +282,11 @@ sub __removeSizePrefix {
 sub __telegramCommand {
 	my ($self, $path, @words) = @_;
 
-	if ($path =~ m/webm$/ && $self->chatId != -407509267) { # TODO: Can we drop this now?
+	if ($path =~ m/mp4$/ && $self->chatId != -407509267) { # TODO: Can we drop this now?
 		return +{
-			animation => { file => $path },
-			caption   => join(' ', @words),
-			method    => 'sendAnimation',
+			video   => { file => $path },
+			caption => join(' ', @words),
+			method  => 'sendVideo',
 		};
 	}
 
@@ -305,7 +305,7 @@ sub __pathFromCache {
 		$self->dic->logger->debug("Checking if '$path' exists (used extension cache)");
 		return $path if (-f $path);
 	} else {
-		foreach my $extension (qw(png webm jpg JPG jpeg)) {
+		foreach my $extension (qw(png mp4 jpg JPG jpeg)) {
 			my $path = __makeCachePattern($name, $extension);
 			$self->dic->logger->debug("Checking if '$path' exists (not in extension cache)");
 			return $path if (-f $path);
