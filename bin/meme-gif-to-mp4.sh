@@ -37,7 +37,7 @@ umask 077
 
 bucket=$(awk -F "=" '/bucket/ {print $2}' etc/telegram-bot.conf | tr -d ' ' | tr -d "'")
 
-tempFileDir=$(mktemp meme-gif-to-webm.XXXXXX --tmpdir -d)
+tempFileDir=$(mktemp meme-gif-to-mp4.XXXXXX --tmpdir -d)
 json="${tempFileDir}/list.json"
 aws --output json s3api list-objects --bucket "$bucket" > "$json"
 

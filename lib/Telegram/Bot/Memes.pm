@@ -287,6 +287,7 @@ sub __telegramCommand {
 			video   => { file => $path },
 			caption => join(' ', @words),
 			method  => 'sendVideo',
+			supports_streaming => 'True',
 		};
 	}
 
