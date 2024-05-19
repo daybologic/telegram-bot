@@ -47,14 +47,14 @@ for gif in $gifs; do
 	originalFileName=$(basename ${gif})
 	remoteParent=$(dirname "${gif}")
 	memeName=$(basename ${gif} .gif)
-	webmFileName="${memeName}.webm"
+	mp4FileName="${memeName}.mp4"
 	originalFilePath="${tempFileDir}/${originalFileName}"
-	webmFilePath="${tempFileDir}/${webmFileName}"
+	mp4FilePath="${tempFileDir}/${mp4FileName}"
 	aws s3 cp "s3://${bucket}/${gif}" "${originalFilePath}"
-	convert "${originalFilePath}" "${webmFilePath}"
-	aws s3 cp "--storage-class=$storageClass" "$webmFilePath" "s3://${bucket}/${remoteParent}/${webmFileName}"
+	convert "${originalFilePath}" "${mp4FilePath}"
+	aws s3 cp "--storage-class=$storageClass" "$mp4FilePath" "s3://${bucket}/${remoteParent}/${mp4FileName}"
 	aws s3 rm "s3://${bucket}/${gif}"
-	rm -f "${originalFilePath}" "${webmFilePath}"
+	rm -f "${originalFilePath}" "${mp4FilePath}"
 done
 
 rm -f "$json"
