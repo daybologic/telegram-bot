@@ -112,10 +112,11 @@ sub testGIF {
 		skip 'Author tests depend on real bucket', 1 unless $ENV{TEST_AUTHOR};
 
 		cmp_deeply($self->sut->run('/hotpotato'), {
-			caption   => '',
-			method    => 'sendAnimation',
-			animation => {
-				file => '/var/cache/telegram-bot/memes/original/hotpotato.gif',
+			caption => '',
+			method  => 'sendVideo',
+			supports_streaming => 'True',
+			video   => {
+				file => '/var/cache/telegram-bot/memes/original/hotpotato.mp4',
 			},
 		}, 'caption and image path correct') or diag(explain($self->sut->run('/hotpotato')));
 	};
