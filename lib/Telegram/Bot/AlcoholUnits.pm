@@ -39,6 +39,9 @@ use Readonly;
 use Scalar::Util qw(looks_like_number);
 use Telegram::Bot::DrinkInfo;
 
+Readonly my $MAX_MEN   => 21;
+Readonly my $MAX_WOMEN => 14;
+
 Readonly my $BOTTLE         => 750;
 Readonly my $CAN_L          => 440;
 Readonly my $CAN_S          => 330;
@@ -220,9 +223,10 @@ sub __report {
 
 sub __govWarning {
 	my ($weeklyUnits) = @_;
-	return '' if ($weeklyUnits <= 14);
+	return '' if ($weeklyUnits < $MAX_WOMEN);
 
-	my $message = "\nWARNING: The UK CMO advises against regularly imbibing more than 14 units in a week.";
+	my $message = sprintf("\nWARNING: The UK guidelines (1995) advise against regularly imbibing more than %d units a week for men and %d for women.",
+	    $MAX_MEN, $MAX_WOMEN);
 	$message .= "\nThe CMO advises over 50 units a week is high risk drinking." if ($weeklyUnits > 50);
 	return $message;
 }
