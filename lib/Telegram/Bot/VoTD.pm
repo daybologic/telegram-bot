@@ -29,41 +29,22 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-package Telegram::Bot::VoTD::Client;
+package Telegram::Bot::VoTD;
+use strict;
+use warnings;
 use Moose;
 
 extends 'Telegram::Bot::Base';
 
-use JSON qw(decode_json);
+use English qw(-no_match_vars);
 use Readonly;
-use Telegram::Bot::VoTD;
 
-Readonly my $VOTD_API_URL => 'https://chleb-api.daybologic.co.uk/1/votd';
+has [qw(chapterOrdinal verseOrdinal)] => (is => 'ro', isa => 'Int');
+has [qw(book text)] => (is => 'ro', isa => 'Str');
 
-has __cache => (is => 'rw', isa => 'HashRef', default => sub { { } });
-
-sub run {
+sub toString {
 	my ($self) = @_;
-
-	my $response = $self->dic->ua->get($VOTD_API_URL);
-	if ($response->is_success) {
-		my $decodedContent = $response->decoded_content;
-		my $verseStruct = decode_json($decodedContent);
-		my $data = $verseStruct->{data};
-		my $included = $verseStruct->{included};
-		my $relationships = $verseStruct->{relationships};
-		my $attributes = $data->[0]->{attributes};
-
-		return Telegram::Bot::VoTD->new({
-			book           => $attributes->{book},
-			chapterOrdinal => $attributes->{chapter},
-			verseOrdinal   => $attributes->{ordinal},
-			text           => $attributes->{text},
-		});
-	}
-
-	$self->dic->logger->error($response->status_line);
-	return "ERROR: Can't retrieve verse of the day at the moment";
+	return sprintf('%s %d:%d %s', $self->book, $self->chapterOrdinal, $self->verseOrdinal, $self->text);
 }
 
 1;
