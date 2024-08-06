@@ -96,7 +96,7 @@ sub source {
 }
 
 sub votd {
-	return $dic->votd->run();
+	return $dic->votdClient->run();
 }
 
 sub units {

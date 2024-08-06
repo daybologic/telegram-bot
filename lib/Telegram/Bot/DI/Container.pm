@@ -55,7 +55,7 @@ use Telegram::Bot::Temperature;
 use Telegram::Bot::Trump;
 use Telegram::Bot::User::Repository;
 use Telegram::Bot::UUIDClient;
-use Telegram::Bot::VoTD;
+use Telegram::Bot::VoTD::Client;
 use Telegram::Bot::Weather::Location;
 use Telegram::Bot::XKCD;
 use WWW::Telegram::BotAPI;
@@ -83,7 +83,7 @@ has trump => (is => 'rw', isa => 'Telegram::Bot::Trump', lazy => 1, builder => '
 has ua => (is => 'rw', isa => 'LWP::UserAgent', lazy => 1, builder => '_makeUserAgent');
 has userRepo => (is => 'rw', isa => 'Telegram::Bot::User::Repository', lazy => 1, builder => '_makeUserRepo');
 has uuidClient => (is => 'rw', isa => 'Telegram::Bot::UUIDClient', lazy => 1, builder => '_makeUuidClient');
-has votd => (is => 'rw', isa => 'Telegram::Bot::VoTD', lazy => 1, builder => '_makeVoTD');
+has votdClient => (is => 'rw', isa => 'Telegram::Bot::VoTD::Client', lazy => 1, builder => '_makeVoTDClient');
 has weatherLocation => (is => 'rw', isa => 'Telegram::Bot::Weather::Location', lazy => 1, builder => '_makeWeatherLocation');
 has xkcd => (is => 'rw', isa => 'Telegram::Bot::XKCD', lazy => 1, builder => '_makeXkcd');
 
@@ -209,9 +209,9 @@ sub _makeUuidClient {
 	return Telegram::Bot::UUIDClient->new(dic => $self);
 }
 
-sub _makeVoTD {
+sub _makeVoTDClient {
 	my ($self) = @_;
-	return Telegram::Bot::VoTD->new(dic => $self);
+	return Telegram::Bot::VoTD::Client->new(dic => $self);
 }
 
 sub _makeUserAgent {
