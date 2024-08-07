@@ -39,12 +39,16 @@ extends 'Telegram::Bot::Base';
 use English qw(-no_match_vars);
 use Readonly;
 
-has [qw(chapterOrdinal verseOrdinal)] => (is => 'ro', isa => 'Int');
+has [qw(chapterOrdinal verseOrdinal)] => (is => 'ro', isa => 'Int', default => 0);
 has [qw(book text)] => (is => 'ro', isa => 'Str');
+has success => (is => 'ro', isa => 'Bool', default => 1, required => 1);
 
 sub toString {
 	my ($self) = @_;
-	return sprintf('%s %d:%d %s', $self->book, $self->chapterOrdinal, $self->verseOrdinal, $self->text);
+	return sprintf('%s %d:%d %s', $self->book, $self->chapterOrdinal, $self->verseOrdinal, $self->text)
+	    if ($self->success);
+
+	return 'ERROR: ' . $self->text;
 }
 
 1;

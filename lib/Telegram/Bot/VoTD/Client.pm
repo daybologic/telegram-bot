@@ -61,7 +61,10 @@ sub run {
 	}
 
 	$self->dic->logger->error($response->status_line);
-	return "ERROR: Can't retrieve verse of the day at the moment";
+	return Telegram::Bot::VoTD->new({
+		success => 0,
+		text    => "Can't retrieve verse of the day at the moment",
+	});
 }
 
 1;

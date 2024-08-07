@@ -39,7 +39,7 @@ use POSIX qw(EXIT_SUCCESS);
 use Readonly;
 use Telegram::Bot::DI::Container;
 use Telegram::Bot::VoTD::Client;
-use Test::Deep qw(all cmp_deeply isa methods);
+use Test::Deep qw(all bool cmp_deeply isa methods);
 use Test::More 0.96;
 
 use lib 'externals/libtest-module-runnable-perl/lib';
@@ -56,7 +56,7 @@ sub setUp {
 
 sub testFailure {
 	my ($self) = @_;
-	plan tests => 2;
+	plan tests => 3;
 
 	my $errorCode = 500;
 	my $errorMsg = 'Failed miserably';
@@ -67,7 +67,16 @@ sub testFailure {
 	$self->mock(ref($self->sut->dic->logger), 'error');
 
 	my $votd = $self->sut->run();
-	diag(explain($votd));
+	cmp_deeply($votd, all(
+		isa('Telegram::Bot::VoTD'),
+		methods(
+			book => undef,
+			chapterOrdinal => 0,
+			success => bool(0),
+			text => "Can't retrieve verse of the day at the moment",
+			verseOrdinal => 0,
+		),
+	), 'votd') or diag(explain($votd));
 
 	my $mockCalls = $self->mockCalls(ref($self->sut->dic->ua), 'get');
 	cmp_deeply($mockCalls, [[ 'https://chleb-api.daybologic.co.uk/1/votd' ]], 'URL get')
@@ -100,6 +109,7 @@ sub testSuccess {
 		methods(
 			book => 'Hosea',
 			chapterOrdinal => 8,
+			success => bool(1),
 			text => 'Israel is swallowed up: now shall they be among the Gentiles as a vessel wherein [is] no pleasure.',
 			verseOrdinal => 8,
 		),
