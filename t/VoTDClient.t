@@ -54,6 +54,14 @@ sub setUp {
 	return $self->SUPER::setUp(%params);
 }
 
+sub tearDown {
+	my ($self, %params) = @_;
+
+	$self->clearMocks();
+
+	return $self->SUPER::tearDown(%params);
+}
+
 sub testHTTPFailure {
 	my ($self) = @_;
 	plan tests => 3;
