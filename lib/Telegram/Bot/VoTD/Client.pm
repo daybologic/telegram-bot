@@ -40,8 +40,6 @@ use Telegram::Bot::VoTD;
 
 Readonly my $VOTD_API_URL => 'https://chleb-api.daybologic.co.uk/1/votd';
 
-has __cache => (is => 'rw', isa => 'HashRef', default => sub { { } });
-
 sub run {
 	my ($self) = @_;
 
