@@ -54,7 +54,7 @@ sub setUp {
 	return $self->SUPER::setUp(%params);
 }
 
-sub testFailure {
+sub testHTTPFailure {
 	my ($self) = @_;
 	plan tests => 3;
 
@@ -130,3 +130,5 @@ package main;
 use strict;
 use warnings;
 exit(VoTDClientTests->new()->run());
+
+# TODO: Test bad JSON
