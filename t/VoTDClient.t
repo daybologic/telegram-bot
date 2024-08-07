@@ -39,7 +39,7 @@ use POSIX qw(EXIT_SUCCESS);
 use Readonly;
 use Telegram::Bot::DI::Container;
 use Telegram::Bot::VoTD::Client;
-use Test::Deep qw(cmp_deeply);
+use Test::Deep qw(all cmp_deeply isa methods);
 use Test::More 0.96;
 
 use lib 'externals/libtest-module-runnable-perl/lib';
@@ -75,6 +75,42 @@ sub testFailure {
 
 	$mockCalls = $self->mockCalls(ref($self->sut->dic->logger), 'error');
 	cmp_deeply($mockCalls, [[ sprintf('%d %s', $errorCode, $errorMsg) ]], 'error logged')
+	    or diag(explain($mockCalls));
+
+	return EXIT_SUCCESS;
+}
+
+sub testSuccess {
+	my ($self) = @_;
+	plan tests => 3;
+
+	my $content = '{"included":[{"relationships":{"book":{"data":{"id":28,"type":"book"}}},"id":"28/8","attributes":{"book":"Hosea","ordinal":8},"type":"chapter"},{"type":"book","attributes":{"testament":"old","ordinal":28},"id":28,"relationships":{}}],"links":{},"data":[{"id":"28/8/8","relationships":{"chapter":{"links":{},"data":{"type":"chapter","id":"28/8"}},"book":{"links":{},"data":{"type":"book","id":28}}},"type":"verse","attributes":{"ordinal":8,"book":"Hosea","chapter":8,"text":"Israel is swallowed up: now shall they be among the Gentiles as a vessel wherein [is] no pleasure."}}]}';
+
+	my $errorCode = 200;
+	my $errorMsg = 'Success';
+	$self->mock(ref($self->sut->dic->ua), 'get', [
+		HTTP::Response->new($errorCode, $errorMsg, undef, $content),
+	]);
+
+	$self->mock(ref($self->sut->dic->logger), 'error');
+
+	my $votd = $self->sut->run();
+	cmp_deeply($votd, all(
+		isa('Telegram::Bot::VoTD'),
+		methods(
+			book => 'Hosea',
+			chapterOrdinal => 8,
+			text => 'Israel is swallowed up: now shall they be among the Gentiles as a vessel wherein [is] no pleasure.',
+			verseOrdinal => 8,
+		),
+	), 'votd') or diag(explain($votd));
+
+	my $mockCalls = $self->mockCalls(ref($self->sut->dic->ua), 'get');
+	cmp_deeply($mockCalls, [[ 'https://chleb-api.daybologic.co.uk/1/votd' ]], 'URL get')
+	    or diag(explain($mockCalls));
+
+	$mockCalls = $self->mockCalls(ref($self->sut->dic->logger), 'error');
+	cmp_deeply($mockCalls, [], 'error *NOT* logged')
 	    or diag(explain($mockCalls));
 
 	return EXIT_SUCCESS;
