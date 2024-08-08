@@ -34,6 +34,7 @@ use Moose;
 
 extends 'Telegram::Bot::Base';
 
+use English qw(-no_match_vars);
 use JSON qw(decode_json);
 use Readonly;
 use Telegram::Bot::VoTD;
@@ -46,7 +47,16 @@ sub run {
 	my $response = $self->dic->ua->get($VOTD_API_URL);
 	if ($response->is_success) {
 		my $decodedContent = $response->decoded_content;
-		my $verseStruct = decode_json($decodedContent);
+
+		my $verseStruct = eval { decode_json($decodedContent) };
+		if (my $evalError = $EVAL_ERROR) {
+			$self->dic->logger->error($evalError);
+			return Telegram::Bot::VoTD->new({
+				success => 0,
+				text    => $evalError,
+			});
+		}
+
 		my $data = $verseStruct->{data};
 		my $included = $verseStruct->{included};
 		my $relationships = $verseStruct->{relationships};

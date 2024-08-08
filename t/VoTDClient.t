@@ -39,7 +39,7 @@ use POSIX qw(EXIT_SUCCESS);
 use Readonly;
 use Telegram::Bot::DI::Container;
 use Telegram::Bot::VoTD::Client;
-use Test::Deep qw(all bool cmp_deeply isa methods);
+use Test::Deep qw(all bool cmp_deeply isa methods re);
 use Test::More 0.96;
 
 use lib 'externals/libtest-module-runnable-perl/lib';
@@ -97,6 +97,42 @@ sub testHTTPFailure {
 	return EXIT_SUCCESS;
 }
 
+sub testJSONFailure {
+	my ($self) = @_;
+	plan tests => 3;
+
+	my $content = '{]';
+	my $errorCode = 200;
+	my $errorMsg = 'Success';
+	$self->mock(ref($self->sut->dic->ua), 'get', [
+		HTTP::Response->new($errorCode, $errorMsg, undef, $content),
+	]);
+
+	$self->mock(ref($self->sut->dic->logger), 'error');
+
+	my $votd = $self->sut->run();
+	cmp_deeply($votd, all(
+		isa('Telegram::Bot::VoTD'),
+		methods(
+			book => undef,
+			chapterOrdinal => 0,
+			success => bool(0),
+			text => re(qr/character offset/),
+			verseOrdinal => 0,
+		),
+	), 'votd') or diag(explain($votd));
+
+	my $mockCalls = $self->mockCalls(ref($self->sut->dic->ua), 'get');
+	cmp_deeply($mockCalls, [[ 'https://chleb-api.daybologic.co.uk/1/votd' ]], 'URL get')
+	    or diag(explain($mockCalls));
+
+	$mockCalls = $self->mockCalls(ref($self->sut->dic->logger), 'error');
+	cmp_deeply($mockCalls, [[ re(qr/character offset/) ]], 'error logged')
+	    or diag(explain($mockCalls));
+
+	return EXIT_SUCCESS;
+}
+
 sub testSuccess {
 	my ($self) = @_;
 	plan tests => 3;
@@ -138,5 +174,3 @@ package main;
 use strict;
 use warnings;
 exit(VoTDClientTests->new()->run());
-
-# TODO: Test bad JSON
