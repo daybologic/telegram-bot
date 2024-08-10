@@ -147,6 +147,7 @@ Readonly my @ARTICLES => (
 	'ISO 27001',
 	'Lemongrab',
 	'a glass of orange juice',
+	'a jar of American Riviera Orchard jam',
 );
 
 sub run {

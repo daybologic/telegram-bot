@@ -1,3 +1,11 @@
+v3.2.0
+------
+Added /votd (Bible Verse of The Day) command
+
+v3.1.0
+------
+Added /djt (Trump) command
+
 v3.0.0
 ------
 You must run the script ./bin/remove-meme-aspects.sh

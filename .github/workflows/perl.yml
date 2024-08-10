@@ -1,0 +1,34 @@
+name: Perl CI
+
+on:
+  push:
+    branches: [ "develop", "master" ]
+  pull_request:
+    branches: [ "develop" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: recursion
+      run: git submodule update --init --recursive
+
+    - name: dependencies
+      run: sudo apt-get install -y libmoose-perl libjson-perl libjson-maybexs-perl libwww-perl libreadonly-perl liblog-log4perl-perl liburi-encode-perl libconfig-ini-perl libdatetime-perl libdbd-mysql-perl libdbi-perl libtime-duration-perl libuniversal-require-perl libtest-deep-perl libtest-mockmodule-perl libcache-cache-perl
+
+    - name: ExtUtils::MakeMaker
+      run: perl Makefile.PL
+
+    - name: local setup
+      run: |
+        ln -sf `pwd`/srht/etc/log4perl.conf etc/log4perl.conf
+        ln -sf `pwd`/debian/etc/telegram-bot.conf etc/telegram-bot.conf
+        mkdir -p build/var/log
+        touch build/var/log/default.log
+
+    - name: make test
+      run: make && make test

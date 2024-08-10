@@ -68,7 +68,7 @@ use POSIX qw(:errno_h);
 use utf8;
 
 BEGIN {
-	our $VERSION = '3.1.0';
+	our $VERSION = '3.2.0';
 }
 
 Readonly my $FIFO_PATH   => '/var/run/telegram-bot/timed-messages.fifo';
@@ -92,7 +92,12 @@ sub karma {
 sub source {
 	return 'Source code for the bot can be obtained from '
 	    . "https://git.sr.ht/~m6kvm/telegram-bot/refs/v${Telegram::Bot::VERSION}\n"
-	    . 'Patches and memes may be sent to 2e0eol@gmail.com with subject "telegram-bot"';
+	    . 'Patches may be sent to 2e0eol@gmail.com with subject "telegram-bot", or raise a GitHub or BitBucket pull request (see docs)';
+}
+
+sub votd {
+	my $votd = $dic->votdClient->run();
+	return $votd->toString();
 }
 
 sub units {
@@ -387,6 +392,7 @@ my $commands = {
 	'insult' => \&insult,
 	'breakfast' => \&breakfast,
 	'source' => \&source,
+	'votd' => \&votd,
 	'miles' => sub {
 		my (@input) = @_;
 		my $text = $input[0]->{text};

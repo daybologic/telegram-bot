@@ -57,6 +57,7 @@ sudo apt install \
 	libdatetime-perl \
 	libdbd-mysql-perl \
 	libdbi-perl \
+	libjson-perl \
 	libjson-maybexs-perl \
 	libtime-duration-perl \
 	liblog-log4perl-perl \

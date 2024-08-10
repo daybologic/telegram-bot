@@ -29,34 +29,26 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-package Telegram::Bot::Config::Section;
+package Telegram::Bot::VoTD;
+use strict;
+use warnings;
 use Moose;
+
+extends 'Telegram::Bot::Base';
+
+use English qw(-no_match_vars);
 use Readonly;
-use utf8;
 
-BEGIN {
-	our $VERSION = '3.2.0';
-}
+has [qw(chapterOrdinal verseOrdinal)] => (is => 'ro', isa => 'Int', default => 0);
+has [qw(book text)] => (is => 'ro', isa => 'Str');
+has success => (is => 'ro', isa => 'Bool', default => 1, required => 1);
 
-has owner => (is => 'ro', isa => 'Telegram::Bot::Config', required => 1);
-has 'keys' => (is => 'rw');
-has name => (isa => 'Str', is => 'rw');
+sub toString {
+	my ($self) = @_;
+	return sprintf('%s %d:%d %s', $self->book, $self->chapterOrdinal, $self->verseOrdinal, $self->text)
+	    if ($self->success);
 
-sub getValueByKey {
-	my ($self, $key) = @_;
-
-	my $name = $self->name;
-	if (!exists($self->keys->{$key})) {
-		# This might appear to be quite a high level of warning, but the user's config is likely out of date
-		# compared to the upstream master and probably needs to be investigated and updated.
-		$self->owner->dic->logger->warn("Accessing key '$key' in section '$name' - but it does not exist");
-		return undef;
-	}
-
-	my $value = $self->keys->{$key};
-	$value =~ s/^'//;
-	$value =~ s/'$//;
-	return $value;
+	return 'ERROR: ' . $self->text;
 }
 
 1;

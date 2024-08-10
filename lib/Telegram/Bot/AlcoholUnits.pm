@@ -39,6 +39,10 @@ use Readonly;
 use Scalar::Util qw(looks_like_number);
 use Telegram::Bot::DrinkInfo;
 
+Readonly my $MAX_MEN     => 21;
+Readonly my $MAX_WOMEN   => 14;
+Readonly my $MAX_DEFAULT => $MAX_WOMEN;
+
 Readonly my $BOTTLE         => 750;
 Readonly my $CAN_L          => 440;
 Readonly my $CAN_S          => 330;
@@ -208,21 +212,24 @@ sub __report {
 	$report .= sprintf('%s drank %.1f units in the past %d days, over %d separate drinks...', $username,
 	    $weeklyUnits, $days, $totalDrinks);
 
-	my $their = $self->dic->genderClient->get($username)->their();
+	my $gender = $self->dic->genderClient->get($username);
 	$totalDrinks++ if ($totalDrinks == 0); # Ensure no division by zero
-	$report .= "\n" . sprintf('%s average drink contained %.2f units.', $their, $weeklyUnits / $totalDrinks);
+	$report .= "\n" . sprintf('%s average drink contained %.2f units.', $gender->their(), $weeklyUnits / $totalDrinks);
 
 	$report .= sprintf("\nThat's %.2f units a day", $weeklyUnits / $days);
-	$report .= __govWarning($weeklyUnits);
+	$report .= __govWarning($weeklyUnits, $gender);
 
 	return $report;
 }
 
 sub __govWarning {
-	my ($weeklyUnits) = @_;
-	return '' if ($weeklyUnits <= 14);
+	my ($weeklyUnits, $gender) = @_;
 
-	my $message = "\nWARNING: The UK CMO advises against regularly imbibing more than 14 units in a week.";
+	my $max = $gender->value eq 'male' ? $MAX_MEN : $MAX_DEFAULT;
+	return '' if ($weeklyUnits < $max);
+
+	my $message = sprintf("\nWARNING: The UK guidelines (1995) advise against regularly imbibing more than %d units a week for men and %d for women.",
+	    $MAX_MEN, $MAX_WOMEN);
 	$message .= "\nThe CMO advises over 50 units a week is high risk drinking." if ($weeklyUnits > 50);
 	return $message;
 }

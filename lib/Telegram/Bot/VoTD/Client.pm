@@ -29,34 +29,52 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-package Telegram::Bot::Config::Section;
+package Telegram::Bot::VoTD::Client;
 use Moose;
+
+extends 'Telegram::Bot::Base';
+
+use English qw(-no_match_vars);
+use JSON qw(decode_json);
 use Readonly;
-use utf8;
+use Telegram::Bot::VoTD;
 
-BEGIN {
-	our $VERSION = '3.2.0';
-}
+Readonly my $VOTD_API_URL => 'https://chleb-api.daybologic.co.uk/1/votd';
 
-has owner => (is => 'ro', isa => 'Telegram::Bot::Config', required => 1);
-has 'keys' => (is => 'rw');
-has name => (isa => 'Str', is => 'rw');
+sub run {
+	my ($self) = @_;
 
-sub getValueByKey {
-	my ($self, $key) = @_;
+	my $response = $self->dic->ua->get($VOTD_API_URL);
+	if ($response->is_success) {
+		my $decodedContent = $response->decoded_content;
 
-	my $name = $self->name;
-	if (!exists($self->keys->{$key})) {
-		# This might appear to be quite a high level of warning, but the user's config is likely out of date
-		# compared to the upstream master and probably needs to be investigated and updated.
-		$self->owner->dic->logger->warn("Accessing key '$key' in section '$name' - but it does not exist");
-		return undef;
+		my $verseStruct = eval { decode_json($decodedContent) };
+		if (my $evalError = $EVAL_ERROR) {
+			$self->dic->logger->error($evalError);
+			return Telegram::Bot::VoTD->new({
+				success => 0,
+				text    => $evalError,
+			});
+		}
+
+		my $data = $verseStruct->{data};
+		my $included = $verseStruct->{included};
+		my $relationships = $verseStruct->{relationships};
+		my $attributes = $data->[0]->{attributes};
+
+		return Telegram::Bot::VoTD->new({
+			book           => $attributes->{book},
+			chapterOrdinal => $attributes->{chapter},
+			verseOrdinal   => $attributes->{ordinal},
+			text           => $attributes->{text},
+		});
 	}
 
-	my $value = $self->keys->{$key};
-	$value =~ s/^'//;
-	$value =~ s/'$//;
-	return $value;
+	$self->dic->logger->error($response->status_line);
+	return Telegram::Bot::VoTD->new({
+		success => 0,
+		text    => "Can't retrieve verse of the day at the moment",
+	});
 }
 
 1;
