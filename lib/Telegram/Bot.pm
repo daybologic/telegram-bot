@@ -95,6 +95,11 @@ sub source {
 	    . 'Patches may be sent to 2e0eol@gmail.com with subject "telegram-bot", or raise a GitHub or BitBucket pull request (see docs)';
 }
 
+sub votd {
+	my $votd = $dic->votdClient->run();
+	return $votd->toString();
+}
+
 sub units {
 	my (@input) = @_;
 	my $text = $input[0]->{text};
@@ -387,6 +392,7 @@ my $commands = {
 	'insult' => \&insult,
 	'breakfast' => \&breakfast,
 	'source' => \&source,
+	'votd' => \&votd,
 	'miles' => sub {
 		my (@input) = @_;
 		my $text = $input[0]->{text};
