@@ -1,3 +1,9 @@
+telegram-bot (3.2.0) stable; urgency=medium
+
+  * Added /votd (Bible Verse of The Day)
+
+ -- Rev. Duncan Ross Palmer <2e0eol@gmail.com>  Sat, 10 Aug 2024 10:44:25 +0100
+
 telegram-bot (3.1.0) stable; urgency=high
 
   * Trump (/djt) command
